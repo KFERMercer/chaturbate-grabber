@@ -7,10 +7,10 @@
 # This is free software, licensed under the GNU General Public License v3.
 #
 # Version: 1.0
-# Release: 4
+# Release: 5
 #
 
-echo "自动挡 v1.0-4"
+echo "自动挡 v1.0-5"
 echo "请输入直播间链接(https/http)或主播名(注意下划线): "
 read input
 
@@ -51,12 +51,13 @@ function link2M3u8(){
 		echo "获取失败, 主播已下播."
 		exit 0
 	fi
-	echo "获取成功! 直播流为: "
+	echo "获取成功! 直播流为: (建议电脑端使用此链接, h.265传输效率更高)"
 	echo ${input}
 }
 
 function hdLink(){
 	input=${input%%playlist.m3u8*}$(wget -4 -q -O - ${input} | tail -1)
+	input=${input//"h265"/"h264"}
 	echo "最高清直播流为: "
 	echo ${input}
 }
