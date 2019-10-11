@@ -7,10 +7,10 @@
 # This is free software, licensed under the GNU General Public License v3.
 #
 # Version: 1.0
-# Release: 3
+# Release: 4
 #
 
-echo "自动挡 v1.0-3"
+echo "自动挡 v1.0-4"
 echo "请输入直播间链接(https/http)或主播名(注意下划线): "
 read input
 
@@ -27,7 +27,7 @@ then
 		name2Link
 	fi
 else
-	echo "链接或主播名错误. "
+	echo "错误输入或检查网络(404). "
 	exit 0
 fi
 }
@@ -41,13 +41,14 @@ function name2Link(){
 }
 
 function link2M3u8(){
-	input=$(wget -4 -q -O - ${input}|grep 'initHlsPlayer' | tail -1)
+	input=$(wget -4 -q -O - ${input} | grep 'initHlsPlayer' | tail -1)
 	if [[ ${input} =~ ".m3u8" ]]
 	then
 		input=${input%"'"*}
 		input=${input#*"'"}
+		input=${input//"h264"/"h265"}
 	else
-		echo "主播已下播."
+		echo "获取失败, 主播已下播."
 		exit 0
 	fi
 	echo "获取成功! 直播流为: "
@@ -55,7 +56,7 @@ function link2M3u8(){
 }
 
 function hdLink(){
-	input=${input%%playlist.m3u8*}$(wget -4 -q -O - ${input} |tail -1)
+	input=${input%%playlist.m3u8*}$(wget -4 -q -O - ${input} | tail -1)
 	echo "最高清直播流为: "
 	echo ${input}
 }
