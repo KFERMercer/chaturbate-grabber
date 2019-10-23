@@ -7,16 +7,10 @@
 # This is free software, licensed under the GNU General Public License v3.
 #
 # Version: 1.0
-# Release: 5
+# Release: 6
 #
 
-echo "自动挡 v1.0-5"
-echo "请输入直播间链接(https/http)或主播名(注意下划线): "
-read input
-
 function inputCheck(){
-if [[ $(curl -4 -s --connect-timeout 5 --head ${input} | head -n 1) =~ "200" ]]
-then
 	if [[ ${input} =~ "chaturbate.com" ]]
 	then
 		if [[ ${input} =~ "m.chaturbate" ]]
@@ -26,14 +20,16 @@ then
 	else
 		name2Link
 	fi
-else
-	echo "错误输入或检查网络(404). "
-	exit 0
-fi
+
+	if ! [[ $(curl -4 -s --connect-timeout 10 --head ${input} | head -n 1 | cut -c 8-) =~ "200" ]]
+	then
+		echo "错误输入或检查网络(404). "
+		exit 0
+	fi
 }
 
 function mLink2Link(){
-	input=${input//"m.chaturbate/"/"chaturbate/"}
+	input=${input//"m.chaturbate"/"chaturbate"}
 }
 
 function name2Link(){
@@ -41,7 +37,7 @@ function name2Link(){
 }
 
 function link2M3u8(){
-	input=$(wget -4 -q -O - ${input} | grep 'initHlsPlayer' | tail -1)
+	input=$(wget -4 -q -O - --timeout=10 ${input} | grep 'initHlsPlayer' | tail -1)
 	if [[ ${input} =~ ".m3u8" ]]
 	then
 		input=${input%"'"*}
@@ -69,6 +65,10 @@ function antiCheck(){
 	echo ${input}
 }
 
+
+echo "自动挡 v1.0-6"
+echo "请输入直播间链接(https/http)或主播名(注意下划线): "
+read input
 inputCheck
 echo "获取直播流中..."
 link2M3u8
