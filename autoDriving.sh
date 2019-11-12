@@ -7,17 +7,20 @@
 # This is free software, licensed under the GNU General Public License v3.
 #
 # Version: 1.0
-# Release: 6
+# Release: 7
 #
 
 function inputCheck(){
 	if [[ ${input} =~ "chaturbate.com" ]]
 	then
+		modelName=${input#*"chaturbate.com/"}
+		modelName=${modelName%"/"*}
 		if [[ ${input} =~ "m.chaturbate" ]]
 		then
 			mLink2Link
 		fi
 	else
+		modelName=${input}
 		name2Link
 	fi
 
@@ -37,12 +40,15 @@ function name2Link(){
 }
 
 function link2M3u8(){
-	input=$(wget -4 -q -O - --timeout=10 ${input} | grep 'initHlsPlayer' | tail -1)
+	input=$(wget -4 -q -O - --timeout=10 ${input} | grep 'm3u8' | tail -1)
 	if [[ ${input} =~ ".m3u8" ]]
 	then
-		input=${input%"'"*}
-		input=${input#*"'"}
-		input=${input//"h264"/"h265"}
+		serverEdge=${input#*"https://"}
+		serverEdge=${serverEdge%'.stream.highwebmedia.com/live\'*}
+		input=${input#*"${modelName}"}
+		input=${input#*'u002Dsd\'}
+		input=${input%"_trns"*}
+		input="https://${serverEdge}.stream.highwebmedia.com/live-hls/amlst:${modelName}-sd-${input}_trns_h265/playlist.m3u8"
 	else
 		echo "获取失败, 主播已下播."
 		exit 0
@@ -66,7 +72,7 @@ function antiCheck(){
 }
 
 
-echo "自动挡 v1.0-6"
+echo "自动挡 v1.0-7"
 echo "请输入直播间链接(https/http)或主播名(注意下划线): "
 read input
 inputCheck
@@ -76,4 +82,6 @@ echo "解析清晰度信息..."
 hdLink
 antiCheck
 unset input
+unset modelName
+unset serverEdge
 exit 0
