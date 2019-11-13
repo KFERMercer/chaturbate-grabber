@@ -7,7 +7,7 @@
 # This is free software, licensed under the GNU General Public License v3.
 #
 # Version: 1.0
-# Release: 7
+# Release: 8
 #
 
 function inputCheck(){
@@ -46,7 +46,7 @@ function link2M3u8(){
 		serverEdge=${input#*"https://"}
 		serverEdge=${serverEdge%'.stream.highwebmedia.com/live\'*}
 		input=${input#*"${modelName}"}
-		input=${input#*'u002Dsd\'}
+		input=${input#*'u002Dsd\u002D'}
 		input=${input%"_trns"*}
 		input="https://${serverEdge}.stream.highwebmedia.com/live-hls/amlst:${modelName}-sd-${input}_trns_h265/playlist.m3u8"
 	else
@@ -72,7 +72,7 @@ function antiCheck(){
 }
 
 
-echo "自动挡 v1.0-7"
+echo "自动挡 v1.0-8"
 echo "请输入直播间链接(https/http)或主播名(注意下划线): "
 read input
 inputCheck
