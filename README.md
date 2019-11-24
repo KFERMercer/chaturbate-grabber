@@ -23,7 +23,7 @@ After that, you can simply run `autodriving` to execute the script.
 ### If you don't want to leave your trail:
 
 ```shell
- sh <(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-auto-get-m3u8/master/autoDriving.sh)
+ bash <(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-auto-get-m3u8/master/autoDriving.sh)
 ```
 
 The above command has a space at the beginning.
