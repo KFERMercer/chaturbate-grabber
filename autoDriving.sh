@@ -7,7 +7,7 @@
 # This is free software, licensed under the GNU General Public License v3.
 #
 # Version: 1.0
-# Release: 8
+# Release: 9
 #
 
 function inputCheck(){
@@ -40,7 +40,7 @@ function name2Link(){
 }
 
 function link2M3u8(){
-	input=$(wget -4 -q -O - --timeout=10 ${input} | grep 'm3u8' | tail -1)
+	input=$(wget -4 -q -O - --timeout=10 ${input} 2>/dev/null | grep 'm3u8' | tail -1)
 	if [[ ${input} =~ ".m3u8" ]]
 	then
 		serverEdge=${input#*"https://"}
