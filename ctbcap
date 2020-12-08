@@ -1,0 +1,153 @@
+#!/bin/bash
+#
+# Copyright (C) 2020 KFERMercer <KFER.Mercer@gmail.com>
+#
+# ctbcap, A simple chaturbate webcam capturer.
+#
+# Version: 1.0
+# Release: 7
+# last edit: KFERMercer 2020-11-28
+#
+
+# 默认保存路径
+save_path="~/cap"
+
+# 默认主播
+input=
+
+# 默认服务器节点(数字)
+edge_flag=
+
+# 对 input 进行处理, 赋值 model_name 和 link , 同时对输入进行检查
+function handle_input() {
+	# 格式化路径, 去除结尾的 /
+	if [[ ${save_path: -1} == "/" ]]; then
+		save_path=${save_path%"/"*}
+	fi
+	if [[ $input =~ "chaturbate.com" ]]; then
+		link=$input
+		model_name=${link#*"chaturbate.com/"}
+		model_name=${model_name%"/"*}
+		if [[ ${input} =~ "m.chaturbate" ]]; then
+			link="https://chaturbate.com/${input}/"
+		fi
+	else
+		model_name=$input
+		link="https://chaturbate.com/${model_name}/"
+	fi
+
+	if ! [[ $(curl -4 -s --connect-timeout 10 --head $link 2>/dev/null | head -n 1 | cut -c 8-) =~ "200" ]]; then
+		echo "错误输入或检查网络(404)."
+		exit 0
+	fi
+}
+
+# 检查在线状态, 获取 m3u8 , 赋值 m3u8_link
+function link_to_m3u8() {
+	m3u8_link=$(wget -4 -q -O - --timeout=10 $link 2>/dev/null | grep 'm3u8' | tail -1)
+	if [[ $m3u8_link =~ ".m3u8" ]]; then
+		if [ ! $edge_flag ]; then
+			server_edge=${m3u8_link#*"https://"}
+			server_edge=${server_edge%'.stream.highwebmedia.com/live\'*}
+		fi
+		m3u8_link=${m3u8_link#*"$model_name"}
+		m3u8_link=${m3u8_link#*'u002Dsd\u002D'}
+		m3u8_link=${m3u8_link%"_trns"*}
+		m3u8_link="https://${server_edge}.stream.highwebmedia.com/live-hls/amlst:${model_name}-sd-${m3u8_link}_trns_h264/playlist.m3u8"
+		m3u8_link_generic=$m3u8_link
+		m3u8_link=${m3u8_link%%playlist.m3u8*}$(wget -4 -q -O - --timeout=10 ${m3u8_link} 2>/dev/null | tail -1)
+		return 1 #主播在线, 来自过去的提示: 此行非无用代码, 不可删除!
+	else
+		echo "[$(date "+%Y%m%d-%H%M%S")] 主播[${model_name}]不在线或网络阻塞.$(if [ $edge_flag ]; then echo "[edge$edge_flag]"; fi)"
+		return 0 #主播不在线, 来自过去的提示: 此行非无用代码, 不可删除!
+	fi
+}
+
+function capture_media() {
+	# ffmpeg -i ${link} -c copy -movflags +faststart -t 10 -y /mnt/d/cap/$(date "+%Y%m%d-%H%M%S").mp4
+	# ffmpeg -i ${link} -c copy -movflags +faststart -t 50 -y /mnt/d/cap/123.ts
+	ffmpeg \
+	-i $m3u8_link \
+	-c copy \
+	-map 0 \
+	-f segment \
+	-segment_list $save_path/$model_name-$(date "+%Y%m%d-%H%M%S").m3u8 \
+	-segment_time 2700 \
+	-loglevel warning \
+	$save_path/$model_name-$(date "+%Y%m%d-%H%M%S")_%03d.ts
+}
+
+# function cut_media() {
+# 	startTime=0
+# 	endTime=5
+# 	length=47
+# 	i=0
+
+# 	while [ $endTime -le $length ]; do
+# 		#statements
+# 		i=$[$i+1]
+# 		endTime=$[$startTime+5]
+# 		ffmpeg -i /mnt/d/cap/123.ts -ss $startTime -to $endTime -acodec copy -vcodec copy -movflags +faststart /mnt/d/cap/$i.mp4
+# 		startTime=$[endTime]
+# 	done
+# }
+
+function whatch_dog() {
+	while [ true ]; do
+		link_to_m3u8
+		if [[ $? == 1 ]]; then
+			echo "[$(date "+%Y%m%d-%H%M%S")] 解析成功! 直播流为:"
+			echo "[$(date "+%Y%m%d-%H%M%S")] $m3u8_link_generic"
+			echo "[$(date "+%Y%m%d-%H%M%S")] $m3u8_link"
+			echo "[$(date "+%Y%m%d-%H%M%S")] 开始录播..."
+			capture_media
+			echo "[$(date "+%Y%m%d-%H%M%S")] 录制中断, 休眠三分钟后重连..."
+			sleep 180
+		else
+			echo "[$(date "+%Y%m%d-%H%M%S")] 休眠大约十分钟..."
+			sleep $((RANDOM % (661 - 540) + 540))
+		fi
+	done
+}
+
+echo "-----------------------"
+echo "-  陈冠希.exe v1.0r7  -"
+echo "-----------------------"
+
+if [[ $1 == "--help" || $1 == "-h" || $1 == "" ]]; then
+	echo "... [链接或主播名] [选项]"
+	exit 0
+else
+	input=$1
+fi
+
+handle_input
+
+echo
+echo "正在视奸主播: $model_name"
+echo
+
+if [ $2 ]; then
+	if [[ $2 == "--stream" || $2 == "-s" ]]; then
+		link_to_m3u8
+		echo $m3u8_link_generic
+		exit 0
+	elif [[ $2 == "--asia" || $2 == "-a" ]]; then
+		edge_flag=$((RANDOM % (167 - 155) + 155))
+		server_edge=edge$edge_flag
+	elif [ $2 -gt 0 ] 2>/dev/null; then
+		edge_flag=$2
+		server_edge=edge$edge_flag
+	else
+		echo "选项输入无效"
+		exit 0
+	fi
+fi
+
+mkdir -p $save_path
+
+mkdir -p /tmp/ctbcap
+
+whatch_dog 2>&1 | tee /tmp/ctbcap/$model_name.log
+
+exit 0
