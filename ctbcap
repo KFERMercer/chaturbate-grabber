@@ -9,8 +9,12 @@
 # last edit: KFERMercer 2020-11-28
 #
 
+# exec 1>/path/file.log 2>&1 || true
+
+# set -xu
+
 # 默认保存路径
-save_path="~/cap"
+save_path="${HOME}/cap"
 
 # 默认主播
 input=
@@ -111,7 +115,7 @@ function whatch_dog() {
 }
 
 echo "-----------------------"
-echo "-  陈冠希.exe v1.0r7  -"
+echo "-  陈冠希.exe v1.0r8  -"
 echo "-----------------------"
 
 if [[ $1 == "--help" || $1 == "-h" || $1 == "" ]]; then
@@ -134,6 +138,9 @@ if [ $2 ]; then
 		exit 0
 	elif [[ $2 == "--asia" || $2 == "-a" ]]; then
 		edge_flag=$((RANDOM % (167 - 155) + 155))
+		server_edge=edge$edge_flag
+	elif [[ $2 == "--europe" || $2 == "-e" ]]; then
+		edge_flag=$((RANDOM % (281 - 263) + 263))
 		server_edge=edge$edge_flag
 	elif [ $2 -gt 0 ] 2>/dev/null; then
 		edge_flag=$2
