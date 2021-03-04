@@ -4,14 +4,16 @@
 #
 # ctbcap, A simple chaturbate webcam capturer.
 #
-# Version: 1.0
-# Release: 8
-# last edit: KFERMercer 2021-02-22
-#
 
 # exec 1>/path/file.log 2>&1 || true
-
 # set -xu
+
+version=1.0
+release=9
+last_edit:KFERMercer@2021-03-05
+
+# 日志路径
+log_path="/tmp/ctbcap"
 
 # 默认保存路径
 save_path="${HOME}/cap"
@@ -40,8 +42,9 @@ function handle_input() {
 		link="https://en.chaturbate.com/${model_name}/"
 	fi
 
-	if ! [[ $(curl -4 -s --connect-timeout 10 --head $link 2>/dev/null | head -n 1 | cut -c 8-) =~ "200" ]]; then
+	if ! [[ $(curl -4 -I -s --connect-timeout 5 --retry 10 --retry-delay 5 $link -w %{http_code} 2>/dev/null | tail -n1) == "200" ]]; then
 		echo "错误输入或检查网络(404)."
+		touch $log_path/$(date "+%Y%m%d-%H%M%S")-${model_name}.err
 		exit 0
 	fi
 }
@@ -115,7 +118,7 @@ function whatch_dog() {
 }
 
 echo "-----------------------"
-echo "-  陈冠希.exe v1.0r8  -"
+echo "-  陈冠希.exe v1.0r$release  -"
 echo "-----------------------"
 
 if [[ $1 == "--help" || $1 == "-h" || $1 == "" ]]; then
@@ -151,10 +154,8 @@ if [ $2 ]; then
 	fi
 fi
 
-mkdir -p $save_path
+mkdir -p $log_path $save_path
 
-mkdir -p /tmp/ctbcap
-
-whatch_dog 2>&1 | tee /tmp/ctbcap/$model_name.log
+whatch_dog 2>&1 | tee $log_path/$(date "+%Y%m%d-%H%M%S")-$model_name.log
 
 exit 0
