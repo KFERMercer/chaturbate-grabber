@@ -1,12 +1,12 @@
 #!/bin/bash
 #
-# Copyright (C) 2020 KFERMercer <KFER.Mercer@gmail.com>
+# Copyright (C) 2021 KFERMercer <KFER.Mercer@gmail.com>
 #
 # ctbcap, A simple chaturbate webcam capturer.
 #
 # Version: 1.0
-# Release: 7
-# last edit: KFERMercer 2020-11-28
+# Release: 8
+# last edit: KFERMercer 2021-02-22
 #
 
 # exec 1>/path/file.log 2>&1 || true
@@ -33,11 +33,11 @@ function handle_input() {
 		model_name=${link#*"chaturbate.com/"}
 		model_name=${model_name%"/"*}
 		if [[ ${input} =~ "m.chaturbate" ]]; then
-			link="https://chaturbate.com/${input}/"
+			link="https://en.chaturbate.com/${input}/"
 		fi
 	else
 		model_name=$input
-		link="https://chaturbate.com/${model_name}/"
+		link="https://en.chaturbate.com/${model_name}/"
 	fi
 
 	if ! [[ $(curl -4 -s --connect-timeout 10 --head $link 2>/dev/null | head -n 1 | cut -c 8-) =~ "200" ]]; then
@@ -57,7 +57,7 @@ function link_to_m3u8() {
 		m3u8_link=${m3u8_link#*"$model_name"}
 		m3u8_link=${m3u8_link#*'u002Dsd\u002D'}
 		m3u8_link=${m3u8_link%"_trns"*}
-		m3u8_link="https://${server_edge}.stream.highwebmedia.com/live-hls/amlst:${model_name}-sd-${m3u8_link}_trns_h264/playlist.m3u8"
+		m3u8_link="https://${server_edge}.stream.highwebmedia.com/live-edge/amlst:${model_name}-sd-${m3u8_link}_trns_h264/playlist.m3u8"
 		m3u8_link_generic=$m3u8_link
 		m3u8_link=${m3u8_link%%playlist.m3u8*}$(wget -4 -q -O - --timeout=10 ${m3u8_link} 2>/dev/null | tail -1)
 		return 1 #主播在线, 来自过去的提示: 此行非无用代码, 不可删除!

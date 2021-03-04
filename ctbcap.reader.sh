@@ -1,13 +1,13 @@
 #!/bin/bash
 #
 
-exec 1>/tmp/ctbcap.reader.log 2>&1 || true
+# exec 1>/tmp/ctbcap.reader.log 2>&1 || true
 
 config_path="${HOME}/.ctbcap"
 
 function check_internet(){
 	while [ true ]; do
-		if [ $(curl -I -s --connect-timeout 5 www.google.com -w %{http_code} | tail -n1) = "200" ]; then
+		if [ $(curl -I -s --connect-timeout 5 https://www.youtube.com -w %{http_code} | tail -n1) = "200" ]; then
 			# 网络畅通
 			break
 		else
