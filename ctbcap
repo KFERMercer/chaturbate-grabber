@@ -9,8 +9,8 @@
 # set -xu
 
 version=1.0
-release=9
-last_edit:KFERMercer@2021-03-05
+release=10
+last_edit=KFERMercer@2021-03-05
 
 # 日志路径
 log_path="/tmp/ctbcap"
@@ -117,9 +117,11 @@ function whatch_dog() {
 	done
 }
 
-echo "-----------------------"
-echo "-  陈冠希.exe v1.0r$release  -"
-echo "-----------------------"
+echo "----------------------"
+echo "- 陈冠希.exe v1.0r$release -"
+echo "----------------------"
+
+mkdir -p $log_path $save_path
 
 if [[ $1 == "--help" || $1 == "-h" || $1 == "" ]]; then
 	echo "... [链接或主播名] [选项]"
@@ -153,8 +155,6 @@ if [ $2 ]; then
 		exit 0
 	fi
 fi
-
-mkdir -p $log_path $save_path
 
 whatch_dog 2>&1 | tee $log_path/$(date "+%Y%m%d-%H%M%S")-$model_name.log
 
