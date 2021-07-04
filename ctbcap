@@ -9,8 +9,8 @@
 # set -xu
 
 version=1.0
-release=10
-last_edit=KFERMercer@2021-03-05
+release=11
+last_edit=KFERMercer@2021-07-05
 
 # 日志路径
 log_path="/tmp/ctbcap"
@@ -30,6 +30,7 @@ function handle_input() {
 	if [[ ${save_path: -1} == "/" ]]; then
 		save_path=${save_path%"/"*}
 	fi
+	input=${input,,}
 	if [[ $input =~ "chaturbate.com" ]]; then
 		link=$input
 		model_name=${link#*"chaturbate.com/"}
