@@ -26,7 +26,10 @@ edge_flag=
 
 # 对 input 进行处理, 赋值 model_name 和 link , 同时对输入进行检查
 function handle_input() {
-	save_path=${save_path%"/"*}
+	# 格式化路径, 去除结尾的 /
+	if [[ ${save_path: -1} == "/" ]]; then
+		save_path=${save_path%"/"*}
+	fi
 	input=${input,,}
 	if [[ $input =~ "chaturbate.com" ]]; then
 		link=$input
