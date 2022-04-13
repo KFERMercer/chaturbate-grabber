@@ -9,8 +9,8 @@
 # set -xu
 
 version=1.0
-release=12
-last_edit=KFERMercer@2021-11-17
+release=13
+last_edit=KFERMercer@2022-04-14
 
 # 日志路径
 log_path="/tmp/ctbcap"
@@ -53,15 +53,14 @@ function link_to_m3u8() {
 	m3u8_link=$(wget -4 -q -O - --timeout=10 $link 2>/dev/null | grep 'm3u8' | tail -1)
 	if [[ $m3u8_link =~ ".m3u8" ]]; then
 		if [ ! $edge_flag ]; then
-			server_edge=${m3u8_link#*"https://"}
+			server_edge=${m3u8_link#*"https://edge"}
 			server_edge=${server_edge%'.stream.highwebmedia.com/live\'*}
 		fi
-		m3u8_link=${m3u8_link#*"$model_name"}
-		m3u8_link=${m3u8_link#*'u002Dsd\u002D'}
+		m3u8_link=${m3u8_link#*"amlst:$model_name\u002Dsd\u002D"}
 		m3u8_link=${m3u8_link%"_trns"*}
-		m3u8_link="https://${server_edge}.stream.highwebmedia.com/live-hls/amlst:${model_name}-sd-${m3u8_link}_trns_h264/playlist.m3u8"
+		m3u8_link="https://edge${server_edge}.stream.highwebmedia.com/live-hls/amlst:${model_name}-sd-${m3u8_link}_trns_h264/playlist.m3u8"
 		m3u8_link_generic=$m3u8_link
-		m3u8_link=${m3u8_link%%playlist.m3u8*}$(wget -4 -q -O - --timeout=10 ${m3u8_link} 2>/dev/null | tail -1)
+		m3u8_link=${m3u8_link%%playlist.m3u8*}$(curl --compressed ${m3u8_link} 2>/dev/null | tail -1)
 		return 1 #主播在线, 来自过去的提示: 此行非无用代码, 不可删除!
 	else
 		echo "[$(date "+%Y%m%d-%H%M%S")] 主播[${model_name}]不在线或网络阻塞.$(if [ $edge_flag ]; then echo "[edge$edge_flag]"; fi)"
