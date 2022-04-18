@@ -142,7 +142,7 @@ if [ $2 ]; then
 		exit 0
 	elif [[ $2 == "--asia" || $2 == "-a" ]]; then
 		edge_flag=$((RANDOM % (167 - 155) + 155))
-		server_edge=edge$edge_flag
+		server_edge=$edge_flag
 	elif [[ $2 == "--europe" || $2 == "-e" ]]; then
 		edge_flag=$((RANDOM % (281 - 263) + 263))
 		server_edge=edge$edge_flag
