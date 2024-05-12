@@ -62,6 +62,8 @@ apk add install git ffmpeg curl
 Use the following command to run:
 
 ```shell
+SAVE_PATH=/path/to/savedir \
+LOG_PATH=/path/to/logdir \
 ./ctbcap <model-name>
 ```
 
@@ -77,12 +79,12 @@ You can add this script to system path:
 ln -s ~/chaturbate-grabber/ctbcap /sbin/ctbcap
 ```
 
-Next time you can simply run `ctbcap` to execute the script.
+So next time you can run the `ctpcap` directly without going into repo.
 
 #### If you don't want to leave your trail on localmachine:
 
 ```shell
-    bash <(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)
+    SAVE_PATH=/path/to/savedir LOG_PATH=/path/to/logdir bash <(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)
 # ^ There's a space at the beginning.
 ```
 
