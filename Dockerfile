@@ -4,12 +4,15 @@
 
 FROM bash:latest
 
-RUN apk add ffmpeg curl wget
+RUN apk add --no-cache tzdata ffmpeg curl wget
 
 COPY ctbcap /usr/sbin/
 
+# see <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List>
+ENV TZ          "UTC"
+
 ENV LOG_PATH    "/log"
-ENV SAVE_PATH   "/cap"
+ENV SAVE_PATH   "/save"
 
 USER 1000:1000
 

@@ -1,0 +1,23 @@
+services:
+
+  ctpcap-modelname1:
+    # container_name: ctpcap-modelname1
+    command: modelname1
+    build: .
+    restart: unless-stopped
+    volumes:
+      - /path/to/viddir:/save
+      - /path/to/logdir:/log
+    environment:
+      - TZ=Asia/Shanghai
+
+  ctpcap-modelname2:
+    # container_name: ctpcap-modelname2
+    command: modelname2
+    build: .
+    restart: unless-stopped
+    volumes:
+      - /path/to/viddir:/save
+      - /path/to/logdir:/log
+    environment:
+      - TZ=Asia/Shanghai
