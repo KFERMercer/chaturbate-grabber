@@ -8,33 +8,67 @@ A shell script to cpture live stream from chaturbate.
 
 ## Usage：
 
-By first, make sure your linux shell is `bash`, at the same time, you need `git`, `ffmpeg`, `curl` and `screen`. Follow the command below to install them:
+First of all, clone the repo to your local:
+
+```shell
+git clone https://github.com/KFERMercer/chaturbate-grabber.git && cd chaturbate-grabber
+```
+
+Now you neeo choose whether to use docker or a host environment,
+
+I suggest you use [docker](#docker-recommended).
+
+### Docker (recommended):
+
+First install some Docker-like products.
+
+Custome your own docker-compose file:
+
+```shell
+cat ./docker-compose.yml.sample > ./compose.yml
+```
+
+Then edit `./compose.yml` to configure.
+
+Deploy the compose service:
+
+```shell
+# If you wish to run in the front of the terminal:
+docker compose up
+
+# If you want run and create to background daemon:
+docker compose up -d
+```
+
+Unload the compose service:
+
+```shell
+docker compose down
+```
+
+### Host environment:
+
+First make sure your linux shell is `bash`, and get install `git`, `ffmpeg`, `curl`. Follow this command to install them:
 
 ```shell
 # apt: 
-apt-get install -y git ffmpeg curl screen
+apt-get install -y git ffmpeg curl
 # yum:
-yum -y install git ffmpeg curl screen
+yum -y install git ffmpeg curl
+# apk:
+apk add install git ffmpeg curl
 ```
 
-Then use git to get the script library, which is convenient for subsequent updates:
+Use the following command to run:
 
 ```shell
-git clone https://github.com/KFERMercer/chaturbate-grabber.git ~/chaturbate-grabber
+./ctbcap <model-name>
 ```
 
-If necessary, you can modify [line 16](https://github.com/KFERMercer/chaturbate-grabber/blob/master/ctbcap#L16), [line 19](https://github.com/KFERMercer/chaturbate-grabber/blob/master/ctbcap#L19), [line 22](https://github.com/KFERMercer/chaturbate-grabber/blob/master/ctbcap#L22) and [line 25](https://github.com/KFERMercer/chaturbate-grabber/blob/master/ctbcap#L25) in the `./ctbcap` file to modify the default log file path, the path saved after capture, the default model, and the default server node code.
-
-After that, you can use the following command to run:
+If you just want to get the m3u link of stream:
 
 ```shell
-~/chaturbate-grabber/ctbcap <your-favorite-model-name>
-```
-
-If you just want to get the link of stream:
-
-```shell
-~/chaturbate-grabber/ctbcap <your-favorite-model-name> -s
+./ctbcap <your-favorite-model-name> -s
 ```
 
 You can add this script to system path:
@@ -43,15 +77,36 @@ You can add this script to system path:
 ln -s ~/chaturbate-grabber/ctbcap /sbin/ctbcap
 ```
 
-Then you can simply run `ctbcap` to execute the script.
+Next time you can simply run `ctbcap` to execute the script.
 
-### If you don't want to leave your trail:
+#### If you don't want to leave your trail on localmachine:
 
 ```shell
- bash <(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)
+    bash <(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)
+# ^ There's a space at the beginning.
 ```
 
-The above command has a space at the beginning.
+### Get follow-up updates:
+
+Go to local git repo:
+
+```shell
+cd chaturbate-grabber
+```
+
+Update repo to newest commit:
+
+```shell
+git pull
+```
+
+Restart the compose service (when use docker):
+
+```shell
+docker compose down
+
+docker compose up -d
+```
 
 ---
 
