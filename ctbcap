@@ -9,14 +9,14 @@
 # set -xu
 
 CTBCAP_VERSION=1.0
-CTBCAP_RELEASE=16
-CTBCAP_LAST_EDIT=KFERMercer@2023-08-23
+CTBCAP_RELEASE=17
+CTBCAP_LAST_EDIT=KFERMercer@2024-05-12
 
 # 日志路径
-LOG_PATH="/var/log/ctbcap"
+[ $LOG_PATH ] || LOG_PATH="${PWD}/log/ctbcap"
 
 # 默认保存路径
-SAVE_PATH="${PWD}"
+[ $SAVE_PATH ] || SAVE_PATH="/mnt/r"
 
 # 默认主播
 INPUT=
