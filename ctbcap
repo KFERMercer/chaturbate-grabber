@@ -83,7 +83,7 @@ function whatch_dog() {
 			echo "[$(date "+%Y%m%d-%H%M%S")] $M3U8_LINK_GENERIC"
 			echo "[$(date "+%Y%m%d-%H%M%S")] $M3U8_LINK"
 			echo "[$(date "+%Y%m%d-%H%M%S")] 开始录播..."
-			touch $LOG_PATH/$MODEL_NAME.online
+			echo $M3U8_LINK_GENERIC > $LOG_PATH/$MODEL_NAME.online
 			capture_media
 			echo "[$(date "+%Y%m%d-%H%M%S")] 录制中断, 休眠三分钟后重连..."
 			rm -f $LOG_PATH/$MODEL_NAME.online

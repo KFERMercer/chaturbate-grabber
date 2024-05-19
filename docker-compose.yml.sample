@@ -1,23 +1,28 @@
 services:
 
-  ctpcap-modelname1:
-    # container_name: ctpcap-modelname1
-    command: modelname1
-    build: .
+  modelname_1: &template-config
+    container_name: ctpcap-modelname_1 # Change modelname to yours.
+    image: ctbcap:latest # Image used by the containers. No need to change if you follow the README.md to set up.
     restart: unless-stopped
-    volumes:
-      - /path/to/viddir:/save
-      - /path/to/logdir:/log
     environment:
+      - MODEL=modelname_1 # Change modelname to yours.
+      - TZ=Asia/Shanghai # Naming video file by using the time in this timezone. see <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List>.
+    volumes:
+      - /path/to/viddir:/save # Video save path mapping.
+      - /path/to/logdir:/log # Log save path mapping.
+
+  # Wathing more model with add more blocks:
+
+  modelname_2:
+    <<: *template-config
+    container_name: ctpcap-modelname_2
+    environment:
+      - MODEL=modelname_2
       - TZ=Asia/Shanghai
 
-  ctpcap-modelname2:
-    # container_name: ctpcap-modelname2
-    command: modelname2
-    build: .
-    restart: unless-stopped
-    volumes:
-      - /path/to/viddir:/save
-      - /path/to/logdir:/log
+  modelname_3:
+    <<: *template-config
+    container_name: ctpcap-modelname_3
     environment:
+      - MODEL=modelname_3
       - TZ=Asia/Shanghai

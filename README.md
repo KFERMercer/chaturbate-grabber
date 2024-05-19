@@ -18,75 +18,81 @@ Now you neeo choose whether to use docker or a host environment,
 
 I suggest you use [docker](#docker-recommended).
 
-### Docker (recommended):
+### Docker (Recommended. CaaS, High Availability.):
 
-First install some Docker-like products.
+1. Install some Docker-like product to your systeam.
 
-Custome your own docker-compose file:
+2. Build (or rebuild after update) the docker image:
 
-```shell
-cat ./docker-compose.yml.sample > ./compose.yml
-```
+    ```shell
+    docker build -t ctbcap .
+    ```
 
-Then edit `./compose.yml` to configure.
+3. Custome your own docker-compose file:
 
-Deploy the compose service:
+    ```shell
+    cat ./docker-compose.yml.sample > ./compose.yml
+    ```
 
-```shell
-# If you wish to run in the front of the terminal:
-docker compose up
+    Then edit `./compose.yml` to configure.
 
-# If you want run and create to background daemon:
-docker compose up -d
-```
+4. Deploy the compose service:
 
-Unload the compose service:
+    ```shell
+    # build or rebuild the services:
+    docker compose build
 
-```shell
-docker compose down
-```
+    # If you wish to run in the front of the terminal:
+    docker compose up
+
+    # If you want run and create to background daemon:
+    docker compose up -d
+
+    # Unload the compose service:
+    docker compose down
+    ```
 
 ### Host environment:
 
-First make sure your linux shell is `bash`, and get install `git`, `ffmpeg`, `curl`. Follow this command to install them:
+1. Make sure your shell is `bash`, and get install `git`, `ffmpeg`, `curl`. Follow this command to install them:
 
-```shell
-# apt: 
-apt-get install -y git ffmpeg curl
-# yum:
-yum -y install git ffmpeg curl
-# apk:
-apk add install git ffmpeg curl
-```
+    ```shell
+    # apt: 
+    apt-get install -y git ffmpeg curl
+    # yum:
+    yum -y install git ffmpeg curl
+    # apk:
+    apk add install git ffmpeg curl
+    ```
 
-Use the following command to run:
+2. Use the following command to run:
 
-```shell
-SAVE_PATH=/path/to/savedir \
-LOG_PATH=/path/to/logdir \
-./ctbcap <model-name>
-```
+    ```shell
+    SAVE_PATH=/path/to/savedir \
+    LOG_PATH=/path/to/logdir \
+    ./ctbcap <model-name>
+    ```
 
-If you just want to get the m3u link of stream:
+3. If you just want to get the m3u link of stream:
 
-```shell
-./ctbcap <your-favorite-model-name> -s
-```
+    ```shell
+    ./ctbcap <your-favorite-model-name> -s
+    ```
 
-You can add this script to system path:
+    You can add this script to system path:
 
-```shell
-ln -s ~/chaturbate-grabber/ctbcap /sbin/ctbcap
-```
+    ```shell
+    ln -s ~/chaturbate-grabber/ctbcap /sbin/ctbcap
+    ```
 
-So next time you can run the `ctpcap` directly without going into repo.
+    Then next time you can run the `ctpcap` directly without going into repo.
 
-#### If you don't want to leave your trail on localmachine:
+    #### If you don't want to leave your trail on localmachine:
 
-```shell
-    SAVE_PATH=/path/to/savedir LOG_PATH=/path/to/logdir bash <(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)
-# ^ There's a space at the beginning.
-```
+    ```shell
+        bash <(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap) <model-name>
+    # ^ Should has space at the beginning.
+    ```
 
 ### Get follow-up updates:
 
@@ -99,15 +105,7 @@ cd chaturbate-grabber
 Update repo to newest commit:
 
 ```shell
-git pull
-```
-
-Restart the compose service (when use docker):
-
-```shell
-docker compose down
-
-docker compose up -d
+git pull --rebase
 ```
 
 ---
