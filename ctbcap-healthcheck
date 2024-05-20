@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#
+# Copyright (C) 2019-2024 KFERMercer <KFER.Mercer@gmail.com>
+#
+
+[ ! ${MODEL} ] && [ ! ${LOG_PATH} ] && echo "Variables not found!" && exit 1
+
+PROCESS=$(ps -ef | grep -oE "[f]fmpeg -i.*${MODEL}.*\.m3u8*" 2>/dev/null)
+
+[ -f ${LOG_PATH}/${MODEL}.online ] && RESPONSE=$(curl -4 -I -s $(cat ${LOG_PATH}/${MODEL}.online) -w %{http_code} 2>/dev/null | tail -n1)
+
+# 无 ffmpeg 进程时 --> 正常
+[ "${PROCESS}" ] || exit 0
+
+# 有 ffmpeg 进程, 但直播流无效时 --> 错误
+[ "${PROCESS}" ] && [ ${RESPONSE} -ge 400 ] && echo "FFMPEG process did not exit correctly (err)" && exit 1
+
+exit 0
