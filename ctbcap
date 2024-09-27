@@ -21,6 +21,9 @@ CTBCAP_LAST_EDIT=KFERMercer@2024-05-21
 # 默认输入(主播名或直播间链接)
 [ $MODEL ] || MODEL=
 
+# CDN服务器
+[ $EDGE_FLAG ] || EDGE_FLAG=
+
 # 对 $MODEL 进行处理, 赋值 $MODEL_NAME 和 $LINK
 function handle_MODEL() {
 	SAVE_PATH=${SAVE_PATH%"/"}
@@ -54,6 +57,10 @@ function link_to_m3u8() {
 		M3U8_LINK=$(echo "$M3U8_LINK" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -1)
 		M3U8_LINK_GENERIC=$M3U8_LINK
 		M3U8_LINK=${M3U8_LINK%%playlist.m3u8*}$(curl --compressed ${M3U8_LINK} 2>/dev/null | tail -1)
+		if [ -n "$EDGE_FLAG" ]; then
+			M3U8_LINK_GENERIC=$(echo "$M3U8_LINK_GENERIC" | sed "s/edge[0-9]\{1,2\}-[a-z]\{3\}/$EDGE_FLAG/g")
+			M3U8_LINK=$(echo "$M3U8_LINK" | sed "s/edge[0-9]\{1,2\}-[a-z]\{3\}/$EDGE_FLAG/g")
+		fi
 		return 1
 	else
 		echo "[$(date "+%Y%m%d-%H%M%S")] 主播[${MODEL_NAME}]不在线或网络阻塞."
