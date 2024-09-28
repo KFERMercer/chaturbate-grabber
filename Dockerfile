@@ -1,7 +1,3 @@
-# docker build -t ctbcap .
-# docker run -it --rm -v /path/to/cap:/cap ctbcap
-# docker system prune
-
 FROM alpine:latest
 
 RUN \
