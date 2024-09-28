@@ -3,111 +3,87 @@
 │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘
 └─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─
 8===================================================D
-A shell script to cpture live stream from chaturbate.
+              Capture Streaming From CB
 ```
 
-## Usage：
+# Usage：
 
-First of all, clone the repo to your local:
+  1. ### Clone the repo to your local:
 
-```shell
-git clone https://github.com/KFERMercer/chaturbate-grabber.git && cd chaturbate-grabber
-```
+      ```shell
+      git clone https://github.com/KFERMercer/chaturbate-grabber.git && cd chaturbate-grabber
+      ```
 
-Now you neeo choose whether to use docker or a host environment,
+  2. ### Install & trigger some Docker-like shit in your OS.
 
-I suggest you use [docker](#docker-recommended).
+      ```shell
+      # <https://www.google.com/search?q=please+tell+me+how+to+use+docker+I+will+do+anything>
+      ```
 
-### Docker (Recommended. CaaS, High Availability.):
+  3. ### Build (or rebuild after update) the docker image:
 
-1. Install some Docker-like product to your systeam.
+      ```shell
+      docker build -t ctbcap .
+      ```
 
-2. Build (or rebuild after update) the docker image:
+  4. ### RUN SIMP RUN!
 
-    ```shell
-    docker build -t ctbcap .
-    ```
+     - ### Run as daemon:
 
-3. Custome your own docker-compose file:
+       1. ### Custome your own docker-compose file:
 
-    ```shell
-    cat ./docker-compose.yml.sample > ./compose.yml
-    ```
+          ```shell
+          cat ./docker-compose.yml.sample > ./compose.yml
+          ```
+          Then edit `./compose.yml` to configure.
 
-    Then edit `./compose.yml` to configure.
+       2. ### Deploy the compose service:
 
-4. Deploy the compose service:
+          ```shell
+          # Run by background daemon:
+          docker compose up -d
 
-    ```shell
-    # build or rebuild the services:
-    docker compose build
+          # stop the daemon:
+          docker compose down
+          ```
 
-    # If you wish to run in the front of the terminal:
-    docker compose up
+     - ### Run once:
 
-    # If you want run and create to background daemon:
-    docker compose up -d
+        ```shell
+        docker run -it --rm \
+        -e TZ=Asia/Shanghai \
+        -v /path/to/viddir:/save \
+        -v /path/to/logdir:/log \
+        ctbcap:latest <modelname> <--stream>[m3u8 url only]
+        ```
+     - ### Run in non-container env:
 
-    # Unload the compose service:
-    docker compose down
-    ```
+       1. Make sure your shell is `bash`, and `curl`, `ffmpeg`, `wget` is installed.
 
-### Host environment:
+       2. Use the following command to run:
 
-1. Make sure your shell is `bash`, and get install `git`, `ffmpeg`, `curl`. Follow this command to install them:
+          ```shell
+          SAVE_PATH=/path/to/savedir \
+          LOG_PATH=/path/to/logdir \
+          ./ctbcap <modelname> <--stream>[m3u8 url only]
+          ```
 
-    ```shell
-    # apt: 
-    apt-get install -y git ffmpeg curl
-    # yum:
-    yum -y install git ffmpeg curl
-    # apk:
-    apk add install git ffmpeg curl
-    ```
+### Follow update:
 
-2. Use the following command to run:
-
-    ```shell
-    SAVE_PATH=/path/to/savedir \
-    LOG_PATH=/path/to/logdir \
-    ./ctbcap <model-name>
-    ```
-
-3. If you just want to get the m3u link of stream:
+1. Go to local repo:
 
     ```shell
-    ./ctbcap <your-favorite-model-name> -s
+    cd chaturbate-grabber
     ```
 
-    You can add this script to system path:
+2. Update repo to newest commit:
 
     ```shell
-    ln -s ~/chaturbate-grabber/ctbcap /sbin/ctbcap
+    git pull --rebase
     ```
 
-    Then next time you can run the `ctpcap` directly without going into repo.
-
-    #### If you don't want to leave your trail on localmachine:
-
-    ```shell
-        bash <(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap) <model-name>
-    # ^ Should has space at the beginning.
-    ```
-
-### Get follow-up updates:
-
-Go to local git repo:
-
-```shell
-cd chaturbate-grabber
-```
-
-Update repo to newest commit:
-
-```shell
-git pull --rebase
-```
+- **Once successfully update, you all need to [rebuild the image](#build-or-rebuild-after-update-the-docker-image).**
 
 ---
 
-### have fun : )
+`(. )( .)`
