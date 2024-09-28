@@ -12,7 +12,7 @@ WATCHDOG_PROCESS=$(ps -ef | grep -oE "[t]ee.*${MODEL}.*\.log*" 2>/dev/null)
 [ -f ${LOG_PATH}/${MODEL}.online ] && M3U8_RESPONSE=$(curl -4 -I -s $(cat ${LOG_PATH}/${MODEL}.online) -w %{http_code} 2>/dev/null | tail -n1)
 
 # 无 ffmpeg 进程时 --> 正常
-[ "${FFMPEG_PROCESS}" ] || exit 0
+[ ! "${FFMPEG_PROCESS}" ] && exit 0
 
 # 无监视进程时 --> 错误
 [ ! "${WATCHDOG_PROCESS}" ] && echo "Watchdog process does not exist! (err)" && exit 1
