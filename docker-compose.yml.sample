@@ -1,7 +1,7 @@
 services:
 
   modelname_1: &template-config
-    container_name: ctpcap-modelname_1 # Change modelname to yours.
+    container_name: ctbcap-modelname_1 # Change modelname to yours.
     image: ctbcap:latest # Image used by the containers. No need to change if you follow the README.md to set up.
     restart: unless-stopped
     environment:
@@ -15,14 +15,14 @@ services:
 
   modelname_2:
     <<: *template-config
-    container_name: ctpcap-modelname_2
+    container_name: ctbcap-modelname_2
     environment:
       MODEL=modelname_2
       TZ=Asia/Shanghai
 
   modelname_3:
     <<: *template-config
-    container_name: ctpcap-modelname_3
+    container_name: ctbcap-modelname_3
     environment:
       MODEL=modelname_3
       TZ=Asia/Shanghai
