@@ -5,8 +5,9 @@ services:
     image: ctbcap:latest # Image used by the containers. No need to change if you follow the README.md to set up.
     restart: unless-stopped
     environment:
-      MODEL=modelname_1 # Change modelname to yours.
-      TZ=Asia/Shanghai # Naming video file by using the time in this timezone. see <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List>.
+      MODEL: modelname_1 # Change modelname to yours.
+      TZ: Asia/Shanghai # Naming video file by using the time in this timezone. see <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List>.
+
     volumes:
       - /path/to/viddir:/save # Video save path mapping.
       - /path/to/logdir:/log # Log save path mapping.
@@ -17,12 +18,12 @@ services:
     <<: *template-config
     container_name: ctbcap-modelname_2
     environment:
-      MODEL=modelname_2
-      TZ=Asia/Shanghai
+      MODEL: modelname_2
+      TZ: Asia/Shanghai
 
   modelname_3:
     <<: *template-config
     container_name: ctbcap-modelname_3
     environment:
-      MODEL=modelname_3
-      TZ=Asia/Shanghai
+      MODEL: modelname_3
+      TZ: Asia/Shanghai
