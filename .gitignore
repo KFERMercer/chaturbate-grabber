@@ -1,3 +1,5 @@
 compose.yml
 docker-compose.yml
 log
+dev
+temp
