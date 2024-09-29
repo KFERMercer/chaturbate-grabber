@@ -52,6 +52,7 @@
         ```shell
         docker run -it --rm \
         -e TZ=Asia/Shanghai \
+        -e EDGE_FLAG= \
         -v /path/to/viddir:/save \
         -v /path/to/logdir:/log \
         ctbcap:latest <modelname> <--stream>[m3u8 url only]
@@ -65,6 +66,7 @@
           ```shell
           SAVE_PATH=/path/to/savedir \
           LOG_PATH=/path/to/logdir \
+          EDGE_FLAG= \
           ./ctbcap <modelname> <--stream>[m3u8 url only]
           ```
 

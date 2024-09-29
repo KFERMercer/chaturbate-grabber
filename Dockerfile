@@ -14,7 +14,8 @@ ENV \
     TZ="UTC" \
     LOG_PATH="/log" \
     SAVE_PATH="/save" \
-    MODEL=""
+    MODEL="" \
+    EDGE_FLAG=""
 
 HEALTHCHECK \
     --interval=30s \
