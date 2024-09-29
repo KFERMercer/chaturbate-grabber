@@ -48,7 +48,7 @@ function check_status() {
 
 # 获取直播流, 赋值 $M3U8_LINK , $M3U8_LINK_GENERIC
 function link_to_m3u8() {
-	M3U8_LINK=$(wget -4 -q -O - --timeout=10 $LINK 2>/dev/null)
+	M3U8_LINK=$(wget -4 -q -O - --timeout=10 $LINK -U 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' 2>/dev/null)
 	M3U8_LINK=$(echo -e $M3U8_LINK) # deunicode
 	if [[ $M3U8_LINK =~ ".m3u8" ]]; then
 		M3U8_LINK=$(echo "$M3U8_LINK" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -1)
