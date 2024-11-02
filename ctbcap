@@ -2,88 +2,158 @@
 #
 # Copyright (C) 2019-2024 KFERMercer <KFER.Mercer@gmail.com>
 #
-# ctbcap, A simple chaturbate webcam capturer.
+# A simple webcam capturer for CB & SC.
 #
-
-# exec 1>/path/file.log 2>&1 || true
-# set -xu
 
 CTBCAP_VERSION=1.0
 CTBCAP_RELEASE=26
 
 # 默认保存路径
-[ $SAVE_PATH ] || SAVE_PATH="${PWD}"
+[ ${SAVE_PATH} ] || SAVE_PATH="${PWD}"
 
 # 日志路径
-[ $LOG_PATH ] || LOG_PATH="${SAVE_PATH}/log/ctbcap"
+[ ${LOG_PATH} ] || LOG_PATH="${SAVE_PATH}/log/ctbcap"
 
-# 默认输入(主播名或直播间链接)
-[ $MODEL ] || MODEL=
+# 默认输入 (主播名或直播间链接)
+[ ${MODEL} ] || [ $1 ] || MODEL=
 
-# 对 $MODEL 进行处理, 赋值 $MODEL_NAME 和 $LINK
-function handle_MODEL() {
+# 直播平台 { chaturbate / stripchat } (默认为 chaturbate)
+[ ${PLATFORM} ] || PLATFORM="chaturbate"
+
+# 对运行要素变量进行检查和处理, 赋值 ${MODEL_NAME} 和 ${LINK}
+function handle_input() {
+
 	SAVE_PATH=${SAVE_PATH%"/"}
 	LOG_PATH=${LOG_PATH%"/"}
 
+	if [ ! ${MODEL} ] ||  [ ${MODEL} = "--help" ] || [ ${MODEL} = "-h" ]; then
+		echo "... <链接或主播名> <--stream>[只获取直播流]"
+		exit 0
+	fi
+
 	MODEL=${MODEL,,}
-	if [[ $MODEL =~ "chaturbate.com" ]]; then
-		LINK=$MODEL
-		MODEL_NAME=${LINK#*"chaturbate.com/"}
-		MODEL_NAME=${MODEL_NAME%"/"*}
-		LINK="https://chaturbate.com/${MODEL_NAME}/"
-	else
-		MODEL_NAME=$MODEL
-		LINK="https://chaturbate.com/${MODEL_NAME}/"
+	MODEL=${MODEL#*"chaturbate.com/"}
+	MODEL=${MODEL#*"stripchat.com/"}
+	MODEL=${MODEL%"/"*}
+	MODEL_NAME=${MODEL}
+	unset MODEL
+
+	PLATFORM=${PLATFORM,,}
+	# is chaturbate?
+	[ ${PLATFORM} = "chaturbate" ] || [ ${PLATFORM} = "ctb" ] || [ ${PLATFORM} = "cb" ] \
+	&& \
+	PLATFORM=chaturbate \
+	&& \
+	LINK="https://chaturbate.com/${MODEL_NAME}"
+	# is stripchat?
+	[ ${PLATFORM} = "stripchat" ] || [ ${PLATFORM} = "stc" ] || [ $PLATFORM = "sc" ] || [ ${PLATFORM} = "st" ] \
+	&& \
+	PLATFORM=stripchat \
+	&& \
+	LINK="https://stripchat.com/api/front/v2/models/username/${MODEL_NAME}/cam"
+	# if neither, exit.
+	[ ! $LINK ] && echo "未知直播平台! [$PLATFORM]" && exit 1
+}
+
+function curl_utils() {
+
+	# https://jnrbsn.github.io/user-agents/user-agents.json
+
+	if [ $1 = "status" ] ; then
+		CONNECT_STATUS=$( \
+			curl -4 -I -s \
+			--connect-timeout 5 --retry 5 --retry-delay 2 \
+			--user-agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
+			$2 \
+			-w %{http_code} \
+			2>/dev/null | tail -n1 \
+		)
+	fi
+
+	if [ $1 = "dumps" ] ; then
+		CONNECT_DUMPS=$( \
+			curl -4 -s \
+			--connect-timeout 5 --retry 5 --retry-delay 2 \
+			--user-agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
+			$2 \
+			2>/dev/null \
+		)
+		CONNECT_DUMPS=$(echo -e ${CONNECT_DUMPS}) # deunicode
 	fi
 }
 
 function check_status() {
-	CONNECT_STATUS=$(curl -4 -I -s --connect-timeout 5 --retry 10 --retry-delay 5 $1 -w %{http_code} 2>/dev/null | tail -n1)
-	[ $CONNECT_STATUS -ge 400 ] && echo "错误输入或检查网络($CONNECT_STATUS)." && exit 1
+
+	curl_utils status ${LINK}
+	[ ${CONNECT_STATUS} -ge 400 ] && echo "平台 [${PLATFORM}] 不存在主播 [${{MODEL_NAME}}], 或网络连接失败 [${CONNECT_STATUS}]." && exit 1
+
+	# for stripchat:
+	# if [ ${PLATFORM} = "stripchat" ]; then
+	# 	curl_utils dumps ${LINK}
+	# 	[[ ${CONNECT_DUMPS} =~ '"error":"Not Found"' ]] && echo "平台 [${PLATFORM}] 不存在主播 [${MODEL_NAME}]." && exit 1
+	# fi
 }
 
-# 获取直播流, 赋值 $M3U8_LINK , $M3U8_LINK_GENERIC
+# 获取直播流, 赋值 ${M3U8_LINK} , ${M3U8_LINK_GENERIC}
 function link_to_m3u8() {
-	# https://jnrbsn.github.io/user-agents/user-agents.json
-	M3U8_LINK=$(wget -4 -q -O - --timeout=10 $LINK -U 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' 2>/dev/null)
-	M3U8_LINK=$(echo -e $M3U8_LINK) # deunicode
-	if [[ $M3U8_LINK =~ ".m3u8" ]]; then
-		M3U8_LINK=$(echo "$M3U8_LINK" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -1)
-		M3U8_LINK_GENERIC=$M3U8_LINK
-		M3U8_LINK=${M3U8_LINK%%playlist.m3u8*}$(curl --compressed ${M3U8_LINK} 2>/dev/null | tail -1)
-		return 1
-	else
-		echo "[$(date "+%Y%m%d-%H%M%S")] 主播[${MODEL_NAME}]不在线或网络阻塞."
+
+	# for chaturbate:
+	if [ ${PLATFORM} = "chaturbate" ]; then
+		curl_utils dumps ${LINK}
+		if [[ ${CONNECT_STATUS} =~ ".m3u8" ]]; then
+			M3U8_LINK=$(echo "${M3U8_LINK}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -1)
+			M3U8_LINK_GENERIC=${M3U8_LINK}
+			M3U8_LINK=${M3U8_LINK%%playlist.m3u8*}$(curl --compressed ${M3U8_LINK} 2>/dev/null | tail -1)
+			return 1
+		else
+			echo "[$(date "+%Y%m%d-%H%M%S")] 主播 [${MODEL_NAME}] 不在线或网络阻塞."
+		fi
+	fi
+
+	# for stripchat:
+	if [ ${PLATFORM} = "stripchat" ]; then
+		curl_utils dumps $LINK
+		if [[ ${CONNECT_DUMPS} =~ '"isCamAvailable":true' ]]; then
+		
+			local STREAMNAME=${CONNECT_DUMPS#*'"streamName":"'}
+			local STREAMNAME=${STREAMNAME%%'"'*}
+			local VIEWSERVER=25 # TODO: dynamize this number
+			local PRESET=${CONNECT_DUMPS#*'"default":["'}
+			local PRESET=${PRESET%%'"'*}
+
+			M3U8_LINK_GENERIC="https://b-hls-${VIEWSERVER}.doppiocdn.live/hls/${STREAMNAME}/${STREAMNAME}_${PRESET}.m3u8"
+			M3U8_LINK=${M3U8_LINK_GENERIC}
+			return 1
+		else
+			echo "[$(date "+%Y%m%d-%H%M%S")] 主播 [${MODEL_NAME}] 不在线或网络阻塞."
+		fi
 	fi
 }
 
 function capture_media() {
-	# ffmpeg -i $M3U8_LINK -c copy -movflags +faststart -t 60 -y $(date "+%Y%m%d-%H%M%S").mp4
+	# ffmpeg -i ${M3U8_LINK} -c copy -movflags +faststart -t 60 -y $(date "+%Y%m%d-%H%M%S").mp4
 	ffmpeg \
-	-i $M3U8_LINK \
+	-i ${M3U8_LINK} \
 	-c copy \
 	-map 0 \
 	-f segment \
-	-segment_list $SAVE_PATH/$MODEL_NAME-$(date "+%Y%m%d-%H%M%S").m3u8 \
+	-segment_list ${SAVE_PATH}/${MODEL_NAME}-$(date "+%Y%m%d-%H%M%S").m3u8 \
 	-segment_time 1800 \
 	-loglevel warning \
-	$SAVE_PATH/$MODEL_NAME-$(date "+%Y%m%d-%H%M%S")_%03d.ts
+	${SAVE_PATH}/${MODEL_NAME}-$(date "+%Y%m%d-%H%M%S")_%03d.ts
 }
-
-function urldecode() { : "${*//+/ }"; echo -e "${_//%/\\x}"; }
 
 function watchdog() {
 	while [ true ]; do
 		link_to_m3u8
 		if [ $? -eq 1 ]; then
 			echo "[$(date "+%Y%m%d-%H%M%S")] 解析成功! 直播流为:"
-			echo "[$(date "+%Y%m%d-%H%M%S")] $M3U8_LINK_GENERIC"
-			echo "[$(date "+%Y%m%d-%H%M%S")] $M3U8_LINK"
+			echo "[$(date "+%Y%m%d-%H%M%S")] ${M3U8_LINK_GENERIC}"
 			echo "[$(date "+%Y%m%d-%H%M%S")] 开始录播..."
-			echo $M3U8_LINK_GENERIC > $LOG_PATH/$MODEL_NAME.online
+			echo ${M3U8_LINK_GENERIC} > ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online
 			capture_media
 			echo "[$(date "+%Y%m%d-%H%M%S")] 录制中断, 休眠三分钟后重连..."
-			rm -f $LOG_PATH/$MODEL_NAME.online
+			rm -f ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online
 			sleep 180
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] 休眠大约十分钟..."
@@ -98,37 +168,29 @@ echo "│  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤�
 echo "└─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─"
 echo "                       v${CTBCAP_VERSION}r${CTBCAP_RELEASE}"
 echo "8===================================================D"
-echo "              Capture Streaming From CB"
+echo "             Simping Stream from CB & SC"
 
 [ $# -gt 2 ] && echo "无效参数" && exit 1
 
-[ $MODEL ] || if [ ! $1 ] || [ $1 = "--help" ] || [ $1 = "-h" ]; then
-	echo "... <链接或主播名> <--stream>[只获取直播流]"
-	exit 0
-else
-	MODEL=$1
-fi
+[ $1 ] && MODEL=$1
 
-mkdir -p $LOG_PATH $SAVE_PATH
+handle_input
 
-handle_MODEL
+mkdir -p ${LOG_PATH} ${SAVE_PATH}
 
-check_status $LINK
+check_status\
 
 echo
-echo "正在视奸主播: $MODEL_NAME ($CONNECT_STATUS)"
+echo "正在视奸主播: ${MODEL_NAME} (${CONNECT_STATUS})"
 echo
 
-rm -f $LOG_PATH/$MODEL_NAME.online
+rm -f ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online
 
 [ ! $2 ] || if [ $2 = "--stream" ] || [ $2 = "-s" ]; then
 	link_to_m3u8
 	if [ $? -eq 1 ]; then
-		echo "多清晰度流:"
-		echo $M3U8_LINK_GENERIC
-		echo
-		echo "最高清晰度流:"
-		echo $M3U8_LINK
+		echo "直播流链接:"
+		echo ${M3U8_LINK_GENERIC}
 	fi
 	exit 0
 else
@@ -136,6 +198,6 @@ else
 	exit 1
 fi
 
-watchdog 2>&1 | tee $LOG_PATH/$(date "+%Y%m%d-%H%M%S")-$MODEL_NAME.log
+watchdog 2>&1 | tee ${LOG_PATH}/$(date "+%Y%m%d-%H%M%S")-${MODEL_NAME}.log
 
 exit 0

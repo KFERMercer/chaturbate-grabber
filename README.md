@@ -3,7 +3,7 @@
 │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘
 └─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─
 8===================================================D
-              Capture Streaming From CB
+             Simping Stream from CB & SC
 ```
 
 # Usage：
@@ -52,19 +52,21 @@
         ```shell
         docker run -it --rm \
         -e TZ=Asia/Shanghai \
+        -e PLATFORM=chaturbate <or stripchat> \
         -v /path/to/viddir:/save \
         -v /path/to/logdir:/log \
         ctbcap:latest <modelname> <--stream>[m3u8 url only]
         ```
      - ### Run in non-container env:
 
-       1. Make sure your shell is `bash`, and `curl`, `ffmpeg`, `wget` is installed.
+       1. Make sure your shell is `bash`, and `curl`, `ffmpeg` is installed.
 
        2. Use the following command to run:
 
           ```shell
           SAVE_PATH=/path/to/savedir \
           LOG_PATH=/path/to/logdir \
+          PLATFORM=chaturbate <or stripchat> \
           ./ctbcap <modelname> <--stream>[m3u8 url only]
           ```
 

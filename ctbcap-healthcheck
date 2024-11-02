@@ -9,7 +9,12 @@ FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg -i.*${MODEL}.*\.m3u8*" 2>/dev/null)
 
 WATCHDOG_PROCESS=$(ps -ef | grep -oE "[t]ee.*${MODEL}.*\.log*" 2>/dev/null)
 
-[ -f ${LOG_PATH}/${MODEL}.online ] && M3U8_RESPONSE=$(curl -4 -I -s $(cat ${LOG_PATH}/${MODEL}.online) -w %{http_code} 2>/dev/null | tail -n1)
+MODEL=${MODEL,,}
+MODEL=${MODEL#*"chaturbate.com/"}
+MODEL=${MODEL#*"stripchat.com/"}
+MODEL=${MODEL%"/"*}
+
+[ -f ${LOG_PATH}/${MODEL}.online ] && M3U8_RESPONSE=$(curl -4 -I -s $(cat ${LOG_PATH}/${PLATFORM}-${MODEL}.online) -w %{http_code} 2>/dev/null | tail -n1)
 
 # 无 ffmpeg 进程时 --> 正常
 [ ! "${FFMPEG_PROCESS}" ] && exit 0

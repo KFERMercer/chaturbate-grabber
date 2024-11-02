@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 RUN \
-    apk add --no-cache bash curl ffmpeg tzdata wget; \
+    apk add --no-cache bash curl ffmpeg tzdata; \
     mkdir -p /log /save; \
     chmod 777 /log /save; \
     rm -rf /tmp/* /var/log/*
@@ -14,7 +14,8 @@ ENV \
     TZ="UTC" \
     LOG_PATH="/log" \
     SAVE_PATH="/save" \
-    MODEL=""
+    MODEL="" \
+    PLATFORM="chaturbate"
 
 HEALTHCHECK \
     --interval=30s \

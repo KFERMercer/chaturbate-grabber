@@ -6,6 +6,7 @@ services:
     restart: unless-stopped
     environment:
       MODEL: modelname_1 # Change modelname to yours.
+      PLATFORM: chaturbate # What Platform are model streaming at. choose [ chaturbate / stripchat ].
       TZ: Asia/Shanghai # Naming video file by using the time in this timezone. see <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List>.
 
     volumes:
@@ -19,6 +20,7 @@ services:
     container_name: ctbcap-modelname_2
     environment:
       MODEL: modelname_2
+      PLATFORM: chaturbate
       TZ: Asia/Shanghai
 
   modelname_3:
@@ -26,4 +28,5 @@ services:
     container_name: ctbcap-modelname_3
     environment:
       MODEL: modelname_3
+      PLATFORM: chaturbate
       TZ: Asia/Shanghai
