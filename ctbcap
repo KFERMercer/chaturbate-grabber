@@ -72,10 +72,9 @@ function curl_utils() {
 
 	if [ $1 = "dumps" ] ; then
 		CONNECT_DUMPS=$( \
-			curl -4 -s \
-			--connect-timeout 5 --retry 5 --retry-delay 2 \
-			--user-agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
-			$2 \
+			wget -4 -q -O - \
+			--timeout=10 $LINK \
+			-U 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
 			2>/dev/null \
 		)
 		CONNECT_DUMPS=$(echo -e ${CONNECT_DUMPS}) # deunicode
@@ -100,8 +99,8 @@ function link_to_m3u8() {
 	# for chaturbate:
 	if [ ${PLATFORM} = "chaturbate" ]; then
 		curl_utils dumps ${LINK}
-		if [[ ${CONNECT_STATUS} =~ ".m3u8" ]]; then
-			M3U8_LINK=$(echo "${M3U8_LINK}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -1)
+		if [[ ${CONNECT_DUMPS} =~ ".m3u8" ]]; then
+			M3U8_LINK=$(echo "${CONNECT_DUMPS}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -1)
 			M3U8_LINK_GENERIC=${M3U8_LINK}
 			M3U8_LINK=${M3U8_LINK%%playlist.m3u8*}$(curl --compressed ${M3U8_LINK} 2>/dev/null | tail -1)
 			return 1

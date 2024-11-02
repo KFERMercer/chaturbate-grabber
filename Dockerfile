@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 RUN \
-    apk add --no-cache bash curl ffmpeg tzdata; \
+    apk add --no-cache bash curl ffmpeg tzdata wget; \
     mkdir -p /log /save; \
     chmod 777 /log /save; \
     rm -rf /tmp/* /var/log/*
