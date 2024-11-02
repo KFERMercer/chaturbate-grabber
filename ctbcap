@@ -73,7 +73,7 @@ function curl_utils() {
 	if [ $1 = "dumps" ] ; then
 		CONNECT_DUMPS=$( \
 			wget -4 -q -O - \
-			--timeout=10 $LINK \
+			--timeout=10 $2 \
 			-U 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
 			2>/dev/null \
 		)
