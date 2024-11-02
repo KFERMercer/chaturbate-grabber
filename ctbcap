@@ -133,6 +133,7 @@ function link_to_m3u8() {
 function capture_media() {
 	# ffmpeg -i ${M3U8_LINK} -c copy -movflags +faststart -t 60 -y $(date "+%Y%m%d-%H%M%S").mp4
 	ffmpeg \
+	-user_agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
 	-i ${M3U8_LINK} \
 	-c copy \
 	-map 0 \
