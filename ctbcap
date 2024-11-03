@@ -124,7 +124,7 @@ function link_to_m3u8() {
 			local PRESET=${PRESET%%'"'*}
 
 			# if ${PRESET} is not good, use automod.
-			# Fuck you stripchat, your backend is so wired
+			# Fuck you stripchat, your backend is so weird
 			if [ ${PRESET} = "{" ]; then
 				M3U8_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
 				M3U8_LINK=$(curl --compressed ${M3U8_LINK_GENERIC} 2>/dev/null | tail -1)
