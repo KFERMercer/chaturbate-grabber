@@ -9,19 +9,19 @@ CTBCAP_VERSION=2.0
 CTBCAP_RELEASE=1
 
 # 默认保存路径
-[ ${SAVE_PATH} ] || SAVE_PATH="${PWD}"
+[[ ${SAVE_PATH} ]] || SAVE_PATH="${PWD}"
 
 # 日志路径
-[ ${LOG_PATH} ] || LOG_PATH="${SAVE_PATH}/log/ctbcap"
+[[ ${LOG_PATH} ]] || LOG_PATH="${SAVE_PATH}/log/ctbcap"
 
 # 默认输入 (主播名或直播间链接)
-[ ${MODEL} ] || [ $1 ] || MODEL=
+[[ ${MODEL} ]] || [ $1 ] || MODEL=
 
 # 直播平台 { chaturbate / stripchat } (默认为 chaturbate)
-[ ${PLATFORM} ] || PLATFORM="chaturbate"
+[[ ${PLATFORM} ]] || PLATFORM="chaturbate"
 
 # Debug mod. inactive if not 1.
-[ ${DEBUG_MODE} ] || DEBUG_MODE="your mom is so hot"
+[[ ${DEBUG_MODE} ]] || DEBUG_MODE="your mom is so hot"
 
 # 对运行要素变量进行检查和处理, 赋值 ${MODEL_NAME} 和 ${LINK}
 function handle_input() {
@@ -29,7 +29,7 @@ function handle_input() {
 	SAVE_PATH=${SAVE_PATH%"/"}
 	LOG_PATH=${LOG_PATH%"/"}
 
-	if [ ! ${MODEL} ] ||  [ ${MODEL} = "--help" ] || [ ${MODEL} = "-h" ]; then
+	if [[ ! ${MODEL} ]] ||  [ ${MODEL} = "--help" ] || [ ${MODEL} = "-h" ]; then
 		echo "... <链接或主播名> <--stream>[只获取直播流]"
 		exit 0
 	fi
@@ -201,7 +201,7 @@ echo
 
 rm -f ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online
 
-[ ! $2 ] || if [ $2 = "--stream" ] || [ $2 = "-s" ]; then
+[[ ! $2 ]] || if [ $2 = "--stream" ] || [ $2 = "-s" ]; then
 	link_to_m3u8
 	if [ $? -eq 1 ]; then
 		echo "直播流链接:"
