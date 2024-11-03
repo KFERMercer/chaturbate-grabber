@@ -52,10 +52,10 @@ function handle_input() {
 	&& \
 	LINK="https://stripchat.com/api/front/v2/models/username/${MODEL_NAME}/cam"
 	# if neither, exit.
-	[ ! $LINK ] && echo "未知直播平台! [$PLATFORM]" && exit 1
+	[ ! ${LINK} ] && echo "未知直播平台! [$PLATFORM]" && exit 1
 }
 
-function curl_utils() {
+function connect_utils() {
 
 	# https://jnrbsn.github.io/user-agents/user-agents.json
 
@@ -70,7 +70,7 @@ function curl_utils() {
 		)
 	fi
 
-	if [ $1 = "dumps" ] ; then
+	if [ $1 = "dump" ] ; then
 		CONNECT_DUMPS=$( \
 			wget -4 -q -O - \
 			--timeout=10 $2 \
@@ -83,12 +83,12 @@ function curl_utils() {
 
 function check_status() {
 
-	curl_utils status ${LINK}
+	connect_utils status ${LINK}
 	[ ${CONNECT_STATUS} -ge 400 ] && echo "平台 [${PLATFORM}] 不存在主播 [${{MODEL_NAME}}], 或网络连接失败 [${CONNECT_STATUS}]." && exit 1
 
 	# for stripchat:
 	# if [ ${PLATFORM} = "stripchat" ]; then
-	# 	curl_utils dumps ${LINK}
+	# 	connect_utils dump ${LINK}
 	# 	[[ ${CONNECT_DUMPS} =~ '"error":"Not Found"' ]] && echo "平台 [${PLATFORM}] 不存在主播 [${MODEL_NAME}]." && exit 1
 	# fi
 }
@@ -98,9 +98,9 @@ function link_to_m3u8() {
 
 	# for chaturbate:
 	if [ ${PLATFORM} = "chaturbate" ]; then
-		curl_utils dumps ${LINK}
+		connect_utils dump ${LINK}
 		if [[ ${CONNECT_DUMPS} =~ ".m3u8" ]]; then
-			M3U8_LINK=$(echo "${CONNECT_DUMPS}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -1)
+			M3U8_LINK=$(echo ${CONNECT_DUMPS} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -1)
 			M3U8_LINK_GENERIC=${M3U8_LINK}
 			M3U8_LINK=${M3U8_LINK%%playlist.m3u8*}$(curl --compressed ${M3U8_LINK} 2>/dev/null | tail -1)
 			return 1
@@ -111,7 +111,7 @@ function link_to_m3u8() {
 
 	# for stripchat:
 	if [ ${PLATFORM} = "stripchat" ]; then
-		curl_utils dumps $LINK
+		connect_utils dump ${LINK}
 		if [[ ${CONNECT_DUMPS} =~ '"isCamAvailable":true' ]]; then
 		
 			local STREAMNAME=${CONNECT_DUMPS#*'"streamName":"'}
@@ -149,12 +149,14 @@ function watchdog() {
 		if [ $? -eq 1 ]; then
 			echo "[$(date "+%Y%m%d-%H%M%S")] 解析成功! 直播流为:"
 			echo "[$(date "+%Y%m%d-%H%M%S")] ${M3U8_LINK_GENERIC}"
+			echo "[$(date "+%Y%m%d-%H%M%S")] 最高清晰度流:"
+			echo "[$(date "+%Y%m%d-%H%M%S")] ${M3U8_LINK}"
 			echo "[$(date "+%Y%m%d-%H%M%S")] 开始录播..."
 			echo ${M3U8_LINK_GENERIC} > ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online
 			capture_media
-			echo "[$(date "+%Y%m%d-%H%M%S")] 录制中断, 休眠三分钟后重连..."
+			echo "[$(date "+%Y%m%d-%H%M%S")] 录制中断, 休眠一分钟后重连..."
 			rm -f ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online
-			sleep 180
+			sleep 60
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] 休眠大约十分钟..."
 			sleep $((RANDOM % (661 - 540) + 540))
@@ -178,7 +180,7 @@ handle_input
 
 mkdir -p ${LOG_PATH} ${SAVE_PATH}
 
-check_status\
+check_status
 
 echo
 echo "正在视奸主播: ${MODEL_NAME} (${CONNECT_STATUS})"
@@ -191,6 +193,8 @@ rm -f ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online
 	if [ $? -eq 1 ]; then
 		echo "直播流链接:"
 		echo ${M3U8_LINK_GENERIC}
+		echo "最高清晰度流:"
+		echo "${M3U8_LINK}"
 	fi
 	exit 0
 else
