@@ -87,7 +87,7 @@ function connect_utils() {
 function check_status() {
 
 	connect_utils status ${LINK}
-	[ ${CONNECT_STATUS} -ge 400 ] && echo "平台 [${PLATFORM}] 不存在主播 [${{MODEL_NAME}}], 或网络连接失败 [${CONNECT_STATUS}]." && exit 1
+	[ ${CONNECT_STATUS} -ge 400 ] && echo "平台 [${PLATFORM}] 不存在主播 [${MODEL_NAME}], 或网络连接失败 [${CONNECT_STATUS}]." && exit 1
 
 	# for stripchat:
 	# if [ ${PLATFORM} = "stripchat" ]; then
