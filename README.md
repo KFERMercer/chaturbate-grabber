@@ -8,7 +8,7 @@
 
 # Usage：
 
-  1. ### Clone the repo to your local:
+  1. ### Clone this repo to your local:
 
       ```shell
       git clone https://github.com/KFERMercer/chaturbate-grabber.git && cd chaturbate-grabber
@@ -23,7 +23,7 @@
   3. ### Build (or rebuild after update) the docker image:
 
       ```shell
-      docker build -t ctbcap .
+      docker build -t ctbcap ./
       ```
 
   4. ### RUN SIMP RUN!
@@ -57,6 +57,7 @@
         -v /path/to/logdir:/log \
         ctbcap:latest <modelname> <--stream>[m3u8 url only]
         ```
+
      - ### Run in non-container env:
 
        1. Make sure your shell is `bash`, and `curl`, `ffmpeg`, `wget` is installed.
@@ -73,14 +74,14 @@
 
 ### Container Variables
 
-|  Variable | Value type | Optional value | Default | Necessary to change|
+|  Variable | Value type | Optional value | Default | Necessary to change |
 | :-: | :-: | :- | :-: | :-: |
 | MODEL | Streamer's username <br> or <br> stream link | `tri80085` <br> `s1mp_L0r3-87` <br> `https://chaturbate.com/your_sister` <br> `https://stripchat.com/dicklessman` <br> ... | - | Yes |
 | PLATFORM | `chaturbate`  <br> or <br> `stripchat` | `chaturbate` <br> `stripchat` | `chaturbate` | Yes |
 | TZ | [TZ identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) | `UTC` <br> `Asia/Shanghai` <br> `Africa/Harare` <br> ... | `UTC` | No |
 | SAVE_PATH | Path of stream saves | `/path/to/savedir` | `/viddir` | No |
 | LOG_PATH | Path of logs | `/path/to/logdir` | `/logdir` | No |
-| DEBUG_MODE | `1` or any other string. | `1` <br> `ishowspeed` <br> `i was born form my sis` <br> ... | `your mom is so hot` | No
+| DEBUG_MODE | `1` <br> or <br> any other string. | `1` <br> `ishowspeed` <br> `i was born form my sis` <br> ... | `your mom is so hot` | No |
 
 ### Follow update:
 
