@@ -116,12 +116,19 @@ function link_to_m3u8() {
 		
 			local STREAMNAME=${CONNECT_DUMPS#*'"streamName":"'}
 			local STREAMNAME=${STREAMNAME%%'"'*}
-			local VIEWSERVER=25 # TODO: dynamize this number
+			local VIEWSERVER=$((RANDOM % (16) + 10)) # Random num BI 10 - 25
 			local PRESET=${CONNECT_DUMPS#*'"default":["'}
 			local PRESET=${PRESET%%'"'*}
 
-			M3U8_LINK_GENERIC="https://b-hls-${VIEWSERVER}.doppiocdn.live/hls/${STREAMNAME}/${STREAMNAME}_${PRESET}.m3u8"
-			M3U8_LINK=${M3U8_LINK_GENERIC}
+			# if ${PRESET} is not good, use automod.
+			# Fuck you stripchat, your backend is so wired
+			if [ ${PRESET} = "{" ]; then
+				M3U8_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
+				M3U8_LINK=$(curl --compressed ${M3U8_LINK_GENERIC} 2>/dev/null | tail -1)
+			else
+				M3U8_LINK_GENERIC="https://b-hls-${VIEWSERVER}.doppiocdn.live/hls/${STREAMNAME}/${STREAMNAME}_${PRESET}.m3u8"
+				M3U8_LINK=${M3U8_LINK_GENERIC}
+			fi
 			return 1
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] 主播 [${MODEL_NAME}] 不在线或网络阻塞."
