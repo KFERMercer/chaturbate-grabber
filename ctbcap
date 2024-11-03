@@ -150,7 +150,8 @@ function capture_media() {
 	-segment_list ${SAVE_PATH}/${MODEL_NAME}-$(date "+%Y%m%d-%H%M%S").m3u8 \
 	-segment_time 1800 \
 	-loglevel warning \
-	${SAVE_PATH}/${MODEL_NAME}-$(date "+%Y%m%d-%H%M%S")_%03d.ts
+	${SAVE_PATH}/${MODEL_NAME}-$(date "+%Y%m%d-%H%M%S")_%03d.ts \
+	2>${LOG_PATH}/${MODEL_NAME}.ffmpeg.log
 }
 
 function watchdog() {
