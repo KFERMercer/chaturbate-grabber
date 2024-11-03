@@ -80,6 +80,7 @@
 | TZ | [TZ identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) | `UTC` <br> `Asia/Shanghai` <br> `Africa/Harare` <br> ... | `UTC` | No |
 | SAVE_PATH | Path of stream saves | `/path/to/savedir` | `/viddir` | No |
 | LOG_PATH | Path of logs | `/path/to/logdir` | `/logdir` | No |
+| DEBUG_MODE | `1` or any other string. | `1` <br> `ishowspeed` <br> `i was born form my sis` <br> ... | `your mom is so hot` | No
 
 ### Follow update:
 

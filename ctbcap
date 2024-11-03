@@ -20,6 +20,9 @@ CTBCAP_RELEASE=26
 # 直播平台 { chaturbate / stripchat } (默认为 chaturbate)
 [ ${PLATFORM} ] || PLATFORM="chaturbate"
 
+# Debug mod. inactive if not 1.
+[ ${DEBUG_MODE} ] || DEBUG_MODE="your mom is so hot"
+
 # 对运行要素变量进行检查和处理, 赋值 ${MODEL_NAME} 和 ${LINK}
 function handle_input() {
 
@@ -182,6 +185,8 @@ echo "             Simping Stream from CB & SC"
 [ $# -gt 2 ] && echo "无效参数" && exit 1
 
 [ $1 ] && MODEL=$1
+
+[[ ${DEBUG_MODE} == "1" ]] && set -x # debug mode
 
 handle_input
 

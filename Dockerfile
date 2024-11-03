@@ -15,7 +15,8 @@ ENV \
     LOG_PATH="/log" \
     SAVE_PATH="/save" \
     MODEL="" \
-    PLATFORM="chaturbate"
+    PLATFORM="chaturbate" \
+    DEBUG_MODE="your mom is so hot"
 
 HEALTHCHECK \
     --interval=30s \

@@ -8,6 +8,7 @@ services:
       MODEL: modelname_1 # Change modelname to yours.
       PLATFORM: chaturbate # What Platform are model streaming at. choose [ chaturbate / stripchat ].
       TZ: Asia/Shanghai # Naming video file by using the time in this timezone. see <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List>.
+      DEBUG_MODE: "your mom is so hot" # Debug mod. inactive if not 1.
 
     volumes:
       - /path/to/viddir:/save # Video save path mapping.
