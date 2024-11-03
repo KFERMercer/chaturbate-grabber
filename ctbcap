@@ -47,7 +47,7 @@ function handle_input() {
 	&& \
 	PLATFORM=chaturbate \
 	&& \
-	LINK="https://chaturbate.com/${MODEL_NAME}"
+	LINK="https://chaturbate.com/${MODEL_NAME}/" # must keep " / " at the end
 	# is stripchat?
 	[ ${PLATFORM} = "stripchat" ] || [ ${PLATFORM} = "stc" ] || [ $PLATFORM = "sc" ] || [ ${PLATFORM} = "st" ] \
 	&& \
@@ -64,21 +64,21 @@ function connect_utils() {
 
 	if [ $1 = "status" ] ; then
 		CONNECT_STATUS=$( \
-			curl -4 -I -s \
+			curl $2 \
+			-4 -s \
+			-I -w %{http_code} \
 			--connect-timeout 5 --retry 5 --retry-delay 2 \
-			--user-agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
-			$2 \
-			-w %{http_code} \
+			-H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' \
 			2>/dev/null | tail -n1 \
 		)
 	fi
 
 	if [ $1 = "dump" ] ; then
 		CONNECT_DUMPS=$( \
-			wget -4 -q -O - \
-			--timeout=10 $2 \
-			-U 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
-			2>/dev/null \
+			curl $2 \
+			-4 -s \
+			--connect-timeout 5 --retry 5 --retry-delay 2 \
+			-H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' \
 		)
 		CONNECT_DUMPS=$(echo -e ${CONNECT_DUMPS}) # deunicode
 	fi

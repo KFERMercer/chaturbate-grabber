@@ -14,7 +14,7 @@ MODEL=${MODEL#*"chaturbate.com/"}
 MODEL=${MODEL#*"stripchat.com/"}
 MODEL=${MODEL%"/"*}
 
-[ -f ${LOG_PATH}/${MODEL}.online ] && M3U8_RESPONSE=$(curl -4 -I -s $(cat ${LOG_PATH}/${PLATFORM}-${MODEL}.online) -w %{http_code} 2>/dev/null | tail -n1)
+[ -f ${LOG_PATH}/${MODEL}.online ] && M3U8_RESPONSE=$(curl $(cat ${LOG_PATH}/${PLATFORM}-${MODEL}.online) -4 -s -I -w %{http_code} -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' 2>/dev/null | tail -n1)
 
 # 无 ffmpeg 进程时 --> 正常
 [ ! "${FFMPEG_PROCESS}" ] && exit 0
