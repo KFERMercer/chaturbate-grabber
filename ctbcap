@@ -9,10 +9,10 @@ CTBCAP_VERSION=2.0
 CTBCAP_RELEASE=2
 
 # 默认保存路径
-[[ ${SAVE_PATH} ]] || SAVE_PATH="${PWD}"
+[[ ${SAVE_PATH} ]] || SAVE_PATH="${PWD}/cap"
 
 # 日志路径
-[[ ${LOG_PATH} ]] || LOG_PATH="${SAVE_PATH}/log/ctbcap"
+[[ ${LOG_PATH} ]] || LOG_PATH="${SAVE_PATH}/log/"
 
 # 默认输入 (主播名或直播间链接)
 [[ ${MODEL} ]] || [ $1 ] || MODEL=
@@ -140,6 +140,13 @@ function link_to_m3u8() {
 }
 
 function capture_media() {
+
+	local FFMPEG_LOGFILE="${LOG_PATH}/${MODEL_NAME}.ffmpeg.log"
+
+	echo >> ${FFMPEG_LOGFILE}
+	echo "========== [$(date "+%Y%m%d-%H%M%S")] ==========" >> ${FFMPEG_LOGFILE}
+	echo >> ${FFMPEG_LOGFILE}
+
 	# ffmpeg -i ${M3U8_LINK} -c copy -movflags +faststart -t 60 -y $(date "+%Y%m%d-%H%M%S").mp4
 	ffmpeg \
 	-user_agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
@@ -151,7 +158,7 @@ function capture_media() {
 	-segment_time 1800 \
 	-loglevel warning \
 	${SAVE_PATH}/${MODEL_NAME}-$(date "+%Y%m%d-%H%M%S")_%03d.ts \
-	2>${LOG_PATH}/${MODEL_NAME}.ffmpeg.log
+	>> ${FFMPEG_LOGFILE} 2>&1
 }
 
 function watchdog() {
@@ -215,6 +222,6 @@ else
 	exit 1
 fi
 
-watchdog 2>&1 | tee ${LOG_PATH}/$(date "+%Y%m%d-%H%M%S")-${MODEL_NAME}.log
+watchdog 2>&1 | tee ${LOG_PATH}/${MODEL_NAME}-$(date "+%Y%m%d-%H%M%S").log
 
 exit 0
