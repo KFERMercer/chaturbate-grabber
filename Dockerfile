@@ -1,12 +1,13 @@
 FROM alpine:latest
 
 RUN \
-    apk add --no-cache bash curl ffmpeg tzdata; \
+    apk add --no-cache bash curl ffmpeg tini tzdata; \
     mkdir -p /log /save; \
     chmod 777 /log /save; \
     rm -rf /tmp/* /var/log/*
 
-COPY ./ctbcap ./ctbcap-healthcheck /usr/sbin/
+COPY ./ctbcap-healthcheck /usr/sbin/
+COPY ./ctbcap /usr/sbin/
 
 USER 1000:1000
 
@@ -25,4 +26,6 @@ HEALTHCHECK \
     --start-period=5s \
     CMD ["ctbcap-healthcheck"]
 
-ENTRYPOINT ["ctbcap"]
+ENTRYPOINT ["tini", "-g", "--"]
+
+CMD ["ctbcap"]

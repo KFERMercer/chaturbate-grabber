@@ -206,6 +206,11 @@ check_status
 echo "Simping Streamer: ${MODEL_NAME} (${CONNECT_STATUS})"
 echo
 
+# SYSSIG trap
+trap \
+'rm -f ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online; echo; echo "8=====================D"; echo " B (. Y .) B S   O U T"; echo "8=====================D"; exit 0' \
+SIGHUP SIGINT SIGQUIT SIGTERM
+
 rm -f ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online
 
 [[ ! $2 ]] || if [ $2 = "--stream" ] || [ $2 = "-s" ]; then
