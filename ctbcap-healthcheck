@@ -1,28 +1,38 @@
 #!/usr/bin/env bash
 #
-# Copyright (C) 2019-2024 KFERMercer <KFER.Mercer@gmail.com>
+# Copyright (C) 2019-2024 KFERMercer <https://github.com/KFERMercer>
 #
 
-[ ! ${MODEL} ] && [ ! ${LOG_PATH} ] && echo "Variables not found!" && exit 1
+# Check for assignment of runtime variables
+[ ! ${MODEL} ] || [ ! ${PLATFORM} ] || [ ! ${SAVE_PATH} ] || [ ! ${LOG_PATH} ] && echo "Incomplete Runtime Variables!" && exit 1
 
-FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg -i.*${MODEL}.*\.m3u8*" 2>/dev/null)
-
-WATCHDOG_PROCESS=$(ps -ef | grep -oE "[t]ee.*${MODEL}.*\.log*" 2>/dev/null)
-
+# Process $MODEL
 MODEL=${MODEL,,}
 MODEL=${MODEL#*"chaturbate.com/"}
 MODEL=${MODEL#*"stripchat.com/"}
 MODEL=${MODEL%"/"*}
 
-[ -f ${LOG_PATH}/${MODEL}.online ] && M3U8_RESPONSE=$(curl $(cat ${LOG_PATH}/${PLATFORM}-${MODEL}.online) -4 -s -I -w %{http_code} -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' 2>/dev/null | tail -n1)
+# Process $PLATFORM
+[ ${PLATFORM} ] || PLATFORM="chaturbate"
 
-# 无 ffmpeg 进程时 --> 正常
+# Is directories writable?
+[ ! -w ${SAVE_PATH} ] && echo "SAVE_PATH are unwritable!" && exit 1
+[ ! -w ${LOG_PATH} ] && echo "LOG_PATH are unwritable!" && exit 1
+
+# Flag of ffmpeg process
+FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg -i.*${MODEL}.*\.m3u8*" 2>/dev/null)
+# No ffmpeg process --> normal
 [ ! "${FFMPEG_PROCESS}" ] && exit 0
 
-# 无监视进程时 --> 错误
+# Flag of watchdog process
+WATCHDOG_PROCESS=$(ps -ef | grep -oE "[t]ee.*${MODEL}.*\.log*" 2>/dev/null)
+# No watchdog process --> err
 [ ! "${WATCHDOG_PROCESS}" ] && echo "Watchdog process does not exist! (err)" && exit 1
 
-# 有 ffmpeg 进程, 但直播流无效时 --> 错误
+# If Model currently online, set HTTP Status Code of m3u8 link as flag
+[ -f ${LOG_PATH}/${MODEL}.online ] && M3U8_RESPONSE=$(curl $(cat ${LOG_PATH}/${PLATFORM}-${MODEL}.online) -4 -s -I -w %{http_code} -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' 2>/dev/null | tail -n1)
+
+# Has ffmpeg process, but m3u8 link are unavailable --> err
 [ "${FFMPEG_PROCESS}" ] && [ ${M3U8_RESPONSE} -ge 400 ] && echo "FFMPEG process did not exit correctly! (err)" && exit 1
 
 exit 0

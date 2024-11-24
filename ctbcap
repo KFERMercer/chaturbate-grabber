@@ -28,6 +28,8 @@ function handle_input() {
 
 	SAVE_PATH=${SAVE_PATH%"/"}
 	LOG_PATH=${LOG_PATH%"/"}
+	[ ! -w ${SAVE_PATH} ] && echo "(ERROR) No Permission To Write To SAVE_PATH [${SAVE_PATH}] !" && exit 1
+	[ ! -w ${LOG_PATH} ] && echo "(ERROR) No Permission To Write To LOG_PATH [${LOG_PATH}] !" && exit 1
 
 	if [[ ! ${MODEL} ]] ||  [ ${MODEL} = "--help" ] || [ ${MODEL} = "-h" ]; then
 		echo "... <link or username> <--stream>[only just get video stream link]"
@@ -55,7 +57,7 @@ function handle_input() {
 	&& \
 	LINK="https://stripchat.com/api/front/v2/models/username/${MODEL_NAME}/cam"
 	# if neither, exit.
-	[ ! ${LINK} ] && echo "Unknown Platform: [$PLATFORM] !" && exit 1
+	[ ! ${LINK} ] && echo "(ERROR) Unknown Platform: [$PLATFORM] !" && exit 1
 }
 
 function connect_utils() {
@@ -87,12 +89,12 @@ function connect_utils() {
 function check_status() {
 
 	connect_utils status ${LINK}
-	[ ${CONNECT_STATUS} -ge 400 ] && echo "[${MODEL_NAME}] does not exist on Platform [${PLATFORM}]. [${CONNECT_STATUS}]" && exit 1
+	[ ${CONNECT_STATUS} -ge 400 ] && echo "(ERROR) [${MODEL_NAME}] does not exist on Platform [${PLATFORM}]. [${CONNECT_STATUS}]" && exit 1
 
 	# for stripchat:
 	# if [ ${PLATFORM} = "stripchat" ]; then
 	# 	connect_utils dump ${LINK}
-	# 	[[ ${CONNECT_DUMPS} =~ '"error":"Not Found"' ]] && echo "[${MODEL_NAME}] does not exist on Platform [${PLATFORM}]." && exit 1
+	# 	[[ ${CONNECT_DUMPS} =~ '"error":"Not Found"' ]] && echo "(ERROR) [${MODEL_NAME}] does not exist on Platform [${PLATFORM}]." && exit 1
 	# fi
 }
 
@@ -189,7 +191,7 @@ echo "8===================================================D"
 echo "             Simping Stream from CB & SC"
 echo
 
-[ $# -gt 2 ] && echo "Invalid Parameters!" && exit 1
+[ $# -gt 2 ] && echo "(ERROR) Invalid Parameters!" && exit 1
 
 [ $1 ] && MODEL=$1
 
@@ -216,7 +218,7 @@ rm -f ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online
 	fi
 	exit 0
 else
-	echo "Invalid Parameters!" && exit 1
+	echo "(ERROR) Invalid Parameters!" && exit 1
 fi
 
 watchdog 2>&1 | tee ${LOG_PATH}/${MODEL_NAME}-$(date "+%Y%m%d-%H%M%S").log
