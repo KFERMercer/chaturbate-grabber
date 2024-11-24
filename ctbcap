@@ -142,22 +142,20 @@ function link_to_m3u8() {
 function capture_media() {
 
 	local FFMPEG_LOGFILE="${LOG_PATH}/${MODEL_NAME}.ffmpeg.log"
+	local CAPTURE_TIME=$(date "+%Y%m%d-%H%M%S")
 
 	echo >> ${FFMPEG_LOGFILE}
-	echo "========== [$(date "+%Y%m%d-%H%M%S")] ==========" >> ${FFMPEG_LOGFILE}
+	echo "========== [${CAPTURE_TIME}] ==========" >> ${FFMPEG_LOGFILE}
 	echo >> ${FFMPEG_LOGFILE}
 
-	# ffmpeg -i ${M3U8_LINK} -c copy -movflags +faststart -t 60 -y $(date "+%Y%m%d-%H%M%S").mp4
 	ffmpeg \
 	-user_agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
 	-i ${M3U8_LINK} \
 	-c copy \
-	-map 0 \
 	-f segment \
-	-segment_list ${SAVE_PATH}/${MODEL_NAME}-$(date "+%Y%m%d-%H%M%S").m3u8 \
 	-segment_time 1800 \
 	-loglevel warning \
-	${SAVE_PATH}/${MODEL_NAME}-$(date "+%Y%m%d-%H%M%S")_%03d.ts \
+	${SAVE_PATH}/${MODEL_NAME}-${CAPTURE_TIME}_%03d.mkv \
 	>> ${FFMPEG_LOGFILE} 2>&1
 }
 
