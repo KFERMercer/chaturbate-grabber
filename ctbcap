@@ -169,10 +169,10 @@ function watchdog() {
 			echo "[$(date "+%Y%m%d-%H%M%S")] Highest Definition Stream:"
 			echo "[$(date "+%Y%m%d-%H%M%S")] ${M3U8_LINK}"
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
-			echo ${M3U8_LINK_GENERIC} > ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online
+			echo ${M3U8_LINK_GENERIC} > ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
 			capture_media
 			echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted. Sleep for 1 min & try reconnect..."
-			rm -f ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online
+			rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
 			sleep 60
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
@@ -180,6 +180,17 @@ function watchdog() {
 		fi
 	done
 }
+
+function sock_washer {
+	rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
+	echo
+	echo "8=====================D"
+	echo "    BYE (. Y .) BYE"
+	echo
+	exit 0
+}
+
+trap 'sock_washer' SIGHUP SIGINT SIGQUIT SIGTERM
 
 echo
 echo "8===================================================D"
@@ -206,12 +217,7 @@ check_status
 echo "Simping Streamer: ${MODEL_NAME} (${CONNECT_STATUS})"
 echo
 
-# SYSSIG trap
-trap \
-'rm -f ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online; echo; echo "8=====================D"; echo " B (. Y .) B S   O U T"; echo "8=====================D"; exit 0' \
-SIGHUP SIGINT SIGQUIT SIGTERM
-
-rm -f ${LOG_PATH}/${PLATFORM}-${MODEL_NAME}.online
+rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
 
 [[ ! $2 ]] || if [ $2 = "--stream" ] || [ $2 = "-s" ]; then
 	link_to_m3u8
