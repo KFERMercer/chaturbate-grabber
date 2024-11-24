@@ -142,7 +142,7 @@ function link_to_m3u8() {
 
 function capture_media() {
 
-	local FFMPEG_LOGFILE="${LOG_PATH}/${MODEL_NAME}.ffmpeg.log"
+	local FFMPEG_LOGFILE="${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.ffmpeg.log"
 	local CAPTURE_TIME=$(date "+%Y%m%d-%H%M%S")
 
 	echo >> ${FFMPEG_LOGFILE}
@@ -232,6 +232,5 @@ else
 	echo "(ERROR) Invalid Parameters!" && exit 1
 fi
 
-watchdog 2>&1 | tee ${LOG_PATH}/${MODEL_NAME}-$(date "+%Y%m%d-%H%M%S").log
-
+watchdog 2>&1 | tee -a ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.log
 exit 0
