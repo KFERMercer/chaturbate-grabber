@@ -33,11 +33,6 @@ FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg -i.*${MODEL}.*\.m3u8*" 2>/dev/null)
 # No ffmpeg process --> normal
 [ ! "${FFMPEG_PROCESS}" ] && exit 0
 
-# Flag of watchdog process
-WATCHDOG_PROCESS=$(ps -ef | grep -oE "[t]ee.*${MODEL}.*\.log*" 2>/dev/null)
-# No watchdog process --> err
-[ ! "${WATCHDOG_PROCESS}" ] && echo "(ERROR) Watchdog process does not exist!" && exit 1
-
 # If Model currently online, set HTTP Status Code of m3u8 link as flag
 [ -f ${LOG_PATH}/${MODEL}.online ] && M3U8_RESPONSE=$(curl $(cat ${LOG_PATH}/${PLATFORM}-${MODEL}.online) -4 -s -I -w %{http_code} -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' 2>/dev/null | tail -n1)
 

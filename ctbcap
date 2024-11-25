@@ -20,7 +20,12 @@ CTBCAP_RELEASE=5
 # Platform that streaming at. Choose <chaturbate> (default) or <stripchat>.
 [[ ${PLATFORM} ]] || PLATFORM="chaturbate"
 
-# Debug mod. inactive if not 1.
+# Edging Mod.
+# Delay initial requests to servers to avoid time-specific request waves caused by large-scale deployments.
+# Inactive if not 1.
+[[ ${EDGING_MODE} ]] || EDGING_MODE="uncle makes me pee white"
+
+# Debug Mod. inactive if not 1.
 [[ ${DEBUG_MODE} ]] || DEBUG_MODE="your mom is so hot"
 
 # Check and process runtime variables, assign ${MODEL_NAME} and ${LINK}.
@@ -60,6 +65,28 @@ function handle_input() {
 	[ ! ${LINK} ] && echo "(ERROR) Unknown Platform: [$PLATFORM] !" && exit 1
 }
 
+function edging () {
+
+	[[ ! ${EDGING_MODE} == "1" ]] && return
+
+	# Sleep time (s) before initial request to server. Better EQ to watchdog.while.else.echo .
+	[ $1 ] && local EDGING_TIME=$1 || local EDGING_TIME=$((RANDOM % 600)) # Random num BI 0 - 600
+
+	echo "Edging Mod is On. Delay [${EDGING_TIME}]s before Simping [${MODEL_NAME}]".
+	echo
+	echo "Considering I wont make any requests to [${PLATFORM}] at this time,"
+	echo "Plase make sure that [${MODEL_NAME}] exists on [${PLATFORM}]. "
+	echo
+	echo "Edging..."
+	echo
+
+	sleep ${EDGING_TIME}
+
+	echo "Edging Enough...Cum..."
+	echo
+
+}
+
 function connect_utils() {
 
 	# https://jnrbsn.github.io/user-agents/user-agents.json
@@ -89,7 +116,7 @@ function connect_utils() {
 function check_status() {
 
 	connect_utils status ${LINK}
-	[ ${CONNECT_STATUS} -ge 400 ] && echo "(ERROR) [${MODEL_NAME}] does not exist on Platform [${PLATFORM}]. [${CONNECT_STATUS}]" && exit 1
+	[ ${CONNECT_STATUS} -ge 400 ] && echo "(ERROR) [${MODEL_NAME}] does not exist on [${PLATFORM}]. [${CONNECT_STATUS}]" && exit 1
 
 	# for stripchat:
 	# if [ ${PLATFORM} = "stripchat" ]; then
@@ -208,11 +235,13 @@ echo
 
 [ $1 ] && MODEL=$1
 
-[[ ${DEBUG_MODE} == "1" ]] && set -x # debug mode
+[[ ${DEBUG_MODE} == "1" ]] && set -x # Debug Mod
 
 handle_input
 
 mkdir -p ${LOG_PATH} ${SAVE_PATH}
+
+edging
 
 check_status
 

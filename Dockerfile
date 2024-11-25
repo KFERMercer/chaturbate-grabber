@@ -17,6 +17,7 @@ ENV \
     SAVE_PATH="/save" \
     MODEL="" \
     PLATFORM="chaturbate" \
+    EDGING_MODE="uncle makes me pee white" \
     DEBUG_MODE="your mom is so hot"
 
 HEALTHCHECK \
