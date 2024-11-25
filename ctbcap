@@ -53,14 +53,15 @@ function handle_input() {
 		-s|--stream)
 			[[ ! ${MODEL} ]] && echo '(ERROR) Must contain <username or url> as $2 !' && \
 			echo "See --help for more" && \
+			echo && \
 			exit 1
 			STREAM_MODE=1
 			[[ ${MODEL} ]] || MODEL=$2
 		;;
 		-v|--version)
-			echo "chaturbate-grabber / ctbcap , version ${CTBCAP_VERSION}-${CTBCAP_RELEASE}"
+			echo "chaturbate-grabber / ctbcap --- v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}"
 			echo "Copyright (C) 2019-2024 KFERMercer <https://github.com/KFERMercer>"
-			echo "User-Agent: ${UA}"
+			echo "UA: ${UA}"
 			echo
 			exit 0
 		;;
@@ -312,9 +313,9 @@ echo "8=====================================================D"
 echo " ┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐"
 echo " │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘"
 echo " └─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─"
-echo "                        v${CTBCAP_VERSION}r${CTBCAP_RELEASE}"
+echo "                        v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}"
 echo "8=====================================================D"
-echo "             Simping Stream from CB & SC"
+echo "              Simping Stream from CB & SC"
 echo
 
 handle_input $1 $2 $3
