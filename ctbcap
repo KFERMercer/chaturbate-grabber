@@ -127,8 +127,8 @@ function edging () {
 
 	echo "Edging Mod is On. Delay [${EDGING_TIME}]s before Simping [${MODEL_NAME}]".
 	echo
-	echo "Considering I wont make any requests to [${PLATFORM}] at this time,"
-	echo "Plase make sure that [${MODEL_NAME}] exists on [${PLATFORM}]. "
+	echo "Considering we wont send any requests to [${PLATFORM}] server until Edging is over,"
+	echo "So plase make sure that [${MODEL_NAME}] exists on [${PLATFORM}]. "
 	echo
 	echo "Edging..."
 	echo
