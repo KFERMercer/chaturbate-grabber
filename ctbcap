@@ -133,6 +133,8 @@ function link_to_m3u8() {
 
 	# get http_code form ${CONNECT_DUMPS}.
 	local CURRENT_CONNECT_STATUS=$(echo ${CONNECT_DUMPS} | tail -n1 | grep -oE '.{3}$')
+	# if failed, fallback ${CURRENT_CONNECT_STATUS} to 000.
+	[ ! ${CURRENT_CONNECT_STATUS} ] && local CURRENT_CONNECT_STATUS=000
 
 	# for chaturbate:
 	if [ ${PLATFORM} = "chaturbate" ]; then
