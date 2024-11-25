@@ -13,16 +13,18 @@ MODEL=${MODEL#*"stripchat.com/"}
 MODEL=${MODEL%"/"*}
 
 # Process $PLATFORM
-[ ${PLATFORM} ] || PLATFORM="chaturbate"
 PLATFORM=${PLATFORM,,}
-# is chaturbate?
-[ ${PLATFORM} = "chaturbate" ] || [ ${PLATFORM} = "ctb" ] || [ ${PLATFORM} = "cb" ] \
-&& \
-PLATFORM=chaturbate
-# is stripchat?
-[ ${PLATFORM} = "stripchat" ] || [ ${PLATFORM} = "stc" ] || [ $PLATFORM = "sc" ] || [ ${PLATFORM} = "st" ] \
-&& \
-PLATFORM=stripchat
+case ${PLATFORM} in 
+    chaturbate|ctb|cb)
+        PLATFORM=chaturbate
+    ;;
+    stripchat|stc|sc|st)
+        PLATFORM=stripchat
+    ;;
+    *)
+        echo "(ERROR) Invalid Platform!" && exit 1
+    ;;
+esac
 
 # Is directories writable?
 [ ! -w ${SAVE_PATH} ] && echo "SAVE_PATH are unwritable!" && exit 1

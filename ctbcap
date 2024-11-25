@@ -15,7 +15,7 @@ CTBCAP_RELEASE=6
 [[ ${LOG_PATH} ]] || LOG_PATH="${SAVE_PATH}/log/"
 
 # Room Link or Streamer's Username
-[[ ${MODEL} ]] || [ $1 ] || MODEL=
+[[ ${MODEL} ]] || MODEL=
 
 # Platform that streaming at. Choose <chaturbate> (default) or <stripchat>.
 [[ ${PLATFORM} ]] || PLATFORM="chaturbate"
@@ -28,18 +28,68 @@ CTBCAP_RELEASE=6
 # Debug Mod. inactive if not 1.
 [[ ${DEBUG_MODE} ]] || DEBUG_MODE="your mom is so hot"
 
-# Check and process runtime variables, assign ${MODEL_NAME} and ${LINK}.
+# Stream Mod. Only print video stream link if set to 1.
+[[ ${STREAM_MODE} ]] || STREAM_MODE=
+
+# https://jnrbsn.github.io/user-agents/user-agents.json
+[[ ${UA} ]] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'
+
+
+# Check validity and process runtime variables.
 function handle_input() {
 
-	SAVE_PATH=${SAVE_PATH%"/"}
-	LOG_PATH=${LOG_PATH%"/"}
-	[ ! -w ${SAVE_PATH} ] && echo "(ERROR) No Permission To Write To SAVE_PATH [${SAVE_PATH}] !" && exit 1
-	[ ! -w ${LOG_PATH} ] && echo "(ERROR) No Permission To Write To LOG_PATH [${LOG_PATH}] !" && exit 1
+	[ $# -gt 2 ] && echo "(ERROR) Invalid Parameter Number!" && echo && exit 1
 
-	if [[ ! ${MODEL} ]] ||  [ ${MODEL} = "--help" ] || [ ${MODEL} = "-h" ]; then
-		echo "... <link or username> <--stream>[only just get video stream link]"
-		exit 0
-	fi
+	case $1 in
+		-h|--help)
+			echo "Usage: ctbcap [options...] <streamer username or url>"
+			echo "<username or url>		Start to Simping Stream"
+			echo "-h, --help			Get help for commands"
+			echo "-s, --stream <username or url>	Grab the stream link only"
+			echo "-v, --version			Show version number and quit"
+			echo
+			exit 0
+		;;
+		-s|--stream)
+			[[ ! ${MODEL} ]] && echo 'Must contain <username or url> as $2 !' && \
+			echo "See --help for more" && \
+			exit 1
+			STREAM_MODE=1
+			[[ ${MODEL} ]] || MODEL=$2
+		;;
+		-v|--version)
+			echo "chaturbate-grabber / ctbcap , version ${CTBCAP_VERSION}-${CTBCAP_RELEASE}"
+			echo "Copyright (C) 2019-2024 KFERMercer <https://github.com/KFERMercer>"
+			echo "User-Agent: ${UA}"
+			echo
+			exit 0
+		;;
+		-*|--*)
+			echo "(ERROR) Invalid Parameter [$1] !"
+			echo
+			exit 1
+		;;
+		'')
+			[[ ! ${MODEL} ]] && echo "(ERROR) Need Parameter! See --help" && echo && exit 1
+		;;
+		*)
+			MODEL=$1
+		;;
+	esac 
+
+	case $2 in
+		-*|--*)
+			echo "(ERROR) Invalid Parameter [$2] !"
+			echo
+			exit 1
+		;;
+		'')
+		;;
+		*)
+			[ $1 = '-v' ] || [ $1 = '--version' ] && MODEL=$2
+			[[ ${MODEL} ]] && echo "(ERROR) Invalid Parameter [$2] !" && echo && exit 1
+		;;
+	esac
 
 	MODEL=${MODEL,,}
 	MODEL=${MODEL#*"chaturbate.com/"}
@@ -48,21 +98,24 @@ function handle_input() {
 	MODEL_NAME=${MODEL}
 	unset MODEL
 
+	SAVE_PATH=${SAVE_PATH%"/"}
+	LOG_PATH=${LOG_PATH%"/"}
+	[ ! -w ${SAVE_PATH} ] && echo "(ERROR) No Permission To Write To SAVE_PATH [${SAVE_PATH}] !" && exit 1
+	[ ! -w ${LOG_PATH} ] && echo "(ERROR) No Permission To Write To LOG_PATH [${LOG_PATH}] !" && exit 1
+
 	PLATFORM=${PLATFORM,,}
-	# is chaturbate?
-	[ ${PLATFORM} = "chaturbate" ] || [ ${PLATFORM} = "ctb" ] || [ ${PLATFORM} = "cb" ] \
-	&& \
-	PLATFORM=chaturbate \
-	&& \
-	LINK="https://chaturbate.com/${MODEL_NAME}/" # must keep " / " at the end
-	# is stripchat?
-	[ ${PLATFORM} = "stripchat" ] || [ ${PLATFORM} = "stc" ] || [ $PLATFORM = "sc" ] || [ ${PLATFORM} = "st" ] \
-	&& \
-	PLATFORM=stripchat \
-	&& \
-	LINK="https://stripchat.com/api/front/v2/models/username/${MODEL_NAME}/cam"
-	# if neither, exit.
+	case ${PLATFORM} in 
+		chaturbate|ctb|cb)
+			PLATFORM=chaturbate
+			LINK="https://chaturbate.com/${MODEL_NAME}/" # must keep " / " at the end
+		;;
+		stripchat|stc|sc|st)
+			PLATFORM=stripchat
+			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL_NAME}/cam"
+		;;
+	esac
 	[ ! ${LINK} ] && echo "(ERROR) Unknown Platform: [$PLATFORM] !" && exit 1
+
 }
 
 function edging () {
@@ -89,88 +142,117 @@ function edging () {
 
 function connect_utils() {
 
-	# https://jnrbsn.github.io/user-agents/user-agents.json
+	case $1 in 
+		status)
+			echo $( \
+				curl $2 \
+				-4 -s \
+				--compressed \
+				-I -w %{http_code} \
+				--connect-timeout 5 --retry 5 --retry-delay 2 \
+				-H "user-agent: ${UA}" \
+				2>/dev/null | tail -n1 \
+			)
+		;;
+		dump)
+			echo $( \
+				curl $2 \
+				-4 -s \
+				--compressed \
+				-w %{http_code} \
+				--connect-timeout 5 --retry 5 --retry-delay 2 \
+				-H "user-agent: ${UA}" \
+				| grep -v '^$' \
+			)
+		;;
+		dump_m3u)
+			echo $( \
+				curl $2 \
+				-4 -s \
+				--compressed \
+				--connect-timeout 5 --retry 5 --retry-delay 2 \
+				-H "user-agent: ${UA}" \
+				2>/dev/null | tail -1 \
+			)
+		;;
+	esac
 
-	if [ $1 = "status" ] ; then
-		CONNECT_STATUS=$( \
-			curl $2 \
-			-4 -s \
-			-I -w %{http_code} \
-			--connect-timeout 5 --retry 5 --retry-delay 2 \
-			-H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' \
-			2>/dev/null | tail -n1 \
-		)
-	fi
-
-	if [ $1 = "dump" ] ; then
-		CONNECT_DUMPS=$( \
-			curl $2 \
-			-4 -s \
-			-w %{http_code} \
-			--connect-timeout 5 --retry 5 --retry-delay 2 \
-			-H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' \
-		)
-		CONNECT_DUMPS=$(echo -e ${CONNECT_DUMPS}) # deunicode
-	fi
 }
 
-function check_status() {
+function prepare_simping() {
 
-	connect_utils status ${LINK}
+	mkdir -p ${LOG_PATH} ${SAVE_PATH}
+
+	rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
+
+	local CONNECT_STATUS=$(connect_utils status ${LINK})
+
 	[ ${CONNECT_STATUS} -ge 400 ] && echo "(ERROR) [${MODEL_NAME}] does not exist on [${PLATFORM}]. [${CONNECT_STATUS}]" && exit 1
+
 
 	# for stripchat:
 	# if [ ${PLATFORM} = "stripchat" ]; then
-	# 	connect_utils dump ${LINK}
+	# 	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
 	# 	[[ ${CONNECT_DUMPS} =~ '"error":"Not Found"' ]] && echo "(ERROR) [${MODEL_NAME}] does not exist on Platform [${PLATFORM}]." && exit 1
 	# fi
+
+	echo "Simping Streamer: ${MODEL_NAME} (${CONNECT_STATUS})"
+	echo
 }
 
 # Fetch video stream, assign ${M3U8_LINK} & ${M3U8_LINK_GENERIC}.
 function link_to_m3u8() {
 
-	connect_utils dump ${LINK}
-
-	# get http_code form ${CONNECT_DUMPS}.
-	local CURRENT_CONNECT_STATUS=$(echo ${CONNECT_DUMPS} | tail -n1 | grep -oE '.{3}$')
-	# if failed, fallback ${CURRENT_CONNECT_STATUS} to 000.
-	[ ! ${CURRENT_CONNECT_STATUS} ] && local CURRENT_CONNECT_STATUS=000
+	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
+	local CONNECT_STATUS=$(echo ${CONNECT_DUMPS} | tail -n1 | grep -oE '.{3}$')
+	[ ! ${CONNECT_STATUS} ] && local CONNECT_STATUS=000 # If connect failed, fallback to 000.
 
 	# for chaturbate:
 	if [ ${PLATFORM} = "chaturbate" ]; then
 		if [[ ${CONNECT_DUMPS} =~ ".m3u8" ]]; then
-			M3U8_LINK=$(echo ${CONNECT_DUMPS} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -1)
-			M3U8_LINK_GENERIC=${M3U8_LINK}
-			M3U8_LINK=${M3U8_LINK%%playlist.m3u8*}$(curl --compressed ${M3U8_LINK} 2>/dev/null | tail -1)
-			return 1
+			M3U8_LINK_GENERIC=$(echo -e ${CONNECT_DUMPS} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -1)
+			M3U8_LINK=${M3U8_LINK_GENERIC%%playlist.m3u8*}$(connect_utils dump_m3u ${M3U8_LINK_GENERIC} | tail -1)
 		else
-			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. (${CURRENT_CONNECT_STATUS})"
+			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. (${CONNECT_STATUS})"
 		fi
 	fi
 
 	# for stripchat:
 	if [ ${PLATFORM} = "stripchat" ]; then
+
 		if [[ ${CONNECT_DUMPS} =~ '"isCamAvailable":true' ]]; then
-		
-			local STREAMNAME=${CONNECT_DUMPS#*'"streamName":"'}
+
+			local STREAMNAME=$(echo -e ${CONNECT_DUMPS})
+			local STREAMNAME=${STREAMNAME#*'"streamName":"'}
 			local STREAMNAME=${STREAMNAME%%'"'*}
-			local VIEWSERVER=$((RANDOM % (16) + 10)) # Random num BI 10 - 25
+
+			local PRESET=$(echo -e ${CONNECT_DUMPS})
 			local PRESET=${CONNECT_DUMPS#*'"default":["'}
 			local PRESET=${PRESET%%'"'*}
+
+			local VIEWSERVER=$((RANDOM % (16) + 10)) # Random num BI 10 - 25
 
 			# if ${PRESET} is not good, use automod.
 			if [[ ${PRESET} =~ [\]\[{}\"\'] ]]; then # check if ${PRESET} has {}[]"'
 				M3U8_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
-				M3U8_LINK=$(curl --compressed ${M3U8_LINK_GENERIC} 2>/dev/null | tail -1)
+				M3U8_LINK=$(connect_utils dump_m3u ${M3U8_LINK_GENERIC} 2>/dev/null | tail -1)
 			else
 				M3U8_LINK_GENERIC="https://b-hls-${VIEWSERVER}.doppiocdn.live/hls/${STREAMNAME}/${STREAMNAME}_${PRESET}.m3u8"
 				M3U8_LINK=${M3U8_LINK_GENERIC}
 			fi
-			return 1
 		else
-			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. (${CURRENT_CONNECT_STATUS})"
+			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. (${CONNECT_STATUS})"
 		fi
 	fi
+
+	# If successfully grab ${M3U8_LINK}, show them.
+	if [ ${M3U8_LINK} ]; then
+		echo "[$(date "+%Y%m%d-%H%M%S")] Streamer is Online! Successfully capture with stream link:"
+		echo "[$(date "+%Y%m%d-%H%M%S")] ${M3U8_LINK_GENERIC}"
+		echo "[$(date "+%Y%m%d-%H%M%S")] Highest Definition Stream:"
+		echo "[$(date "+%Y%m%d-%H%M%S")] ${M3U8_LINK}"
+	fi
+
 }
 
 function capture_media() {
@@ -183,7 +265,7 @@ function capture_media() {
 	echo >> ${FFMPEG_LOGFILE}
 
 	ffmpeg \
-	-user_agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
+	-user_agent "${UA}" \
 	-i ${M3U8_LINK} \
 	-c copy \
 	-f segment \
@@ -198,11 +280,7 @@ function capture_media() {
 function watchdog() {
 	while [ true ]; do
 		link_to_m3u8
-		if [ $? -eq 1 ]; then
-			echo "[$(date "+%Y%m%d-%H%M%S")] Streamer is Online! Successfully capture with stream link:"
-			echo "[$(date "+%Y%m%d-%H%M%S")] ${M3U8_LINK_GENERIC}"
-			echo "[$(date "+%Y%m%d-%H%M%S")] Highest Definition Stream:"
-			echo "[$(date "+%Y%m%d-%H%M%S")] ${M3U8_LINK}"
+		if [ ${M3U8_LINK} ]; then
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
 			echo ${M3U8_LINK_GENERIC} > ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
 			capture_media
@@ -225,49 +303,30 @@ function sock_washer {
 	exit 0
 }
 
+# Execution Entry
+
 trap 'sock_washer' SIGHUP SIGINT SIGQUIT SIGTERM
 
 echo
-echo "8===================================================D"
-echo "┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐"
-echo "│  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘"
-echo "└─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─"
-echo "                       v${CTBCAP_VERSION}r${CTBCAP_RELEASE}"
-echo "8===================================================D"
+echo "8=====================================================D"
+echo " ┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐"
+echo " │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘"
+echo " └─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─"
+echo "                        v${CTBCAP_VERSION}r${CTBCAP_RELEASE}"
+echo "8=====================================================D"
 echo "             Simping Stream from CB & SC"
 echo
 
-[ $# -gt 2 ] && echo "(ERROR) Invalid Parameters!" && exit 1
-
-[ $1 ] && MODEL=$1
+handle_input $1 $2 $3
 
 [[ ${DEBUG_MODE} == "1" ]] && set -x # Debug Mod
 
-handle_input
-
-mkdir -p ${LOG_PATH} ${SAVE_PATH}
+[[ ${STREAM_MODE} == "1" ]] && link_to_m3u8 && exit 0
 
 edging
 
-check_status
-
-echo "Simping Streamer: ${MODEL_NAME} (${CONNECT_STATUS})"
-echo
-
-rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
-
-[[ ! $2 ]] || if [ $2 = "--stream" ] || [ $2 = "-s" ]; then
-	link_to_m3u8
-	if [ $? -eq 1 ]; then
-		echo "Successfully Capture The Stream Link:"
-		echo ${M3U8_LINK_GENERIC}
-		echo "Highest Definition Stream:"
-		echo "${M3U8_LINK}"
-	fi
-	exit 0
-else
-	echo "(ERROR) Invalid Parameters!" && exit 1
-fi
+prepare_simping
 
 watchdog 2>&1 | tee -a ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.log
+
 exit 0
