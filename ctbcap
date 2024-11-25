@@ -155,6 +155,8 @@ function capture_media() {
 	-c copy \
 	-f segment \
 	-segment_time 1800 \
+	-segment_start_number 1 \
+	-reset_timestamps 1 \
 	-loglevel warning \
 	${SAVE_PATH}/${MODEL_NAME}-${CAPTURE_TIME}_%03d.mkv \
 	>> ${FFMPEG_LOGFILE} 2>&1
