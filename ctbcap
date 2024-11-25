@@ -51,7 +51,7 @@ function handle_input() {
 			exit 0
 		;;
 		-s|--stream)
-			[[ ! ${MODEL} ]] && echo 'Must contain <username or url> as $2 !' && \
+			[[ ! ${MODEL} ]] && echo '(ERROR) Must contain <username or url> as $2 !' && \
 			echo "See --help for more" && \
 			exit 1
 			STREAM_MODE=1
