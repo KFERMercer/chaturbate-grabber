@@ -71,7 +71,9 @@ function handle_input() {
 			exit 1
 		;;
 		'')
-			[[ ! ${MODEL} ]] && echo "(ERROR) Need Parameter! See --help" && echo && exit 1
+			[[ ! ${MODEL} ]] && echo "(ERROR) Need Parameter! See --help" && \
+			echo && \
+			exit 1
 		;;
 		*)
 			MODEL=$1
@@ -88,7 +90,9 @@ function handle_input() {
 		;;
 		*)
 			[ $1 = '-v' ] || [ $1 = '--version' ] && MODEL=$2
-			[[ ${MODEL} ]] && echo "(ERROR) Invalid Parameter [$2] !" && echo && exit 1
+			[[ ${MODEL} ]] && echo "(ERROR) Invalid Parameter [$2] !" && \
+			echo && \
+			exit 1
 		;;
 	esac
 
@@ -121,8 +125,6 @@ function handle_input() {
 
 function edging () {
 
-	[[ ! ${EDGING_MODE} == "1" ]] && return
-
 	# Sleep time (s) before initial request to server. Better EQ to watchdog.while.else.echo .
 	[ $1 ] && local EDGING_TIME=$1 || local EDGING_TIME=$((RANDOM % 600)) # Random num BI 0 - 600
 
@@ -152,7 +154,7 @@ function connect_utils() {
 				-I -w %{http_code} \
 				--connect-timeout 5 --retry 5 --retry-delay 2 \
 				-H "user-agent: ${UA}" \
-				2>/dev/null | tail -n1 \
+				2>/dev/null | tail -1 \
 			)
 		;;
 		dump)
@@ -324,7 +326,7 @@ handle_input $1 $2 $3
 
 [[ ${STREAM_MODE} == "1" ]] && link_to_m3u8 && exit 0
 
-edging
+[[ ${EDGING_MODE} == "1" ]] && edging
 
 prepare_simping
 
