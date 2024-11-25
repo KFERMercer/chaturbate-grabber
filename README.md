@@ -1,9 +1,9 @@
 ```
-┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐
-│  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘
-└─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─
-8===================================================D
-             Simping Stream from CB & SC
+ ┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐
+ │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘
+ └─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─
+8=====================================================D
+              Simping Stream from CB & SC
 ```
 
 # Usage：
@@ -55,10 +55,12 @@
         -e PLATFORM=chaturbate \
         -v /path/to/viddir:/save \
         -v /path/to/logdir:/log \
-        ctbcap:latest <modelname> <--stream>[m3u8 url only]
+        ctbcap:latest [options...] <username or url>
         ```
 
-     - ### Run in non-container env:
+        > Run `docker run -it --rm ctbcap:latest --help` to get help for commands.
+
+     - ### Runs in non-container env:
 
        1. Make sure your shell is `bash`, and `curl`, `ffmpeg` is installed.
 
@@ -68,8 +70,10 @@
           SAVE_PATH=/path/to/savedir \
           LOG_PATH=/path/to/logdir \
           PLATFORM=chaturbate \
-          ./ctbcap <modelname> <--stream>[m3u8 url only]
+          ctbcap [options...] <username or url>
           ```
+
+          > Run `ctbcap --help` to get help for commands.
 
 
 ### Container Variables
