@@ -147,29 +147,27 @@ function connect_utils() {
 	case $1 in
 		status)
 			curl $2 \
-			-4 -L -s \
-			--compressed \
-			-I -w %{http_code} \
-			--connect-timeout 5 --retry 5 --retry-delay 2 \
+			-4 -L -s -I \
 			-H "user-agent: ${UA}" \
-			2>/dev/null | tail -1
+			--compressed \
+			--connect-timeout 5 --retry 5 --retry-delay 2 \
+			2>/dev/null | head -n 1 | grep -oE '[0-9]{3}'
 		;;
 		dump)
 			curl $2 \
-			-4 -L -s \
-			--compressed \
-			-w %{http_code} \
-			--connect-timeout 5 --retry 5 --retry-delay 2 \
+			-4 -L -s -i\
 			-H "user-agent: ${UA}" \
-			2>/dev/null | grep -v '^$'
+			--compressed \
+			--connect-timeout 5 --retry 5 --retry-delay 2 \
+			2>/dev/null | tr -d '\r'
 		;;
 		dump_m3u)
 			curl $2 \
 			-4 -L -s \
+			-H "user-agent: ${UA}" \
 			--compressed \
 			--connect-timeout 5 --retry 5 --retry-delay 2 \
-			-H "user-agent: ${UA}" \
-			2>/dev/null | tail -1 \
+			2>/dev/null | tail -n 1
 		;;
 	esac
 
@@ -188,7 +186,6 @@ function prepare_simping() {
 	&& echo -e "(ERROR) [${MODEL_NAME}] does not exist on [${PLATFORM}]. [${CONNECT_STATUS}] \n" >&2 \
 	&& exit 1
 
-
 	# For stripchat:
 	# if [ ${PLATFORM} = "stripchat" ]; then
 	# 	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
@@ -205,17 +202,25 @@ function prepare_simping() {
 function link_to_m3u() {
 
 	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
-	local CONNECT_STATUS=$(echo ${CONNECT_DUMPS} | tail -n1 | grep -oE '.{3}$')
+	local CONNECT_STATUS=$(echo ${CONNECT_DUMPS:0:15} | grep -oE '[0-9]{3}')
 	[ ! ${CONNECT_STATUS} ] && local CONNECT_STATUS=000 # If connect failed, fallback to 000.
 
 	# For chaturbate:
 	if [ ${PLATFORM} = "chaturbate" ]; then
+		
+		if [ ${CONNECT_STATUS} -ge 300 ] && [ ${CONNECT_STATUS} -lt 400 ]; then
+			local MODEL_NEW_NAME=${CONNECT_DUMPS#*"location: /"}
+			local MODEL_NEW_NAME=${MODEL_NEW_NAME%%"/"*}
+			echo -e "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL_NAME}] Has changed her name to [${MODEL_NEW_NAME}]." >&2
+		fi
+
 		if [[ ${CONNECT_DUMPS} =~ ".m3u8" ]]; then
-			STREAM_LINK_GENERIC=$(echo -e ${CONNECT_DUMPS} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -1)
-			STREAM_LINK=${STREAM_LINK_GENERIC%%playlist.m3u8*}$(connect_utils dump_m3u ${STREAM_LINK_GENERIC} | tail -1)
+			STREAM_LINK_GENERIC=$(echo -e ${CONNECT_DUMPS} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -n 1)
+			STREAM_LINK=${STREAM_LINK_GENERIC%%playlist.m3u8*}$(connect_utils dump_m3u ${STREAM_LINK_GENERIC} | tail -n 1)
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. (${CONNECT_STATUS})"
 		fi
+
 	fi
 
 	# For stripchat:
@@ -236,7 +241,7 @@ function link_to_m3u() {
 			# If ${PRESET} is not good, use automod.
 			if [[ ${PRESET} =~ [\]\[{}\"\'] ]]; then # check if ${PRESET} has {}[]"'
 				STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
-				STREAM_LINK=$(connect_utils dump_m3u ${STREAM_LINK_GENERIC} 2>/dev/null | tail -1)
+				STREAM_LINK=$(connect_utils dump_m3u ${STREAM_LINK_GENERIC} 2>/dev/null | tail -n 1)
 			else
 				STREAM_LINK_GENERIC="https://b-hls-${VIEWSERVER}.doppiocdn.live/hls/${STREAMNAME}/${STREAMNAME}_${PRESET}.m3u8"
 				STREAM_LINK=${STREAM_LINK_GENERIC}
@@ -328,6 +333,6 @@ handle_input $1 $2 $3
 
 prepare_simping
 
-watchdog 2>&1 | tee -a ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.log
+watchdog | tee -a ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.log
 
 exit 0
