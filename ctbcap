@@ -96,6 +96,7 @@ function handle_input() {
 		;;
 	esac
 
+	MODEL=${MODEL// /}
 	MODEL=${MODEL,,}
 	MODEL=${MODEL#*"chaturbate.com/"}
 	MODEL=${MODEL#*"stripchat.com/"}
@@ -116,9 +117,10 @@ function handle_input() {
 			PLATFORM=stripchat
 			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL_NAME}/cam"
 		;;
+		*)
+			echo -e "(ERROR) Unknown Platform: [${PLATFORM}] ! \n" >&2 && exit 1
+		;;
 	esac
-
-	[ ! ${LINK} ] && echo -e "(ERROR) Unknown Platform: [${PLATFORM}] ! \n" >&2 && exit 1
 
 }
 
@@ -176,11 +178,13 @@ function connect_utils() {
 
 function prepare_simping() {
 
-	mkdir -p ${LOG_PATH} ${SAVE_PATH} 2>/dev/null
-	[ ! -w ${SAVE_PATH} ] && echo -e "(ERROR) No Permission To Write [${SAVE_PATH}/] ! \n" >&2 && exit 1
-	[ ! -w ${LOG_PATH} ] && echo -e "(ERROR) No Permission To Write [${LOG_PATH}/] ! \n" >&2 && exit 1
+	if [[ ${STREAM_MODE} != "1" ]]; then
+		mkdir -p ${LOG_PATH} ${SAVE_PATH} 2>/dev/null
+		[ ! -w ${SAVE_PATH} ] && echo -e "(ERROR) No Permission To Write [${SAVE_PATH}/] ! \n" >&2 && exit 1
+		[ ! -w ${LOG_PATH} ] && echo -e "(ERROR) No Permission To Write [${LOG_PATH}/] ! \n" >&2 && exit 1
 
-	rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
+		rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
+	fi
 
 	local CONNECT_STATUS=$(connect_utils status ${LINK})
 	[ ${CONNECT_STATUS} -ge 400 ] \
@@ -353,11 +357,11 @@ handle_input $1 $2 $3
 
 [[ ${DEBUG_MODE}  == "1" ]] && set -x # Debug Mode
 
-[[ ${STREAM_MODE} == "1" ]] && link_to_m3u && exit 0
-
 [[ ${EDGING_MODE} == "1" ]] && edging
 
 prepare_simping
+
+[[ ${STREAM_MODE} == "1" ]] && link_to_m3u && exit 0
 
 watchdog | tee -a ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.log
 
