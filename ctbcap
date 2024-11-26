@@ -125,7 +125,7 @@ function handle_input() {
 function edging () {
 
 	# Sleep time (s) before initial request to server. Range better EQ to ..watchdog.while.else.echo .
-	[ $1 ] && local EDGING_TIME=$1 || local EDGING_TIME=$((RANDOM % 600)) # Random num BI 0 - 600 (10 min)
+	[ $1 ] && local EDGING_TIME=$1 || local EDGING_TIME=$((RANDOM % 600)) # Random num B/E 0 - 600 (10 min)
 
 	echo "Edging Mode is On. Delay [${EDGING_TIME}]s before Simping [${MODEL_NAME}]".
 	echo
@@ -151,7 +151,8 @@ function connect_utils() {
 			-H "user-agent: ${UA}" \
 			--compressed \
 			--connect-timeout 5 --retry 5 --retry-delay 2 \
-			2>/dev/null | head -n 1 | grep -oE '[0-9]{3}'
+			2>/dev/null | head -n 1 | grep -oE '[0-9]{3}' \
+			|| echo 000
 		;;
 		dump)
 			curl $2 \
@@ -202,8 +203,7 @@ function prepare_simping() {
 function link_to_m3u() {
 
 	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
-	local CONNECT_STATUS=$(echo ${CONNECT_DUMPS:0:15} | grep -oE '[0-9]{3}')
-	[ ! ${CONNECT_STATUS} ] && local CONNECT_STATUS=000 # If connect failed, fallback to 000.
+	local CONNECT_STATUS=$(echo ${CONNECT_DUMPS:0:15} | grep -oE '[0-9]{3}' || echo 000)
 
 	# For chaturbate:
 	if [ ${PLATFORM} = "chaturbate" ]; then
@@ -236,7 +236,7 @@ function link_to_m3u() {
 			local PRESET=${CONNECT_DUMPS#*'"default":["'}
 			local PRESET=${PRESET%%'"'*}
 
-			local VIEWSERVER=$((RANDOM % (16) + 10)) # Random num BI 10 - 25
+			local VIEWSERVER=$((RANDOM % (16) + 10)) # Random num B/E 10 - 25
 
 			# If ${PRESET} is not good, use automod.
 			if [[ ${PRESET} =~ [\]\[{}\"\'] ]]; then # check if ${PRESET} has {}[]"'
@@ -287,11 +287,34 @@ function watchdog() {
 	while [ true ]; do
 		link_to_m3u
 		if [ ${STREAM_LINK} ]; then
+
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
-			echo ${STREAM_LINK_GENERIC} > ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
+			echo ${STREAM_LINK} > ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online # Build online flag file
+
 			grab_stream
-			echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted. Sleep for 1 min & try reconnect..."
-			rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
+
+			# If recording interrupt by first time
+			while [ true ]; do
+				sleep 5
+				local STREAM_TEMP_STATUS=$(connect_utils status ${STREAM_LINK})
+
+				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted...  [${STREAM_TEMP_STATUS}]"
+
+				# If ${STREAM_TEMP_STATUS} B/E 200 - 399
+				[ ${STREAM_TEMP_STATUS} -ge 200 ] && [ ${STREAM_TEMP_STATUS} -lt 400 ] \
+				&& sleep 10 \
+				&& echo "[$(date "+%Y%m%d-%H%M%S")] Try rstart recording..." \
+				&& grab_stream
+
+				# If ${STREAM_TEMP_STATUS} not B/E 200 - 399
+				[ ${STREAM_TEMP_STATUS} -lt 200 ] || [ ${STREAM_TEMP_STATUS} -ge 400 ] \
+				&& echo "[$(date "+%Y%m%d-%H%M%S")] Stream might entered Private/Ticket Show... [${STREAM_TEMP_STATUS}]" \
+				&& break
+			done
+
+			rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online # Delete online flag file
+
+			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for 1 min & try reconnect..."
 			sleep 60
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
