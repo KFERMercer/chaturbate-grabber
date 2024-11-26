@@ -306,8 +306,8 @@ function watchdog() {
 				&& echo "[$(date "+%Y%m%d-%H%M%S")] Try rstart recording..." \
 				&& grab_stream
 
-				# If ${STREAM_TEMP_STATUS} not B/E 200 - 399, message then break.
-				[ ${STREAM_TEMP_STATUS} -lt 200 ] || [ ${STREAM_TEMP_STATUS} -ge 400 ] \
+				# If ${STREAM_TEMP_STATUS} B/E 400 - 499, also not EQ 404, message then break.
+				[ ${STREAM_TEMP_STATUS} -ge 400 ] && [ ${STREAM_TEMP_STATUS} -lt 500 ] && [ ${STREAM_TEMP_STATUS} -ne 404 ] \
 				&& echo "[$(date "+%Y%m%d-%H%M%S")] Stream might entered Private/Ticket Show... [${STREAM_TEMP_STATUS}]" \
 				&& break
 			done
