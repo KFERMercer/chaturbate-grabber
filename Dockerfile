@@ -27,6 +27,4 @@ HEALTHCHECK \
     --start-period=5s \
     CMD ["ctbcap-healthcheck"]
 
-ENTRYPOINT ["tini", "-g", "--"]
-
-CMD ["ctbcap"]
+ENTRYPOINT ["tini", "-g", "--", "ctbcap"]
