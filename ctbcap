@@ -146,7 +146,7 @@ function connect_utils() {
 	case $1 in
 		status)
 			curl $2 \
-			-4 -s \
+			-4 -L -s \
 			--compressed \
 			-I -w %{http_code} \
 			--connect-timeout 5 --retry 5 --retry-delay 2 \
@@ -155,7 +155,7 @@ function connect_utils() {
 		;;
 		dump)
 			curl $2 \
-			-4 -s \
+			-4 -L -s \
 			--compressed \
 			-w %{http_code} \
 			--connect-timeout 5 --retry 5 --retry-delay 2 \
@@ -164,7 +164,7 @@ function connect_utils() {
 		;;
 		dump_m3u)
 			curl $2 \
-			-4 -s \
+			-4 -L -s \
 			--compressed \
 			--connect-timeout 5 --retry 5 --retry-delay 2 \
 			-H "user-agent: ${UA}" \
