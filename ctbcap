@@ -32,7 +32,7 @@ CTBCAP_RELEASE=6
 [[ ${STREAM_MODE} ]] || STREAM_MODE=
 
 # https://jnrbsn.github.io/user-agents/user-agents.json
-[[ ${UA} ]] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'
+[[ ${UA} ]] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
 
 
 # Check validity and process runtime variables.
