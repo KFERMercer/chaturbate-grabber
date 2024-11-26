@@ -298,15 +298,15 @@ function watchdog() {
 				sleep 5
 				local STREAM_TEMP_STATUS=$(connect_utils status ${STREAM_LINK})
 
-				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted...  [${STREAM_TEMP_STATUS}]"
+				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted... [${STREAM_TEMP_STATUS}]"
 
-				# If ${STREAM_TEMP_STATUS} B/E 200 - 399
+				# If ${STREAM_TEMP_STATUS} B/E 200 - 399, sleep then reconnect.
 				[ ${STREAM_TEMP_STATUS} -ge 200 ] && [ ${STREAM_TEMP_STATUS} -lt 400 ] \
 				&& sleep 10 \
 				&& echo "[$(date "+%Y%m%d-%H%M%S")] Try rstart recording..." \
 				&& grab_stream
 
-				# If ${STREAM_TEMP_STATUS} not B/E 200 - 399
+				# If ${STREAM_TEMP_STATUS} not B/E 200 - 399, message then break.
 				[ ${STREAM_TEMP_STATUS} -lt 200 ] || [ ${STREAM_TEMP_STATUS} -ge 400 ] \
 				&& echo "[$(date "+%Y%m%d-%H%M%S")] Stream might entered Private/Ticket Show... [${STREAM_TEMP_STATUS}]" \
 				&& break
