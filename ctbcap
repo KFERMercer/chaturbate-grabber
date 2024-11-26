@@ -117,7 +117,7 @@ function handle_input() {
 			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL_NAME}/cam"
 		;;
 	esac
-	[ ! ${LINK} ] && echo "(ERROR) Unknown Platform: [$PLATFORM] !" && exit 1
+	[ ! ${LINK} ] && echo "(ERROR) Unknown Platform: [$PLATFORM] !" && echo && exit 1
 
 }
 
@@ -177,23 +177,28 @@ function connect_utils() {
 function prepare_simping() {
 
 	mkdir -p ${LOG_PATH} ${SAVE_PATH} 2>/dev/null
-	[ ! -w ${SAVE_PATH} ] && echo "(ERROR) No Permission To Write [${SAVE_PATH}/] !" && exit 1
-	[ ! -w ${LOG_PATH} ] && echo "(ERROR) No Permission To Write [${LOG_PATH}/] !" && exit 1
+	[ ! -w ${SAVE_PATH} ] && echo "(ERROR) No Permission To Write [${SAVE_PATH}/] !" && echo && exit 1
+	[ ! -w ${LOG_PATH} ] && echo "(ERROR) No Permission To Write [${LOG_PATH}/] !" && echo && exit 1
 
 	rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
 
 	local CONNECT_STATUS=$(connect_utils status ${LINK})
-
-	[ ${CONNECT_STATUS} -ge 400 ] && echo "(ERROR) [${MODEL_NAME}] does not exist on [${PLATFORM}]. [${CONNECT_STATUS}]" && exit 1
+	[ ${CONNECT_STATUS} -ge 400 ] && \
+	echo "(ERROR) [${MODEL_NAME}] does not exist on [${PLATFORM}]. [${CONNECT_STATUS}]" && \
+	echo && \
+	exit 1
 
 
 	# For stripchat:
 	# if [ ${PLATFORM} = "stripchat" ]; then
 	# 	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
-	# 	[[ ${CONNECT_DUMPS} =~ '"error":"Not Found"' ]] && echo "(ERROR) [${MODEL_NAME}] does not exist on Platform [${PLATFORM}]." && exit 1
+	# 	[[ ${CONNECT_DUMPS} =~ '"error":"Not Found"' ]] && \
+	# 	echo "(ERROR) [${MODEL_NAME}] does not exist on Platform [${PLATFORM}]." && \
+	# 	echo && \
+	# 	exit 1
 	# fi
 
-	echo "Simping Streamer: ${MODEL_NAME} (${CONNECT_STATUS})"
+	echo "Simping Streamer: ${MODEL_NAME} (${PLATFORM}) (${CONNECT_STATUS})"
 	echo
 }
 
