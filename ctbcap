@@ -51,13 +51,13 @@ function handle_input() {
 			exit 0
 		;;
 		-s|--stream)
-			[[ ! ${MODEL} ]] \
+			[[ ! $2 ]] \
 			&& echo -e "(ERROR) Must contain <username or url> as \$2 ! \nSee --help for more \n" >&2 \
 			&& exit 1
 
 			STREAM_MODE=1
 
-			[[ ${MODEL} ]] || MODEL=$2
+			MODEL=$2
 		;;
 		-v|--version)
 			echo "chaturbate-grabber / ctbcap --- v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}"
@@ -88,9 +88,11 @@ function handle_input() {
 		'')
 		;;
 		*)
-			[ $1 = '-v' ] || [ $1 = '--version' ] && MODEL=$2
+			[ ! $1 = '-s' ] && [ ! $1 = '--stream' ] \
+			&& echo -e "(ERROR) Invalid Parameter [$2] ! \n" >&2 \
+			&& exit 1
 
-			[[ ${MODEL} ]] && echo -e "(ERROR) Invalid Parameter [$2] ! \n" >&2 && exit 1
+			[[ ${MODEL} ]] || MODEL=$2
 		;;
 	esac
 
