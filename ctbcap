@@ -295,10 +295,11 @@ function watchdog() {
 
 			# If recording interrupt by first time
 			while [ true ]; do
-				sleep 5
-				local STREAM_TEMP_STATUS=$(connect_utils status ${STREAM_LINK})
+				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
 
-				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted... [${STREAM_TEMP_STATUS}]"
+				sleep 5
+
+				local STREAM_TEMP_STATUS=$(connect_utils status ${STREAM_LINK})
 
 				# If ${STREAM_TEMP_STATUS} B/E 200 - 399, sleep then reconnect.
 				[ ${STREAM_TEMP_STATUS} -ge 200 ] && [ ${STREAM_TEMP_STATUS} -lt 400 ] \
@@ -314,11 +315,11 @@ function watchdog() {
 
 			rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online # Delete online flag file
 
-			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for 1 min & try reconnect..."
-			sleep 60
+			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
+			sleep $((RANDOM % (121) + 240)) # Random num B/E 240 - 360
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
-			sleep $((RANDOM % (661 - 540) + 540))
+			sleep $((RANDOM % (241) + 480)) # Random num B/E 480 - 720
 		fi
 	done
 }
