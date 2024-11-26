@@ -199,8 +199,10 @@ function prepare_simping() {
 	echo
 }
 
-# Fetch video stream, assign ${STREAM_LINK} & ${STREAM_LINK_GENERIC}.
+# Fetch ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, then show them.
 function link_to_m3u() {
+
+	unset STREAM_LINK_GENERIC STREAM_LINK
 
 	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
 	local CONNECT_STATUS=$(echo ${CONNECT_DUMPS:0:15} | grep -oE '[0-9]{3}' || echo 000)
