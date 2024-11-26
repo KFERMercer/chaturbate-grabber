@@ -105,8 +105,6 @@ function handle_input() {
 
 	SAVE_PATH=${SAVE_PATH%"/"}
 	LOG_PATH=${LOG_PATH%"/"}
-	[ ! -w ${SAVE_PATH} ] && echo "(ERROR) No Permission To Write To SAVE_PATH [${SAVE_PATH}] !" && exit 1
-	[ ! -w ${LOG_PATH} ] && echo "(ERROR) No Permission To Write To LOG_PATH [${LOG_PATH}] !" && exit 1
 
 	PLATFORM=${PLATFORM,,}
 	case ${PLATFORM} in 
@@ -184,7 +182,9 @@ function connect_utils() {
 
 function prepare_simping() {
 
-	mkdir -p ${LOG_PATH} ${SAVE_PATH}
+	mkdir -p ${LOG_PATH} ${SAVE_PATH} 2>/dev/null
+	[ ! -w ${SAVE_PATH} ] && echo "(ERROR) No Permission To Write [${SAVE_PATH}/] !" && exit 1
+	[ ! -w ${LOG_PATH} ] && echo "(ERROR) No Permission To Write [${LOG_PATH}/] !" && exit 1
 
 	rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
 
