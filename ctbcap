@@ -38,7 +38,7 @@ CTBCAP_RELEASE=6
 # Check validity and process runtime variables.
 function handle_input() {
 
-	[ $# -gt 2 ] && echo "(ERROR) Invalid Parameter Number!" && echo && exit 1
+	[ $# -gt 2 ] && echo -e "(ERROR) Invalid Parameter Number! \n" >&2 && exit 1
 
 	case $1 in
 		-h|--help)
@@ -51,11 +51,12 @@ function handle_input() {
 			exit 0
 		;;
 		-s|--stream)
-			[[ ! ${MODEL} ]] && echo '(ERROR) Must contain <username or url> as $2 !' && \
-			echo "See --help for more" && \
-			echo && \
-			exit 1
+			[[ ! ${MODEL} ]] \
+			&& echo -e "(ERROR) Must contain <username or url> as \$2 ! \nSee --help for more \n" >&2 \
+			&& exit 1
+
 			STREAM_MODE=1
+
 			[[ ${MODEL} ]] || MODEL=$2
 		;;
 		-v|--version)
@@ -66,14 +67,13 @@ function handle_input() {
 			exit 0
 		;;
 		-*|--*)
-			echo "(ERROR) Invalid Parameter [$1] !"
-			echo
+			echo -e "(ERROR) Invalid Parameter [$1] ! \n" >&2
 			exit 1
 		;;
 		'')
-			[[ ! ${MODEL} ]] && echo "(ERROR) Need Parameter! See --help" && \
-			echo && \
-			exit 1
+			[[ ! ${MODEL} ]] \
+			&& echo -e "(ERROR) Need Parameter! See --help \n" >&2 \
+			&& exit 1
 		;;
 		*)
 			MODEL=$1
@@ -82,17 +82,15 @@ function handle_input() {
 
 	case $2 in
 		-*|--*)
-			echo "(ERROR) Invalid Parameter [$2] !"
-			echo
+			echo -e "(ERROR) Invalid Parameter [$2] ! \n" >&2
 			exit 1
 		;;
 		'')
 		;;
 		*)
 			[ $1 = '-v' ] || [ $1 = '--version' ] && MODEL=$2
-			[[ ${MODEL} ]] && echo "(ERROR) Invalid Parameter [$2] !" && \
-			echo && \
-			exit 1
+
+			[[ ${MODEL} ]] && echo -e "(ERROR) Invalid Parameter [$2] ! \n" >&2 && exit 1
 		;;
 	esac
 
@@ -117,7 +115,8 @@ function handle_input() {
 			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL_NAME}/cam"
 		;;
 	esac
-	[ ! ${LINK} ] && echo "(ERROR) Unknown Platform: [$PLATFORM] !" && echo && exit 1
+
+	[ ! ${LINK} ] && echo -e "(ERROR) Unknown Platform: [${PLATFORM}] ! \n" >&2 && exit 1
 
 }
 
@@ -177,25 +176,23 @@ function connect_utils() {
 function prepare_simping() {
 
 	mkdir -p ${LOG_PATH} ${SAVE_PATH} 2>/dev/null
-	[ ! -w ${SAVE_PATH} ] && echo "(ERROR) No Permission To Write [${SAVE_PATH}/] !" && echo && exit 1
-	[ ! -w ${LOG_PATH} ] && echo "(ERROR) No Permission To Write [${LOG_PATH}/] !" && echo && exit 1
+	[ ! -w ${SAVE_PATH} ] && echo -e "(ERROR) No Permission To Write [${SAVE_PATH}/] ! \n" >&2 && exit 1
+	[ ! -w ${LOG_PATH} ] && echo -e "(ERROR) No Permission To Write [${LOG_PATH}/] ! \n" >&2 && exit 1
 
 	rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
 
 	local CONNECT_STATUS=$(connect_utils status ${LINK})
-	[ ${CONNECT_STATUS} -ge 400 ] && \
-	echo "(ERROR) [${MODEL_NAME}] does not exist on [${PLATFORM}]. [${CONNECT_STATUS}]" && \
-	echo && \
-	exit 1
+	[ ${CONNECT_STATUS} -ge 400 ] \
+	&& echo -e "(ERROR) [${MODEL_NAME}] does not exist on [${PLATFORM}]. [${CONNECT_STATUS}] \n" >&2 \
+	&& exit 1
 
 
 	# For stripchat:
 	# if [ ${PLATFORM} = "stripchat" ]; then
 	# 	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
-	# 	[[ ${CONNECT_DUMPS} =~ '"error":"Not Found"' ]] && \
-	# 	echo "(ERROR) [${MODEL_NAME}] does not exist on Platform [${PLATFORM}]." && \
-	# 	echo && \
-	# 	exit 1
+	# 	[[ ${CONNECT_DUMPS} =~ '"error":"Not Found"' ]] \
+	# 	&& echo -e "(ERROR) [${MODEL_NAME}] does not exist on Platform [${PLATFORM}]. \n" >&2 \
+	# 	&& exit 1
 	# fi
 
 	echo "Simping Streamer: ${MODEL_NAME} (${PLATFORM}) (${CONNECT_STATUS})"
