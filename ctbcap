@@ -131,7 +131,7 @@ function edging () {
 
 	echo "Edging Mode is On. Delay [${EDGING_TIME}]s before Simping [${MODEL_NAME}]".
 	echo
-	echo "Considering we wont send any requests to [${PLATFORM}] server until Edging is over,"
+	echo "Considering we won't send any requests to [${PLATFORM}] server until Edging is over,"
 	echo "So plase make sure that [${MODEL_NAME}] exists on [${PLATFORM}]. "
 	echo
 	echo "Edging..."
@@ -180,16 +180,27 @@ function prepare_simping() {
 
 	if [[ ${STREAM_MODE} != "1" ]]; then
 		mkdir -p ${LOG_PATH} ${SAVE_PATH} 2>/dev/null
-		[ ! -w ${SAVE_PATH} ] && echo -e "(ERROR) No Permission To Write [${SAVE_PATH}/] ! \n" >&2 && exit 1
-		[ ! -w ${LOG_PATH} ] && echo -e "(ERROR) No Permission To Write [${LOG_PATH}/] ! \n" >&2 && exit 1
+		[ ! -w ${SAVE_PATH} ] && echo -e "(ERROR) Cannot Access To [${SAVE_PATH}/] ! \n" >&2 && exit 1
+		[ ! -w ${LOG_PATH} ] && echo -e "(ERROR) Cannot Access To [${LOG_PATH}/] ! \n" >&2 && exit 1
 
 		rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
 	fi
 
 	local CONNECT_STATUS=$(connect_utils status ${LINK})
-	[ ${CONNECT_STATUS} -ge 400 ] \
-	&& echo -e "(ERROR) [${MODEL_NAME}] does not exist on [${PLATFORM}]. [${CONNECT_STATUS}] \n" >&2 \
-	&& exit 1
+	case ${CONNECT_STATUS} in
+		404)
+			echo -e "(ERROR) Can't find [${MODEL_NAME}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n" >&2
+			exit 1
+		;;
+		2*|3*|4*|5*)
+			echo "Simping Streamer: ${MODEL_NAME} (${PLATFORM}) (${CONNECT_STATUS})"
+			echo
+		;;
+		000)
+			echo -e "Internet Connection Error. [${CONNECT_STATUS}] \n" >&2
+			exit 1
+		;;
+	esac
 
 	# For stripchat:
 	# if [ ${PLATFORM} = "stripchat" ]; then
@@ -199,8 +210,6 @@ function prepare_simping() {
 	# 	&& exit 1
 	# fi
 
-	echo "Simping Streamer: ${MODEL_NAME} (${PLATFORM}) (${CONNECT_STATUS})"
-	echo
 }
 
 # Fetch ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, then show them.
@@ -209,39 +218,54 @@ function link_to_m3u() {
 	unset STREAM_LINK_GENERIC STREAM_LINK
 
 	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
+
+	# Reuse ${CONNECT_DUMPS} to get HTTP status code at the time.
 	local CONNECT_STATUS=$(echo ${CONNECT_DUMPS:0:15} | grep -oE '[0-9]{3}' || echo 000)
+	case ${CONNECT_STATUS} in
+		404)
+			echo "[$(date "+%Y%m%d-%H%M%S")] Can't find [${MODEL_NAME}] now. Retired?"
+			return 1
+		;;
+		4*)
+			echo "[$(date "+%Y%m%d-%H%M%S")] You might gotten blocked by CAPTCHA... [${CONNECT_STATUS}]"
+			return 1
+		;;
+		1*|5*)
+			echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now... [${CONNECT_STATUS}]"
+			return 1
+		;;
+		000)
+			echo "[$(date "+%Y%m%d-%H%M%S")] Internet Connection Error. [${CONNECT_STATUS}]"
+			return 1
+		;;
+	esac
+
 
 	# For chaturbate:
 	if [ ${PLATFORM} = "chaturbate" ]; then
-		
-		if [ ${CONNECT_STATUS} -ge 300 ] && [ ${CONNECT_STATUS} -lt 400 ]; then
-			local MODEL_NEW_NAME=${CONNECT_DUMPS#*"location: /"}
-			local MODEL_NEW_NAME=${MODEL_NEW_NAME%%"/"*}
-			echo -e "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL_NAME}] Has changed her name to [${MODEL_NEW_NAME}]." >&2
-		fi
+		[ ${CONNECT_STATUS} -ge 300 ] \
+		&& local MODEL_NEW_NAME=${CONNECT_DUMPS#*"location: /"} \
+		&& local MODEL_NEW_NAME=${MODEL_NEW_NAME%%"/"*} \
+		&& echo -e "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL_NAME}] Has changed her name to [${MODEL_NEW_NAME}]." >&2
 
 		if [[ ${CONNECT_DUMPS} =~ ".m3u8" ]]; then
 			STREAM_LINK_GENERIC=$(echo -e ${CONNECT_DUMPS} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -n 1)
 			STREAM_LINK=${STREAM_LINK_GENERIC%%playlist.m3u8*}$(connect_utils dump_m3u ${STREAM_LINK_GENERIC} | tail -n 1)
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. (${CONNECT_STATUS})"
+			return 1
 		fi
-
 	fi
 
 	# For stripchat:
 	if [ ${PLATFORM} = "stripchat" ]; then
-
 		if [[ ${CONNECT_DUMPS} =~ '"isCamAvailable":true' ]]; then
-
 			local STREAMNAME=$(echo -e ${CONNECT_DUMPS})
 			local STREAMNAME=${STREAMNAME#*'"streamName":"'}
 			local STREAMNAME=${STREAMNAME%%'"'*}
-
 			local PRESET=$(echo -e ${CONNECT_DUMPS})
 			local PRESET=${CONNECT_DUMPS#*'"default":["'}
 			local PRESET=${PRESET%%'"'*}
-
 			local VIEWSERVER=$((RANDOM % (16) + 10)) # Random num B/E 10 - 25
 
 			# If ${PRESET} is not good, use automod.
@@ -254,6 +278,7 @@ function link_to_m3u() {
 			fi
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. (${CONNECT_STATUS})"
+			return 1
 		fi
 	fi
 
@@ -263,6 +288,7 @@ function link_to_m3u() {
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_LINK_GENERIC}"
 		echo "[$(date "+%Y%m%d-%H%M%S")] Highest Definition Stream:"
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_LINK}"
+		return 0
 	fi
 
 }
@@ -302,21 +328,29 @@ function watchdog() {
 			# If recording interrupt by first time
 			while [ true ]; do
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
-
 				sleep 5
 
 				local STREAM_TEMP_STATUS=$(connect_utils status ${STREAM_LINK})
-
-				# If ${STREAM_TEMP_STATUS} B/E 200 - 399, sleep then reconnect.
-				[ ${STREAM_TEMP_STATUS} -ge 200 ] && [ ${STREAM_TEMP_STATUS} -lt 400 ] \
-				&& sleep 10 \
-				&& echo "[$(date "+%Y%m%d-%H%M%S")] Try rstart recording..." \
-				&& grab_stream
-
-				# If ${STREAM_TEMP_STATUS} B/E 400 - 499, also not EQ 404, message then break.
-				[ ${STREAM_TEMP_STATUS} -ge 400 ] && [ ${STREAM_TEMP_STATUS} -lt 500 ] && [ ${STREAM_TEMP_STATUS} -ne 404 ] \
-				&& echo "[$(date "+%Y%m%d-%H%M%S")] Stream might entered Private/Ticket Show... [${STREAM_TEMP_STATUS}]" \
-				&& break
+				case ${STREAM_TEMP_STATUS} in
+					2*|3*)
+						# Sleep then reconnect.
+						sleep 10
+						echo "[$(date "+%Y%m%d-%H%M%S")] Rstart recording... [${STREAM_TEMP_STATUS}]"
+						grab_stream
+					;;
+					4*)
+						echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. [${STREAM_TEMP_STATUS}]"
+						break
+					;;
+					1*|5*)
+						echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now... [${STREAM_TEMP_STATUS}]"
+						break
+					;;
+					000)
+						echo "[$(date "+%Y%m%d-%H%M%S")] Internet Connection Error. [${STREAM_TEMP_STATUS}]"
+						break
+					;;
+				esac
 			done
 
 			rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online # Delete online flag file
