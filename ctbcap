@@ -364,11 +364,10 @@ function watchdog() {
 	done
 }
 
-function sock_washer {
+function sock_washer() {
 	rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
 	echo
-	echo "8=====================D"
-	echo "    BYE (. Y .) BYE"
+	echo "BYE (. Y .) BYE"
 	echo
 	exit 0
 }
