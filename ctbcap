@@ -263,19 +263,8 @@ function link_to_m3u() {
 			local STREAMNAME=$(echo -e ${CONNECT_DUMPS})
 			local STREAMNAME=${STREAMNAME#*'"streamName":"'}
 			local STREAMNAME=${STREAMNAME%%'"'*}
-			local PRESET=$(echo -e ${CONNECT_DUMPS})
-			local PRESET=${CONNECT_DUMPS#*'"default":["'}
-			local PRESET=${PRESET%%'"'*}
-			local VIEWSERVER=$((RANDOM % (16) + 10)) # Random num B/E 10 - 25
-
-			# If ${PRESET} is not good, use automod.
-			if [[ ${PRESET} =~ [\]\[{}\"\'] ]]; then # check if ${PRESET} has {}[]"'
-				STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
-				STREAM_LINK=$(connect_utils dump_m3u ${STREAM_LINK_GENERIC} 2>/dev/null | tail -n 1)
-			else
-				STREAM_LINK_GENERIC="https://b-hls-${VIEWSERVER}.doppiocdn.live/hls/${STREAMNAME}/${STREAMNAME}_${PRESET}.m3u8"
-				STREAM_LINK=${STREAM_LINK_GENERIC}
-			fi
+			STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
+			STREAM_LINK=$(connect_utils dump ${STREAM_LINK_GENERIC} | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. (${CONNECT_STATUS})"
 			return 1
