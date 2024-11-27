@@ -6,11 +6,16 @@
 # Check for assignment of runtime variables
 [ ! ${MODEL} ] || [ ! ${PLATFORM} ] || [ ! ${SAVE_PATH} ] || [ ! ${LOG_PATH} ] && echo "Incomplete Runtime Variables!" && exit 1
 
-# Process $MODEL
-MODEL=${MODEL,,}
-MODEL=${MODEL#*"chaturbate.com/"}
-MODEL=${MODEL#*"stripchat.com/"}
-MODEL=${MODEL%"/"*}
+# Process ${MODEL}
+# Assume ${MODEL} contain some link form, process & cut invalid chars.
+MODEL_NAME=$(echo ${MODEL,,} \
+    | grep -oE 'http[s]?://[a-zA-Z]?+[.]?[a-zA-Z]+[.][a-zA-Z]+[/][^ /]+' \
+    | cut -d '/' -f4 \
+    | grep -oE '[a-zA-Z0-9_-]+' \
+    | head -n 1)
+# If ${MODEL} not link form, cut invalid chars.
+[[ ! ${MODEL_NAME} ]] && MODEL_NAME=$(echo "${MODEL,,}" | grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
+[[ ! ${MODEL_NAME} ]] && echo "(ERROR) Invalid Username or Link!" && exit 1
 
 # Process $PLATFORM
 PLATFORM=${PLATFORM,,}
