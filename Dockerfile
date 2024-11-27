@@ -1,10 +1,11 @@
 FROM alpine:latest
 
-RUN \
-    apk add --no-cache bash curl ffmpeg tini tzdata; \
-    mkdir -p /log /save; \
-    chmod 777 /log /save; \
-    rm -rf /tmp/* /var/log/*
+RUN apk add --no-cache bash curl ffmpeg tini tzdata
+
+RUN <<EOT
+    mkdir -p /save /log
+    chmod 777 /save /log
+EOT
 
 COPY ./ctbcap-healthcheck /usr/sbin/
 COPY ./ctbcap /usr/sbin/
@@ -21,10 +22,11 @@ ENV \
     DEBUG_MODE="your mom is so hot"
 
 HEALTHCHECK \
-    --interval=30s \
-    --timeout=10s \
+    --interval=300s \
+    --timeout=30s \
+    --start-period=300s \
+    --start-interval=300s \
     --retries=3 \
-    --start-period=5s \
     CMD ["ctbcap-healthcheck"]
 
 ENTRYPOINT ["tini", "-g", "--", "ctbcap"]
