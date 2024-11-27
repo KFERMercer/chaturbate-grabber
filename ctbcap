@@ -193,7 +193,7 @@ function prepare_simping() {
 			exit 1
 		;;
 		2*|3*|4*|5*)
-			echo "Simping Streamer: ${MODEL_NAME} (${PLATFORM}) (${CONNECT_STATUS})"
+			echo "Simping Streamer: [${MODEL_NAME}] (${PLATFORM}) [${CONNECT_STATUS}]"
 			echo
 		;;
 		000)
@@ -253,7 +253,7 @@ function link_to_m3u() {
 			STREAM_LINK=$(connect_utils dump_m3u ${STREAM_LINK_GENERIC} | tail -n 1)
 			[[ ${STREAM_LINK} ]] && STREAM_LINK=${STREAM_LINK_GENERIC%%playlist.m3u8*}${STREAM_LINK}
 		else
-			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. (${CONNECT_STATUS})"
+			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. [${CONNECT_STATUS}]"
 			return 1
 		fi
 	fi
@@ -267,7 +267,7 @@ function link_to_m3u() {
 			STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
 			STREAM_LINK=$(connect_utils dump ${STREAM_LINK_GENERIC} | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)
 		else
-			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. (${CONNECT_STATUS})"
+			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. [${CONNECT_STATUS}]"
 			return 1
 		fi
 	fi
