@@ -180,13 +180,13 @@ function prepare_simping() {
 
 	local CONNECT_STATUS=$(connect_utils status ${LINK})
 	case ${CONNECT_STATUS} in
-		404)
-			echo -e "(ERROR) Can't find [${MODEL_NAME}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n" >&2
-			exit 1
-		;;
-		2*|3*|4*|5*)
+		2*|3*)
 			echo "Simping Streamer: [${MODEL_NAME}] (${PLATFORM}) [${CONNECT_STATUS}]"
 			echo
+		;;
+		4*|5*)
+			echo -e "(ERROR) Can't find [${MODEL_NAME}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n" >&2
+			exit 1
 		;;
 		000)
 			echo -e "Internet Connection Error. [${CONNECT_STATUS}] \n" >&2
