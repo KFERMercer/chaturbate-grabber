@@ -52,8 +52,8 @@ function handle_input() {
 		;;
 		-s|--stream)
 			[[ ! $2 ]] \
-			&& echo -e "(ERROR) Must contain <username or url> as \$2 ! \nSee --help for more \n" >&2 \
-			&& exit 1
+				&& echo -e "(ERROR) Must contain <username or url> as \$2 ! \nSee --help for more \n" >&2 \
+				&& exit 1
 
 			STREAM_MODE=1
 
@@ -72,8 +72,8 @@ function handle_input() {
 		;;
 		'')
 			[[ ! ${MODEL} ]] \
-			&& echo -e "(ERROR) Need Parameter! See --help \n" >&2 \
-			&& exit 1
+				&& echo -e "(ERROR) Need Parameter! See --help \n" >&2 \
+				&& exit 1
 		;;
 		*)
 			MODEL=$1
@@ -89,8 +89,8 @@ function handle_input() {
 		;;
 		*)
 			[ ! $1 = '-s' ] && [ ! $1 = '--stream' ] \
-			&& echo -e "(ERROR) Invalid Parameter [$2] ! \n" >&2 \
-			&& exit 1
+				&& echo -e "(ERROR) Invalid Parameter [$2] ! \n" >&2 \
+				&& exit 1
 
 			[[ ${MODEL} ]] || MODEL=$2
 		;;
@@ -201,8 +201,8 @@ function prepare_simping() {
 	# if [ ${PLATFORM} = "stripchat" ]; then
 	# 	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
 	# 	[[ ${CONNECT_DUMPS} =~ '"error":"Not Found"' ]] \
-	# 	&& echo -e "(ERROR) [${MODEL_NAME}] does not exist on Platform [${PLATFORM}]. \n" >&2 \
-	# 	&& exit 1
+	# 		&& echo -e "(ERROR) [${MODEL_NAME}] does not exist on Platform [${PLATFORM}]. \n" >&2 \
+	# 		&& exit 1
 	# fi
 
 }
@@ -239,9 +239,9 @@ function link_to_m3u() {
 	# For chaturbate:
 	if [ ${PLATFORM} = "chaturbate" ]; then
 		[ ${CONNECT_STATUS} -ge 300 ] \
-		&& local MODEL_NEW_NAME=${CONNECT_DUMPS#*"location: /"} \
-		&& local MODEL_NEW_NAME=${MODEL_NEW_NAME%%"/"*} \
-		&& echo -e "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL_NAME}] Has changed her name to [${MODEL_NEW_NAME}]." >&2
+			&& local MODEL_NEW_NAME=${CONNECT_DUMPS#*"location: /"} \
+			&& local MODEL_NEW_NAME=${MODEL_NEW_NAME%%"/"*} \
+			&& echo -e "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL_NAME}] Has changed her name to [${MODEL_NEW_NAME}]." >&2
 
 		if [[ ${CONNECT_DUMPS} =~ ".m3u8" ]]; then
 			STREAM_LINK_GENERIC=$(echo -e ${CONNECT_DUMPS} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -n 1)
