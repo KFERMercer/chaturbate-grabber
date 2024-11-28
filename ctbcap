@@ -370,6 +370,7 @@ prepare_simping $1 $2 $3
 
 [[ ${STREAM_MODE} == "1" ]] && fetch_m3u && exit 0
 
-watchdog | tee -a ${LOG_PATH}/${MODEL}-${PLATFORM}.log
+watchdog > >(tee -a ${LOG_PATH}/${MODEL}-${PLATFORM}.log >> /dev/stdout) \
+		2> >(tee -a ${LOG_PATH}/${MODEL}-${PLATFORM}.log >> /dev/stderr)
 
 exit 0
