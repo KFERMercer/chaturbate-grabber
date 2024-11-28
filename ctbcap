@@ -36,7 +36,7 @@ CTBCAP_RELEASE=6
 
 
 # Check validity and process runtime variables.
-function handle_input() {
+function prepare_simping() {
 
 	[ $# -gt 2 ] && echo -e "(ERROR) Invalid Parameter Number! \n" >&2 && exit 1
 
@@ -109,22 +109,29 @@ function handle_input() {
 
 	SAVE_PATH=${SAVE_PATH%"/"}
 	LOG_PATH=${LOG_PATH%"/"}
+	if [[ ${STREAM_MODE} != "1" ]]; then
+		mkdir -p ${LOG_PATH} ${SAVE_PATH} 2>/dev/null
+		[ ! -w ${SAVE_PATH} ] && echo -e "(ERROR) Cannot Access To [${SAVE_PATH}/] ! \n" >&2 && exit 1
+		[ ! -w ${LOG_PATH} ] && echo -e "(ERROR) Cannot Access To [${LOG_PATH}/] ! \n" >&2 && exit 1
+	fi
 
 	PLATFORM=${PLATFORM,,}
 	case ${PLATFORM} in
 		chaturbate|ctb|cb)
 			PLATFORM=chaturbate
-			LINK="https://chaturbate.com/${MODEL}/" # Must keep " / " at the end
+			LINK="https://chaturbate.com/api/chatvideocontext/${MODEL}/" # Must keep " / " at the end
 		;;
 		stripchat|stc|sc|st)
 			PLATFORM=stripchat
 			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
-			PROBE_LINK= # Stripchat enabled CF wall by default So leave it empty.
 		;;
 		*)
 			echo -e "(ERROR) Unknown Platform: [${PLATFORM}] ! \n" >&2 && exit 1
 		;;
 	esac
+
+	echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
+	echo
 
 }
 
@@ -172,92 +179,83 @@ function connect_utils() {
 
 }
 
-function prepare_simping() {
+# Fetch ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, show them & return 0.
+# If dont have ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, return 1.
+function fetch_m3u() {
 
-	if [[ ${STREAM_MODE} != "1" ]]; then
-		mkdir -p ${LOG_PATH} ${SAVE_PATH} 2>/dev/null
-		[ ! -w ${SAVE_PATH} ] && echo -e "(ERROR) Cannot Access To [${SAVE_PATH}/] ! \n" >&2 && exit 1
-		[ ! -w ${LOG_PATH} ] && echo -e "(ERROR) Cannot Access To [${LOG_PATH}/] ! \n" >&2 && exit 1
-
-		rm -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online
-	fi
-
-	local CONNECT_STATUS=$(connect_utils status ${LINK})
-	case ${CONNECT_STATUS} in
-		2*|3*)
-			echo "Simping Streamer: [${MODEL}] (${PLATFORM}) [${CONNECT_STATUS}]"
-			echo
-		;;
-		4*|5*)
-			echo -e "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n" >&2
-			exit 1
-		;;
-		000)
-			echo -e "Internet Connection Error. [${CONNECT_STATUS}] \n" >&2
-			exit 1
-		;;
-	esac
-
-	# For stripchat:
-	# if [ ${PLATFORM} = "stripchat" ]; then
-	# 	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
-	# 	[[ ${CONNECT_DUMPS} =~ '"error":"Not Found"' ]] \
-	# 		&& echo -e "(ERROR) [${MODEL}] does not exist on Platform [${PLATFORM}]. \n" >&2 \
-	# 		&& exit 1
-	# fi
-
-}
-
-# Fetch ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, then show them.
-function link_to_m3u() {
-
+	rm -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online
 	unset STREAM_LINK_GENERIC STREAM_LINK
 
-	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
-
-	# Reuse ${CONNECT_DUMPS} to get HTTP status code at the time.
-	local CONNECT_STATUS=$(echo ${CONNECT_DUMPS:0:15} | grep -oE '[0-9]{3}' || echo 000)
+	[ ! ${MODEL_NEW_NAME} ] && local CONNECT_DUMP=$(connect_utils dump ${LINK})
+	[ ${MODEL_NEW_NAME} ] && local CONNECT_DUMP=$(connect_utils dump ${LINK_NEW_NAME})
+	# Reuse ${CONNECT_DUMP} to get HTTP status code at the time.
+	local CONNECT_STATUS=$(echo ${CONNECT_DUMP:0:15} | grep -oE '[0-9]{3}' || echo 000)
 	case ${CONNECT_STATUS} in
-		404)
-			echo "[$(date "+%Y%m%d-%H%M%S")] Can't find [${MODEL}] now. Retired?"
-			return 1
-		;;
-		4*)
-			echo "[$(date "+%Y%m%d-%H%M%S")] You might gotten blocked by CAPTCHA... [${CONNECT_STATUS}]"
-			return 1
-		;;
-		1*|5*)
-			echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now... [${CONNECT_STATUS}]"
-			return 1
-		;;
-		000)
-			echo "[$(date "+%Y%m%d-%H%M%S")] Internet Connection Error. [${CONNECT_STATUS}]"
-			return 1
-		;;
+	2*|3*)
+		# Do nothing. leave to platform method to deal with.
+	;;
+	404)
+		# ↓↓↓ Only effects on Stream Mode. Of not this mode, will leave to platform method to handle.
+		[[ ${STREAM_MODE} == "1" ]] \
+			&& echo -e "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n" >&2 \
+			&& exit 1
+	;;
+	4*)
+		echo "[$(date "+%Y%m%d-%H%M%S")] You might gotten blocked by CAPTCHA. [${CONNECT_STATUS}]" >&2
+		return 1
+	;;
+	000)
+		echo "[$(date "+%Y%m%d-%H%M%S")] Internet Connection Error. [${CONNECT_STATUS}]" >&2
+		[[ ${STREAM_MODE} == "1" ]] && echo >&2 && exit 1
+		return 1
+	;;
+	1*|5*|*)
+		echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now. [${CONNECT_STATUS}]" >&2
+		[[ ${STREAM_MODE} == "1" ]] && echo >&2 && exit 1
+		return 1
+	;;
 	esac
 
+	case ${PLATFORM} in
+	chaturbate)
+		# Cheke of Model change to new name
+		if [ ${CONNECT_STATUS} -eq 404 ]; then
+			MODEL_NEW_NAME=$(connect_utils dump "https://chaturbate.com/${MODEL}/")
+			local CONNECT_STATUS=$(echo ${MODEL_NEW_NAME:0:15} | grep -oE '[0-9]{3}' || echo 000)
+			MODEL_NEW_NAME=${MODEL_NEW_NAME#*"location: /"}
+			MODEL_NEW_NAME=${MODEL_NEW_NAME%%"/"*}
+			LINK_NEW_NAME=$(echo ${LINK} | sed "s|${MODEL}|${MODEL_NEW_NAME}|g")
+			[ ${MODEL_NEW_NAME} ] \
+				&& echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2 \
+				&& sleep 5 \
+				&& local CONNECT_DUMP=$(connect_utils dump ${LINK_NEW_NAME}) \
+				&& local CONNECT_STATUS=$(echo ${CONNECT_DUMP:0:15} | grep -oE '[0-9]{3}' || echo 000)
+			[ ! ${MODEL_NEW_NAME} ] && \
+				echo -e "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n" >&2 && exit 1
+		else
+			[ ${MODEL_NEW_NAME} ] \
+				&& echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]." >&2
+		fi
 
-	# For chaturbate:
-	if [ ${PLATFORM} = "chaturbate" ]; then
-		[ ${CONNECT_STATUS} -ge 300 ] \
-			&& local MODEL_NEW_NAME=${CONNECT_DUMPS#*"location: /"} \
-			&& local MODEL_NEW_NAME=${MODEL_NEW_NAME%%"/"*} \
-			&& echo -e "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] Has changed her name to [${MODEL_NEW_NAME}]." >&2
-
-		if [[ ${CONNECT_DUMPS} =~ ".m3u8" ]]; then
-			STREAM_LINK_GENERIC=$(echo -e ${CONNECT_DUMPS} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -n 1)
+		if [[ ${CONNECT_DUMP} =~ ".m3u8" ]]; then
+			STREAM_LINK_GENERIC=$(echo -e ${CONNECT_DUMP} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
 			STREAM_LINK=$(connect_utils dump ${STREAM_LINK_GENERIC} | tail -n 1)
 			[[ ${STREAM_LINK} ]] && STREAM_LINK=${STREAM_LINK_GENERIC%%playlist.m3u8*}${STREAM_LINK}
 		else
-			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
+			STREAM_STATUS=${CONNECT_DUMP#*'"room_status": "'}
+			STREAM_STATUS=${STREAM_STATUS%%'"'*}
+			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is ${STREAM_STATUS} now. [${CONNECT_STATUS}]"
 			return 1
 		fi
-	fi
+	;;
+	stripchat)
+		if [ ${CONNECT_STATUS} -eq 404 ]; then
+			# TODO: Name changing detection for Stripchat method.
+			echo -e "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n" >&2 && exit 1
+		fi
 
-	# For stripchat:
-	if [ ${PLATFORM} = "stripchat" ]; then
-		if [[ ${CONNECT_DUMPS} =~ '"isCamAvailable":true' ]]; then
-			local STREAMNAME=$(echo -e ${CONNECT_DUMPS})
+		if [[ ${CONNECT_DUMP} =~ '"isCamAvailable":true' ]]; then
+			local STREAMNAME=$(echo -e ${CONNECT_DUMP})
 			local STREAMNAME=${STREAMNAME#*'"streamName":"'}
 			local STREAMNAME=${STREAMNAME%%'"'*}
 			STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
@@ -266,7 +264,8 @@ function link_to_m3u() {
 			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
 			return 1
 		fi
-	fi
+	;;
+	esac
 
 	# If successfully grabed ${STREAM_LINK_GENERIC} ${STREAM_LINK}, show them.
 	if [ ${STREAM_LINK} ]; then
@@ -305,7 +304,7 @@ function grab_stream() {
 
 function watchdog() {
 	while [ true ]; do
-		link_to_m3u
+		fetch_m3u
 		if [ ${STREAM_LINK} ]; then
 
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
@@ -326,16 +325,7 @@ function watchdog() {
 						echo "[$(date "+%Y%m%d-%H%M%S")] Rstart recording... [${STREAM_TEMP_STATUS}]"
 						grab_stream
 					;;
-					4*)
-						echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${STREAM_TEMP_STATUS}]"
-						break
-					;;
-					1*|5*)
-						echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now... [${STREAM_TEMP_STATUS}]"
-						break
-					;;
-					000)
-						echo "[$(date "+%Y%m%d-%H%M%S")] Internet Connection Error. [${STREAM_TEMP_STATUS}]"
+					*)
 						break
 					;;
 				esac
@@ -374,15 +364,13 @@ echo "8=====================================================D"
 echo "              Simping Stream from CB & SC"
 echo
 
-handle_input $1 $2 $3
+prepare_simping $1 $2 $3
 
 [[ ${DEBUG_MODE}  == "1" ]] && set -x # Debug Mode
 
 [[ ${EDGING_MODE} == "1" ]] && edging
 
-prepare_simping
-
-[[ ${STREAM_MODE} == "1" ]] && link_to_m3u && exit 0
+[[ ${STREAM_MODE} == "1" ]] && fetch_m3u && exit 0
 
 watchdog | tee -a ${LOG_PATH}/${MODEL}-${PLATFORM}.log
 
