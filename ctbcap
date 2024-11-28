@@ -222,8 +222,7 @@ function fetch_m3u() {
 		if [ ${CONNECT_STATUS} -eq 404 ]; then
 			MODEL_NEW_NAME=$(connect_utils dump "https://chaturbate.com/${MODEL}/")
 			local CONNECT_STATUS=$(echo ${MODEL_NEW_NAME:0:15} | grep -oE '[0-9]{3}' || echo 000)
-			MODEL_NEW_NAME=${MODEL_NEW_NAME#*"location: /"}
-			MODEL_NEW_NAME=${MODEL_NEW_NAME%%"/"*}
+			MODEL_NEW_NAME=$(echo ${MODEL_NEW_NAME} | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
 			LINK_NEW_NAME=$(echo ${LINK} | sed "s|${MODEL}|${MODEL_NEW_NAME}|g")
 			[ ${MODEL_NEW_NAME} ] \
 				&& echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2 \
@@ -242,8 +241,7 @@ function fetch_m3u() {
 			STREAM_LINK=$(connect_utils dump ${STREAM_LINK_GENERIC} | tail -n 1)
 			[[ ${STREAM_LINK} ]] && STREAM_LINK=${STREAM_LINK_GENERIC%%playlist.m3u8*}${STREAM_LINK}
 		else
-			STREAM_STATUS=${CONNECT_DUMP#*'"room_status": "'}
-			STREAM_STATUS=${STREAM_STATUS%%'"'*}
+			local STREAM_STATUS=$(echo ${CONNECT_DUMP} | grep -oE '"room_status":[ ]?"[^"]+"' | cut -d '"' -f4)
 			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is ${STREAM_STATUS} now. [${CONNECT_STATUS}]"
 			return 1
 		fi
