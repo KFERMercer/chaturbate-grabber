@@ -97,15 +97,15 @@ function handle_input() {
 	esac
 
 	# Assume ${MODEL} contain some link form, process & cut invalid chars.
-	MODEL_NAME=$(echo ${MODEL,,} \
+	local MODEL_TEMP=$(echo ${MODEL,,} \
 		| grep -oE 'http[s]?://[a-zA-Z]?+[.]?[a-zA-Z]+[.][a-zA-Z]+[/][^ /]+' \
 		| cut -d '/' -f4 \
 		| grep -oE '[a-zA-Z0-9_-]+' \
 		| head -n 1)
+	[[ ${MODEL_TEMP} ]] && MODEL=${MODEL_TEMP}
 	# If ${MODEL} not link form, cut invalid chars.
-	[[ ! ${MODEL_NAME} ]] && MODEL_NAME=$(echo "${MODEL,,}" | grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
-	[[ ! ${MODEL_NAME} ]] && echo -e "(ERROR) Invalid Username or Link! [${MODEL}]\n" >&2 && exit 1
-	unset MODEL
+	[[ ! ${MODEL_TEMP} ]] && MODEL=$(echo "${MODEL,,}" | grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
+	[[ ! ${MODEL} ]] && echo -e "(ERROR) Invalid Username or Link! [${MODEL}]\n" >&2 && exit 1
 
 	SAVE_PATH=${SAVE_PATH%"/"}
 	LOG_PATH=${LOG_PATH%"/"}
@@ -114,11 +114,12 @@ function handle_input() {
 	case ${PLATFORM} in
 		chaturbate|ctb|cb)
 			PLATFORM=chaturbate
-			LINK="https://chaturbate.com/${MODEL_NAME}/" # Must keep " / " at the end
+			LINK="https://chaturbate.com/${MODEL}/" # Must keep " / " at the end
 		;;
 		stripchat|stc|sc|st)
 			PLATFORM=stripchat
-			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL_NAME}/cam"
+			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
+			PROBE_LINK= # Stripchat enabled CF wall by default So leave it empty.
 		;;
 		*)
 			echo -e "(ERROR) Unknown Platform: [${PLATFORM}] ! \n" >&2 && exit 1
@@ -132,10 +133,10 @@ function edging () {
 	# Sleep time (s) before initial request to server. Range better EQ to ..watchdog().while.else.echo .
 	[ $1 ] && local EDGING_TIME=$1 || local EDGING_TIME=$((RANDOM % 600)) # Random num B/E 0 - 600 (10 min)
 
-	echo "Edging Mode is On. Delay [${EDGING_TIME}]s before Simping [${MODEL_NAME}]".
+	echo "Edging Mode is On. Delay [${EDGING_TIME}]s before Simping [${MODEL}]".
 	echo
 	echo "Considering we won't send any requests to [${PLATFORM}] server until Edging is over,"
-	echo "So plase make sure that [${MODEL_NAME}] exists on [${PLATFORM}]. "
+	echo "So plase make sure that [${MODEL}] exists on [${PLATFORM}]. "
 	echo
 	echo "Edging..."
 	echo
@@ -178,17 +179,17 @@ function prepare_simping() {
 		[ ! -w ${SAVE_PATH} ] && echo -e "(ERROR) Cannot Access To [${SAVE_PATH}/] ! \n" >&2 && exit 1
 		[ ! -w ${LOG_PATH} ] && echo -e "(ERROR) Cannot Access To [${LOG_PATH}/] ! \n" >&2 && exit 1
 
-		rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
+		rm -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online
 	fi
 
 	local CONNECT_STATUS=$(connect_utils status ${LINK})
 	case ${CONNECT_STATUS} in
 		2*|3*)
-			echo "Simping Streamer: [${MODEL_NAME}] (${PLATFORM}) [${CONNECT_STATUS}]"
+			echo "Simping Streamer: [${MODEL}] (${PLATFORM}) [${CONNECT_STATUS}]"
 			echo
 		;;
 		4*|5*)
-			echo -e "(ERROR) Can't find [${MODEL_NAME}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n" >&2
+			echo -e "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n" >&2
 			exit 1
 		;;
 		000)
@@ -201,7 +202,7 @@ function prepare_simping() {
 	# if [ ${PLATFORM} = "stripchat" ]; then
 	# 	local CONNECT_DUMPS=$(connect_utils dump ${LINK})
 	# 	[[ ${CONNECT_DUMPS} =~ '"error":"Not Found"' ]] \
-	# 		&& echo -e "(ERROR) [${MODEL_NAME}] does not exist on Platform [${PLATFORM}]. \n" >&2 \
+	# 		&& echo -e "(ERROR) [${MODEL}] does not exist on Platform [${PLATFORM}]. \n" >&2 \
 	# 		&& exit 1
 	# fi
 
@@ -218,7 +219,7 @@ function link_to_m3u() {
 	local CONNECT_STATUS=$(echo ${CONNECT_DUMPS:0:15} | grep -oE '[0-9]{3}' || echo 000)
 	case ${CONNECT_STATUS} in
 		404)
-			echo "[$(date "+%Y%m%d-%H%M%S")] Can't find [${MODEL_NAME}] now. Retired?"
+			echo "[$(date "+%Y%m%d-%H%M%S")] Can't find [${MODEL}] now. Retired?"
 			return 1
 		;;
 		4*)
@@ -241,14 +242,14 @@ function link_to_m3u() {
 		[ ${CONNECT_STATUS} -ge 300 ] \
 			&& local MODEL_NEW_NAME=${CONNECT_DUMPS#*"location: /"} \
 			&& local MODEL_NEW_NAME=${MODEL_NEW_NAME%%"/"*} \
-			&& echo -e "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL_NAME}] Has changed her name to [${MODEL_NEW_NAME}]." >&2
+			&& echo -e "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] Has changed her name to [${MODEL_NEW_NAME}]." >&2
 
 		if [[ ${CONNECT_DUMPS} =~ ".m3u8" ]]; then
 			STREAM_LINK_GENERIC=$(echo -e ${CONNECT_DUMPS} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | tail -n 1)
 			STREAM_LINK=$(connect_utils dump ${STREAM_LINK_GENERIC} | tail -n 1)
 			[[ ${STREAM_LINK} ]] && STREAM_LINK=${STREAM_LINK_GENERIC%%playlist.m3u8*}${STREAM_LINK}
 		else
-			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. [${CONNECT_STATUS}]"
+			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
 			return 1
 		fi
 	fi
@@ -262,7 +263,7 @@ function link_to_m3u() {
 			STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
 			STREAM_LINK=$(connect_utils dump ${STREAM_LINK_GENERIC} | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)
 		else
-			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. [${CONNECT_STATUS}]"
+			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
 			return 1
 		fi
 	fi
@@ -282,7 +283,7 @@ function link_to_m3u() {
 
 function grab_stream() {
 
-	local FFMPEG_LOGFILE="${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.ffmpeg.log"
+	local FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
 	local CAPTURE_TIME=$(date "+%Y%m%d-%H%M%S")
 
 	echo >> ${FFMPEG_LOGFILE}
@@ -298,7 +299,7 @@ function grab_stream() {
 	-segment_start_number 1 \
 	-reset_timestamps 1 \
 	-loglevel warning \
-	${SAVE_PATH}/${MODEL_NAME}-${CAPTURE_TIME}_%03d.mkv \
+	${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%03d.mkv \
 	>> ${FFMPEG_LOGFILE} 2>&1
 }
 
@@ -308,7 +309,7 @@ function watchdog() {
 		if [ ${STREAM_LINK} ]; then
 
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
-			echo ${STREAM_LINK} > ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online # Build online flag file
+			echo ${STREAM_LINK} > ${LOG_PATH}/${MODEL}-${PLATFORM}.online # Build online flag file
 
 			grab_stream
 
@@ -326,7 +327,7 @@ function watchdog() {
 						grab_stream
 					;;
 					4*)
-						echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL_NAME}] is offline/private now. [${STREAM_TEMP_STATUS}]"
+						echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${STREAM_TEMP_STATUS}]"
 						break
 					;;
 					1*|5*)
@@ -340,7 +341,7 @@ function watchdog() {
 				esac
 			done
 
-			rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online # Delete online flag file
+			rm -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online # Delete online flag file
 
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
 			sleep $((RANDOM % (121) + 240)) # Random num B/E 240 - 360
@@ -352,7 +353,7 @@ function watchdog() {
 }
 
 function sock_washer() {
-	rm -f ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.online
+	rm -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online
 	echo
 	echo "BYE (. Y .) BYE"
 	echo
@@ -383,6 +384,6 @@ prepare_simping
 
 [[ ${STREAM_MODE} == "1" ]] && link_to_m3u && exit 0
 
-watchdog | tee -a ${LOG_PATH}/${MODEL_NAME}-${PLATFORM}.log
+watchdog | tee -a ${LOG_PATH}/${MODEL}-${PLATFORM}.log
 
 exit 0
