@@ -302,7 +302,7 @@ function grab_stream() {
 }
 
 function watchdog() {
-	while [ true ]; do
+	while true; do
 		fetch_m3u
 		if [ ${STREAM_LINK} ]; then
 
@@ -311,7 +311,7 @@ function watchdog() {
 
 			grab_stream
 			# If recording interrupt by first time
-			while [ true ]; do
+			while true; do
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
 				local STREAM_TEMP_STATUS=$(connect_utils status ${STREAM_LINK})
 				case ${STREAM_TEMP_STATUS} in
