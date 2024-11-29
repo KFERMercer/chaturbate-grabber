@@ -196,7 +196,7 @@ fetch_m3u() {
 		# Do nothing. leave to platform method to deal with.
 	;;
 	404)
-		# ↓↓↓ Only effects on Stream Mode. Of not this mode, will leave to platform method to handle.
+		# ↓↓↓ Only effects on Stream Mode. Of not this mode, leave to platform method to handle.
 		[ "${STREAM_MODE}" = "1" ] \
 			&& printf "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 \
 			&& exit 1
@@ -217,6 +217,7 @@ fetch_m3u() {
 	;;
 	esac
 
+	# Core methods by each Platform:
 	case ${PLATFORM} in
 	chaturbate)
 		# Cheke of Model change to new name
@@ -237,10 +238,10 @@ fetch_m3u() {
 				&& echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]." >&2
 		fi
 
+		# Check if online:
 		local ROOM_STATUS=$(echo ${CONNECT_DUMP} | grep -oE '"room_status":[ ]?"[^"]+"' | cut -d '"' -f4)
-
-		STREAM_LINK_GENERIC=$(echo ${CONNECT_DUMP} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
-		if [ -n "${STREAM_LINK_GENERIC}" ]; then
+		if [ -n "$(echo ${CONNECT_DUMP} | grep -oE 'http[s]?://edge[^ ]+\.m3u8')" ]; then
+			STREAM_LINK_GENERIC=$(echo ${CONNECT_DUMP} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
 			STREAM_LINK=$(connect_utils dump ${STREAM_LINK_GENERIC} | tail -n 1)
 			[ -n "${STREAM_LINK}" ] && STREAM_LINK=$(echo ${STREAM_LINK_GENERIC} | sed 's|playlist.m3u8.*||')${STREAM_LINK}
 		else
@@ -254,9 +255,9 @@ fetch_m3u() {
 			echo -e "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 && exit 1
 		fi
 
-		if [ "${CONNECT_DUMP}" = *'"isCamAvailable":true'* ]; then
+		if [ -n "$(echo ${CONNECT_DUMP} | grep -o '"isCamAvailable":true')" ]; then
 			local STREAMNAME=$(echo -e ${CONNECT_DUMP})
-			local STREAMNAME=$(${STREAMNAME} | sed 's|.*"streamName":"||')
+			local STREAMNAME=$(echo ${STREAMNAME} | sed 's|.*"streamName":"||')
 			local STREAMNAME=$(echo ${STREAMNAME} | sed 's|".*||')
 			STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
 			STREAM_LINK=$(connect_utils dump ${STREAM_LINK_GENERIC} | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)
