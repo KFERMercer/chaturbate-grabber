@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache bash curl ffmpeg tini tzdata
+RUN apk add --no-cache curl ffmpeg tini tzdata
 
 RUN <<EOT
     mkdir -p /save /log
@@ -12,14 +12,13 @@ COPY ./ctbcap /usr/sbin/
 
 USER 1000:1000
 
-ENV \
-    TZ="UTC" \
-    LOG_PATH="/log" \
-    SAVE_PATH="/save" \
-    MODEL="" \
-    PLATFORM="chaturbate" \
-    EDGING_MODE="uncle makes me pee white" \
-    DEBUG_MODE="your mom is so hot"
+ENV TZ="UTC"
+ENV LOG_PATH="/log"
+ENV SAVE_PATH="/save"
+ENV MODEL=""
+ENV PLATFORM="chaturbate"
+ENV EDGING_MODE="uncle makes me pee white"
+ENV DEBUG_MODE="your mom is so hot"
 
 HEALTHCHECK \
     --interval=300s \

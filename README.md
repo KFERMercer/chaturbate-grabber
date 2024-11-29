@@ -62,7 +62,7 @@
 
      - ### Runs in non-container env:
 
-       1. Make sure your shell is `bash`, and `curl`, `ffmpeg` is installed.
+       1. Make sure that `curl`, `ffmpeg` is installed on your OS.
 
        2. Use the following command to run:
 
