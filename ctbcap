@@ -252,13 +252,11 @@ fetch_m3u() {
 	stripchat)
 		if [ ${CONNECT_STATUS} -eq 404 ]; then
 			# TODO: Name changing detection for Stripchat method.
-			echo -e "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 && exit 1
+			printf "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 && exit 1
 		fi
 
 		if [ -n "$(echo ${CONNECT_DUMP} | grep -o '"isCamAvailable":true')" ]; then
-			local STREAMNAME=$(echo -e ${CONNECT_DUMP})
-			local STREAMNAME=$(echo ${STREAMNAME} | sed 's|.*"streamName":"||')
-			local STREAMNAME=$(echo ${STREAMNAME} | sed 's|".*||')
+			local STREAMNAME=$(echo ${CONNECT_DUMP} | sed 's|.*"streamName":"||'| sed 's|".*||')
 			STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
 			STREAM_LINK=$(connect_utils dump ${STREAM_LINK_GENERIC} | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)
 		else
