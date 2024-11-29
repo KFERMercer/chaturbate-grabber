@@ -317,7 +317,7 @@ function watchdog() {
 				case ${STREAM_TEMP_STATUS} in
 					2*|3*)
 						# Reconnect.
-						echo "[$(date "+%Y%m%d-%H%M%S")] Rstart recording... [${STREAM_TEMP_STATUS}]"
+						echo "[$(date "+%Y%m%d-%H%M%S")] Restart recording... [${STREAM_TEMP_STATUS}]"
 						grab_stream
 					;;
 					*)
