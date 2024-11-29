@@ -267,9 +267,9 @@ function fetch_m3u() {
 
 	# If successfully grabed ${STREAM_LINK_GENERIC} ${STREAM_LINK}, show them.
 	if [ ${STREAM_LINK} ]; then
-		echo "[$(date "+%Y%m%d-%H%M%S")] Streamer is Online! Successfully capture with stream link:"
+		echo "[$(date "+%Y%m%d-%H%M%S")] Streamer is Online! Successfully capture with Stream Link:"
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_LINK_GENERIC}"
-		echo "[$(date "+%Y%m%d-%H%M%S")] Highest Definition Stream:"
+		echo "[$(date "+%Y%m%d-%H%M%S")] Highest Definition Stream Link:"
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_LINK}"
 		return 0
 	else
@@ -309,21 +309,18 @@ function watchdog() {
 			echo ${STREAM_LINK} > ${LOG_PATH}/${MODEL}-${PLATFORM}.online # Build online flag file
 
 			grab_stream
-
 			# If recording interrupt by first time
 			while [ true ]; do
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
-				sleep 5
-
 				local STREAM_TEMP_STATUS=$(connect_utils status ${STREAM_LINK})
 				case ${STREAM_TEMP_STATUS} in
 					2*|3*)
-						# Sleep then reconnect.
-						sleep 10
+						# Reconnect.
 						echo "[$(date "+%Y%m%d-%H%M%S")] Rstart recording... [${STREAM_TEMP_STATUS}]"
 						grab_stream
 					;;
 					*)
+						echo "[$(date "+%Y%m%d-%H%M%S")] Stream Link closed... [${STREAM_TEMP_STATUS}]"
 						break
 					;;
 				esac
