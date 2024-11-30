@@ -86,7 +86,8 @@ prepare_simping() {
 		echo "<https://github.com/KFERMercer/chaturbate-grabber>"
 		echo
 	}
-
+	
+	[ -z "$1" ] && [ -z ${MODEL} ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && echo "$(hello)" && exit 0
 	while getopts ':def:hlo:p:v' OPT; do
 		case ${OPT} in
 		d) DEBUG_MODE=1 ;;
@@ -123,7 +124,6 @@ prepare_simping() {
 		esac
 	done
 	shift $((${OPTIND} - 1))
-	[ -z "$1" ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && echo "$(hello)" && exit 0
 
 	[ -n "$1" ] && MODEL=$1
 	# Assume ${MODEL} contain some link form, process & cut invalid chars.
