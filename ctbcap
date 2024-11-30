@@ -37,64 +37,110 @@ CTBCAP_RELEASE=6
 # Check validity and process runtime variables.
 prepare_simping() {
 
-	[ $# -gt 2 ] && printf "(ERROR) Invalid Parameter Number! \n\n" >&2 && exit 1
+	hello() {
+		echo "Usage: ctbcap [options...] <streamer username or url>"
+		echo
+		echo "<username or url>	Streamer's Username or Chat"
+		echo "			Room Link."
+		echo
+		echo "-d			[D]ebug Mode."
+		echo "			Show the raw crawler data."
+		echo
+		echo "-e			[E]dging Mode."
+		echo "			Delay initial requests to"
+		echo "			servers by Random Time in"
+		echo "			10 min to avoid time-specific"
+		echo "			request waves caused by"
+		echo "			large-scale deployments."
+		echo
+		echo "-f </path/to/viddir>	Video [f]ile Saving Path,"
+		echo "			Default is /\${PWD}/cap/ ."
+		echo "			Don't Touch if Runs in Docker."
+		echo
+		echo "-h			Get [H]elp for Commands."
+		echo
+		echo "-l			[L]ink Mode."
+		echo "			Try Only capture the Stream"
+		echo "			Link and disable recording"
+		echo "			procedure."
+		echo
+		echo "-o </path/to/viddir>	L[o]g Saving Path,"
+		echo "			Default is /\${PWD}/cap/log/ ,"
+		echo "			Don't Touch if Runs in Docker."
+		echo
+		echo "-p <chaturbate|stripchat> Specifi Stream [P]latform"
+		echo "			<chaturbate> (default) or"
+		echo "			<stripchat>, also support"
+		echo "			<ctb|cb> / <stc|sc|st>."
+		echo "			Change if online detection"
+		echo "			goes wrong."
+		echo
+		echo "-v			Show version number and quit"
+		echo
+		echo
+		echo "Chaturbate-Grabber (aka CtbCap) is made by KFERMercer"
+		echo "with Sweat and Cum. Please use Her under GPLv3, and"
+		echo "kindly ask you that don't use for any commercial "
+		echo "operations. If you like this toy, please visit the"
+		echo "official REPO to Star/Fork, Issue/PR are also open:"
+		echo "<https://github.com/KFERMercer/chaturbate-grabber>"
+		echo
+	}
 
-	case $1 in
-		-h|--help)
-			echo "Usage: ctbcap [options...] <streamer username or url>"
-			echo "<username or url>		Start to Simping Stream"
-			echo "-h, --help			Get help for commands"
-			echo "-s, --stream <username or url>	Grab the stream link only"
-			echo "-v, --version			Show version number and quit"
+	while getopts ':def:hlo:p:v' OPT; do
+		case ${OPT} in
+		d) DEBUG_MODE=1 ;;
+		e) EDGING_MODE=1 ;;
+		f) SAVE_PATH=${OPTARG} ;;
+		h) hello && exit 0 ;;
+		l) LINK_MODE=1 ;;
+		o) LOG_PATH=${OPTARG} ;;
+		p) PLATFORM=${OPTARG} ;;
+		v)
+			echo "Chaturbate-Grabber (aka CtbCap) v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}."
+			echo
+			echo "We defend the ideals of Communism and Anarky, Believe that the transmission"
+			echo "of knowledge and information cannot receive any perceived impediment."
+			echo
+			echo "Copyright (C) 2019-2024-, KFERMercer <https://github.com/KFERMercer>."
+			echo
+			echo "UA in Use: ${UA}"
 			echo
 			exit 0
 		;;
-		-s|--stream)
-			[ -z $2 ] \
-				&& printf "(ERROR) Must contain <username or url> as \$2 ! \nSee --help for more \n\n" >&2 \
-				&& exit 1
-
-			STREAM_MODE=1
-
-			MODEL=$2
-		;;
-		-v|--version)
-			echo "chaturbate-grabber / ctbcap --- v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}"
-			echo "Copyright (C) 2019-2024 KFERMercer <https://github.com/KFERMercer>"
-			echo "UA: ${UA}"
-			echo
-			exit 0
-		;;
-		-*|--*)
-			printf "(ERROR) Invalid Parameter [$1] ! \n\n" >&2
+		\?)
+			printf "(ERROR) Invalid Option [$1] ! \n\n$(hello)\n\n" >&2
 			exit 1
 		;;
-		'')
-			[ -z "${MODEL}" ] \
-				&& printf "(ERROR) Need Parameter! See --help \n\n" >&2 \
-				&& exit 1
+		:)
+			[ "${OPTARG}" = "f" ] \
+			&& printf "(ERROR) No Video Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
+			[ "${OPTARG}" = "o" ] \
+			&& printf "(ERROR) No Log Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
+			[ "${OPTARG}" = "p" ] \
+			&& printf "(ERROR) No Platform Specified!\n\nSee --help\n\n" >&2 && exit 1
+		;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	[ -z "$1" ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && echo "$(hello)" && exit 0
+
+	PLATFORM=$(echo ${PLATFORM} | tr '[:upper:]' '[:lower:]')
+	case ${PLATFORM} in
+		chaturbate|ctb|cb)
+			PLATFORM=chaturbate
+			LINK="https://chaturbate.com/api/chatvideocontext/${MODEL}/" # Must keep " / " at the end
+		;;
+		stripchat|stc|sc|st)
+			PLATFORM=stripchat
+			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
 		;;
 		*)
-			MODEL=$1
+			printf "(ERROR) Unknown Platform: [${PLATFORM}] ! \n\n" >&2 && exit 1
 		;;
 	esac
 
-	case $2 in
-		-*|--*)
-			printf "(ERROR) Invalid Parameter [$2] ! \n\n" >&2
-			exit 1
-		;;
-		'')
-		;;
-		*)
-			[ ! $1 = '-s' ] && [ ! $1 = '--stream' ] \
-				&& printf "(ERROR) Invalid Parameter [$2] ! \n\n" >&2 \
-				&& exit 1
-
-			[ -n "${MODEL}" ] || MODEL=$2
-		;;
-	esac
-
+	MODEL=$1
 	# Assume ${MODEL} contain some link form, process & cut invalid chars.
 	local MODEL_TEMP=$(echo ${MODEL} \
 		| tr '[:upper:]' '[:lower:]' \
@@ -114,21 +160,6 @@ prepare_simping() {
 		[ ! -w ${SAVE_PATH} ] && printf "(ERROR) Cannot Access To [${SAVE_PATH}/] ! \n\n" >&2 && exit 1
 		[ ! -w ${LOG_PATH} ] && printf "(ERROR) Cannot Access To [${LOG_PATH}/] ! \n\n" >&2 && exit 1
 	fi
-
-	PLATFORM=$(echo ${PLATFORM} | tr '[:upper:]' '[:lower:]')
-	case ${PLATFORM} in
-		chaturbate|ctb|cb)
-			PLATFORM=chaturbate
-			LINK="https://chaturbate.com/api/chatvideocontext/${MODEL}/" # Must keep " / " at the end
-		;;
-		stripchat|stc|sc|st)
-			PLATFORM=stripchat
-			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
-		;;
-		*)
-			printf "(ERROR) Unknown Platform: [${PLATFORM}] ! \n\n" >&2 && exit 1
-		;;
-	esac
 
 	echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
 	echo
@@ -376,7 +407,7 @@ echo "8=====================================================D"
 echo "              Simping Stream from CB & SC"
 echo
 
-prepare_simping $1 $2 $3
+prepare_simping $@
 
 [ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
