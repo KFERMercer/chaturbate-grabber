@@ -40,7 +40,7 @@ prepare_simping() {
 	hello() {
 		echo "Usage: ctbcap [options...] <streamer username or url>"
 		echo
-		echo "<username or url>	Streamer's Username or Chat"
+		echo "<username|url>		Streamer's Username or Chat"
 		echo "			Room Link."
 		echo
 		echo "-d			[D]ebug Mode."
@@ -69,7 +69,7 @@ prepare_simping() {
 		echo "			Don't Touch if Runs in Docker."
 		echo
 		echo "-p <chaturbate|stripchat> Specifi Stream [P]latform"
-		echo "			<chaturbate> (default) or"
+		echo "			to <chaturbate> (default) or"
 		echo "			<stripchat>, also support"
 		echo "			<ctb|cb> / <stc|sc|st>."
 		echo "			Change if online detection"

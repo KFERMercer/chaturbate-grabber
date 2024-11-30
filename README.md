@@ -1,43 +1,126 @@
-```
- ┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐
- │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘
- └─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─
-8=====================================================D
-              Simping Stream from CB & SC
+<br>
+
+```text
+     ┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐
+     │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘
+     └─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─
+    8=====================================================D
+                  Simping Stream from CB & SC
 ```
 
-# Usage：
+<br>
 
-  1. ### Clone this repo to your local:
+<div align="center"><h3><code>Chaturbate-Grabber</code> / <code>CtbCap</code> is a Easy to use, Extremely lightweight, yet Functional and Reliable <code>Chaturbate</code> & <code>StripChat</code> Recorder and watch bot.</h3></div>
+
+<div align="center"><p><a href="#command-examples">Command Examples</a></p></div>
+
+<br>
+
+<div align="center"><h2>Key Advantages:</h2></div>
+
+
+- ### **Lightweight.** [Pythonless](https://m.media-amazon.com/images/I/71CmeuB3XXL._AC_UF1000,1000_QL80_.jpg), but far superior Performance and Energy efficiency. Written by most basic `sh` syntax with full POSIX compatibility.
+
+- ### **All platforms available.** All functions are available with just require `curl` & `ffmpeg`.
+
+    #### Considering all the things mentioned and their platform versatility, this pretty much means you can run it on any device with only need internet connection: your Phone, Refrigerator, Slipper, TV remote, [Buttplug](https://news.berkeley.edu/wp-content/uploads/2017/10/SaguaroCardon750.jpg), even [your boss's wig](https://m.media-amazon.com/images/I/71+B81wFylL._SX466_.jpg).
+
+- ### **Multifunction.** Auto Recording, Auto Monitoring, Auto Stopping, Large-scale deploy... Just find by yourself.
+
+<br>
+
+<div align="center"><h2>Usage | Deploy:</h2></div>
+
+<br>
+
+### One-Command to GO:
+
+> Yeah, 1 Line, Just Crazy.
+
+  1. Open your whatever terminal & drop this:
+
+      ```shell
+      sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
+      ```
+      > Options follows @. e.g `sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -el -f ~ yourwife`
+
+<br>
+
+##
+
+<br>
+
+### Raw Environment:
+
+> Traditional way to runn. All platforms available. - running directly on naked system environment, dependencies are loaded in the system.
+
+> **Termux supported.**
+
+   1. Make sure that `curl`, `ffmpeg` is installed on your OS.
+
+   2. Clone this repo to your local:
 
       ```shell
       git clone https://github.com/KFERMercer/chaturbate-grabber.git && cd chaturbate-grabber
       ```
 
-  2. ### Install & trigger some Docker-like shit in your OS.
+   3. Use the following command to run:
+
+      ```shell
+      ctbcap
+      ```
+
+<br>
+
+##
+
+<br>
+
+### Docker Container (Recommend):
+
+> if you're using `x86`- and such platforms that have good support for Docker and similar, I highly recommend this method. More serious, High-Availability, Everything runs in containers / easily configures a lot of models at the same time.
+
+  1. Clone this repo to your local:
+
+      ```shell
+      git clone https://github.com/KFERMercer/chaturbate-grabber.git && cd chaturbate-grabber
+      ```
+
+  2. Install & trigger some Docker-like shit in your OS.
 
       ```shell
       # <https://www.google.com/search?q=please+tell+me+how+to+use+docker+I+will+do+anything>
       ```
 
-  3. ### Build (or rebuild after update) the docker image:
+  3. Build | Rebuild the docker image:
 
       ```shell
       docker build -t ctbcap ./
       ```
 
-  4. ### RUN SIMP RUN!
+  4. RUN SIMP RUN!
 
-     - ### Run as daemon:
+     - Run once:
 
-       1. ### Custome your own docker-compose file:
+        ```shell
+        docker run -it --rm \
+        -e TZ=Asia/Shanghai \
+        -e PLATFORM=chaturbate \
+        -v /path/to/viddir:/save \
+        -v /path/to/logdir:/log \
+        ctbcap:latest -h
+        ```
+
+     - **Run as daemon**:
+
+       1. Custome your own docker-compose file:
 
           ```shell
           cat ./docker-compose.yml.sample > ./compose.yml
           ```
           Then edit `./compose.yml` to configure.
 
-       2. ### Deploy the compose service:
+       2. Deploy the compose service:
 
           ```shell
           # Run by background daemon:
@@ -47,34 +130,31 @@
           docker compose down
           ```
 
-     - ### Run once:
+### Follow update:
 
-        ```shell
-        docker run -it --rm \
-        -e TZ=Asia/Shanghai \
-        -e PLATFORM=chaturbate \
-        -v /path/to/viddir:/save \
-        -v /path/to/logdir:/log \
-        ctbcap:latest [options...] <username or url>
-        ```
+  1. Go to local repo:
 
-        > Run `docker run -it --rm ctbcap:latest --help` to get help for commands.
+      ```shell
+      cd chaturbate-grabber
+      ```
 
-     - ### Runs in non-container env:
+  2. Update repo to newest commit:
 
-       1. Make sure that `curl`, `ffmpeg` is installed on your OS.
+      ```shell
+      git pull --rebase
+      ```
 
-       2. Use the following command to run:
+  3. Rebuild image & upgrade container :
 
-          ```shell
-          SAVE_PATH=/path/to/savedir \
-          LOG_PATH=/path/to/logdir \
-          PLATFORM=chaturbate \
-          ctbcap [options...] <username or url>
-          ```
+      ```shell
+      # Rebuild image
+      docker build -t ctbcap ./
 
-          > Run `ctbcap --help` to get help for commands.
+      # Upgrade container
+      docker compose up -d --remove-orphans
+      ```
 
+<br>
 
 ### Container Variables
 
@@ -88,22 +168,57 @@
 | EDGING_MODE | Inactive if not <br> `1` | `1` <br> `0` <br> ... | `uncles make me pee white` | No <br> if simping <br> less ~5 sluts |
 | DEBUG_MODE | Inactive if not <br> `1` | `1` <br> `-999` <br> `i was born form my sis` <br> `Whatever` | `your mom is so hot` | No |
 
-### Follow update:
+<br>
 
-1. Go to local repo:
+<div align="center"><h2>Command Examples</h2></div>
 
-    ```shell
-    cd chaturbate-grabber
-    ```
+<br>
 
-2. Update repo to newest commit:
+> Get Help for Commands:
 
-    ```shell
-    git pull --rebase
-    ```
+```shell
+# Raw ENV
+catbcap -h
 
-- **Once successfully update, you all need to [rebuild the image](#build-or-rebuild-after-update-the-docker-image).**
+# In One-Command run:
+sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
 
----
+# Docker run
+docker run -it -rm ctbcap -h
+```
 
-<p align="right"><code>(. Y .)</code></p>
+<br>
+<br>
+
+> Simping your girl with nonstop:
+
+```shell
+# Raw ENV
+catbcap -f /path/to/viddir your_girl
+
+# In One-Command run:
+sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/viddir your_girl
+
+# Docker run
+docker run -it -rm -v /path/to/viddir:/save ctbcap your_girl
+```
+
+<br>
+<br>
+
+> Just wanna check if your girl is online:
+
+```shell
+# Raw ENV
+catbcap -l your_girl
+
+# In One-Command run:
+sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -l your_girl
+
+# Docker run
+docker run -it -rm ctbcap -d your_girl
+```
+
+##
+
+<p align="center"><code>(. Y .)</code></p>
