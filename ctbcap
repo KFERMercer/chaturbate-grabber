@@ -23,17 +23,16 @@ CTBCAP_RELEASE=6
 # Edging Mode.
 # Delay initial requests to servers to avoid time-specific request waves caused by large-scale deployments.
 # Inactive if not 1.
-[ -n "${EDGING_MODE}" ] || EDGING_MODE="uncle makes me pee white"
+[ "${EDGING_MODE}" = "1" ] || EDGING_MODE=
 
 # Debug Mode. Inactive if not 1.
-[ -n "${DEBUG_MODE}" ] || DEBUG_MODE="your mom is so hot"
+[ "${DEBUG_MODE}" = "1" ] || DEBUG_MODE=
 
-# Stream Mode. Only grab stream link. Inactive if not 1.
-[ -n "${STREAM_MODE}" ] || STREAM_MODE=
+# Link Mode. Only grab stream link. Inactive if not 1.
+[ "${LINK_MODE}" = "1" ] || LINK_MODE=
 
 # https://jnrbsn.github.io/user-agents/user-agents.json
 [ -n "${UA}" ] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-
 
 # Check validity and process runtime variables.
 prepare_simping() {
@@ -110,7 +109,7 @@ prepare_simping() {
 
 	SAVE_PATH=${SAVE_PATH%"/"}
 	LOG_PATH=${LOG_PATH%"/"}
-	if [ "${STREAM_MODE}" != "1" ]; then
+	if [ "${LINK_MODE}" != "1" ]; then
 		mkdir -p ${LOG_PATH} ${SAVE_PATH} 2>/dev/null
 		[ ! -w ${SAVE_PATH} ] && printf "(ERROR) Cannot Access To [${SAVE_PATH}/] ! \n\n" >&2 && exit 1
 		[ ! -w ${LOG_PATH} ] && printf "(ERROR) Cannot Access To [${LOG_PATH}/] ! \n\n" >&2 && exit 1
@@ -134,6 +133,29 @@ prepare_simping() {
 	echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
 	echo
 
+}
+
+# Power Tools
+utils() {
+
+	case $1 in
+	connect_status)
+		curl $2 \
+		-4 -L -s -I \
+		-A "${UA}" \
+		--compressed \
+		--connect-timeout 5 --retry 5 --retry-delay 2 \
+		2>/dev/null | head -n 1 | grep -oE '[0-9]{3}' \
+		|| echo 000
+	;;
+	connect_dump)
+		curl $2 \
+		-4 -L -s -i\
+		-A "${UA}" \
+		--compressed \
+		--connect-timeout 5 --retry 5 --retry-delay 2 \
+		2>/dev/null | tr -d '\r'
+	;;
 	# RE-Implement RANDOM NUM Tool on POSIX Shell (B/E).
 	radom_num)
 		# Usage: ` utils radom_num ${SNUM} ${BNUM} `
@@ -171,30 +193,6 @@ edging () {
 
 }
 
-connect_utils() {
-
-	case $1 in
-		status)
-			curl $2 \
-			-4 -L -s -I \
-			-A "${UA}" \
-			--compressed \
-			--connect-timeout 5 --retry 5 --retry-delay 2 \
-			2>/dev/null | head -n 1 | grep -oE '[0-9]{3}' \
-			|| echo 000
-		;;
-		dump)
-			curl $2 \
-			-4 -L -s -i\
-			-A "${UA}" \
-			--compressed \
-			--connect-timeout 5 --retry 5 --retry-delay 2 \
-			2>/dev/null | tr -d '\r'
-		;;
-	esac
-
-}
-
 # Fetch ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, show them & return 0.
 # If dont have ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, return 1.
 fetch_m3u() {
@@ -202,8 +200,8 @@ fetch_m3u() {
 	rm -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online
 	unset STREAM_LINK_GENERIC STREAM_LINK
 
-	[ -z "${MODEL_NEW_NAME}" ] && local CONNECT_DUMP=$(connect_utils dump ${LINK})
-	[ -n "${MODEL_NEW_NAME}" ] && local CONNECT_DUMP=$(connect_utils dump ${LINK_NEW_NAME})
+	[ -z "${MODEL_NEW_NAME}" ] && local CONNECT_DUMP=$(utils connect_dump ${LINK})
+	[ -n "${MODEL_NEW_NAME}" ] && local CONNECT_DUMP=$(utils connect_dump ${LINK_NEW_NAME})
 	# Reuse ${CONNECT_DUMP} to get HTTP status code at the time.
 	local CONNECT_STATUS=$(echo ${CONNECT_DUMP} | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)
 	case ${CONNECT_STATUS} in
@@ -211,8 +209,8 @@ fetch_m3u() {
 		# Do nothing. leave to platform method to deal with.
 	;;
 	404)
-		# ↓↓↓ Only effects on Stream Mode. Of not this mode, leave to platform method to handle.
-		[ "${STREAM_MODE}" = "1" ] \
+		# ↓↓↓ Only effects on Link Mode. Of not this mode, leave to platform method to handle.
+		[ "${LINK_MODE}" = "1" ] \
 			&& printf "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 \
 			&& exit 1
 	;;
@@ -222,12 +220,12 @@ fetch_m3u() {
 	;;
 	000)
 		echo "[$(date "+%Y%m%d-%H%M%S")] Internet Connection Error. [${CONNECT_STATUS}]" >&2
-		[ "${STREAM_MODE}" = "1" ] && echo >&2 && exit 1
+		[ "${LINK_MODE}" = "1" ] && echo >&2 && exit 1
 		return 1
 	;;
 	1*|5*|*)
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now. [${CONNECT_STATUS}]" >&2
-		[ "${STREAM_MODE}" = "1" ] && echo >&2 && exit 1
+		[ "${LINK_MODE}" = "1" ] && echo >&2 && exit 1
 		return 1
 	;;
 	esac
@@ -237,14 +235,14 @@ fetch_m3u() {
 	chaturbate)
 		# Cheke of Model change to new name
 		if [ ${CONNECT_STATUS} -eq 404 ]; then
-			MODEL_NEW_NAME=$(connect_utils dump "https://chaturbate.com/${MODEL}/")
+			MODEL_NEW_NAME=$(utils connect_dump "https://chaturbate.com/${MODEL}/")
 			local CONNECT_STATUS=$(echo ${MODEL_NEW_NAME} | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)
 			MODEL_NEW_NAME=$(echo ${MODEL_NEW_NAME} | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
 			LINK_NEW_NAME=$(echo ${LINK} | sed "s|${MODEL}|${MODEL_NEW_NAME}|g")
 			[ -n "${MODEL_NEW_NAME}" ] \
 				&& echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2 \
 				&& sleep 5 \
-				&& local CONNECT_DUMP=$(connect_utils dump ${LINK_NEW_NAME}) \
+				&& local CONNECT_DUMP=$(utils connect_dump ${LINK_NEW_NAME}) \
 				&& local CONNECT_STATUS=$(echo ${CONNECT_DUMP} | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)
 			[ -z "${MODEL_NEW_NAME}" ] && \
 				printf "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 && exit 1
@@ -257,7 +255,7 @@ fetch_m3u() {
 		local ROOM_STATUS=$(echo ${CONNECT_DUMP} | grep -oE '"room_status":[ ]?"[^"]+"' | cut -d '"' -f4)
 		if [ -n "$(echo ${CONNECT_DUMP} | grep -oE 'http[s]?://edge[^ ]+\.m3u8')" ]; then
 			STREAM_LINK_GENERIC=$(echo ${CONNECT_DUMP} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
-			STREAM_LINK=$(connect_utils dump ${STREAM_LINK_GENERIC} | tail -n 1)
+			STREAM_LINK=$(utils connect_dump ${STREAM_LINK_GENERIC} | tail -n 1)
 			[ -n "${STREAM_LINK}" ] && STREAM_LINK=$(echo ${STREAM_LINK_GENERIC} | sed 's|playlist.m3u8.*||')${STREAM_LINK}
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is ${ROOM_STATUS} now. [${CONNECT_STATUS}]"
@@ -273,7 +271,7 @@ fetch_m3u() {
 		if [ -n "$(echo ${CONNECT_DUMP} | grep -o '"isCamAvailable":true')" ]; then
 			local STREAMNAME=$(echo ${CONNECT_DUMP} | sed 's|.*"streamName":"||'| sed 's|".*||')
 			STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
-			STREAM_LINK=$(connect_utils dump ${STREAM_LINK_GENERIC} | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)
+			STREAM_LINK=$(utils connect_dump ${STREAM_LINK_GENERIC} | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
 			return 1
@@ -288,10 +286,10 @@ fetch_m3u() {
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_LINK_GENERIC}"
 		echo "[$(date "+%Y%m%d-%H%M%S")] Highest Definition Stream Link:"
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_LINK}"
-		[ "${STREAM_MODE}" = "1" ] && echo
+		[ "${LINK_MODE}" = "1" ] && echo
 		return 0
 	else
-		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch stream link! [$(connect_utils status ${STREAM_LINK_GENERIC})]"
+		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch stream link! [$(utils connect_status ${STREAM_LINK_GENERIC})]"
 	fi
 
 }
@@ -331,7 +329,7 @@ watchdog() {
 			# If recording interrupt by first time
 			while true; do
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
-				local STREAM_TEMP_STATUS=$(connect_utils status ${STREAM_LINK})
+				local STREAM_TEMP_STATUS=$(utils connect_status ${STREAM_LINK})
 				case ${STREAM_TEMP_STATUS} in
 					2*|3*)
 						# Reconnect.
@@ -384,7 +382,7 @@ prepare_simping $1 $2 $3
 
 [ "${EDGING_MODE}" = "1" ] && edging
 
-[ "${STREAM_MODE}" = "1" ] && fetch_m3u && exit 0
+[ "${LINK_MODE}" = "1" ] && fetch_m3u && exit 0
 
 watchdog | tee -a ${LOG_PATH}/${MODEL}-${PLATFORM}.log
 
