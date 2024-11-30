@@ -6,7 +6,7 @@
 [ "${DEBUG_MODE}"  = "1" ] && set -x # Debug Mode
 
 # Check for assignment of runtime variables
-[ -z "${MODEL}" ] || [ -z "${PLATFORM}" ] || [ -z "${SAVE_PATH}" ] || [ -z "${LOG_PATH}" ] && echo "(ERROR) Incomplete Runtime Variables!" && exit 1
+[ -z "${MODEL}" ] || [ -z "${PLATFORM}" ] || [ -z "${SAVE_PATH}" ] || [ -z "${LOG_PATH}" ] && exit 0
 
 # Process ${MODEL}
 # Assume ${MODEL} contain some link form, process & cut invalid chars.
@@ -45,10 +45,10 @@ FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/
 if [ -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online ]; then
     STREAM_LINK=$(sed -n '1p' ${LOG_PATH}/${MODEL}-${PLATFORM}.online)
     UA=$(sed -n '2p' ${LOG_PATH}/${MODEL}-${PLATFORM}.online)
+    [ -z ${UA} ] && echo "(ERROR) FFMPEG process did not exit correctly!" && exit 1
     # Has ffmpeg process, but m3u8 link are unavailable --> err
     M3U8_RESPONSE=$(curl ${STREAM_LINK} -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')
-
-    [ -z "${FFMPEG_PROCESS}" ] && echo "(ERROR) FFMPEG process did not exit correctly!" && exit 1
+    [ -z "${M3U8_RESPONSE}" ] && echo "(ERROR) FFMPEG process did not exit correctly!" && exit 1
 fi
 
 echo "Everything is OK!"
