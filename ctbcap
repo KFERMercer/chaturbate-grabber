@@ -134,12 +134,27 @@ prepare_simping() {
 	echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
 	echo
 
+	# RE-Implement RANDOM NUM Tool on POSIX Shell (B/E).
+	radom_num)
+		# Usage: ` utils radom_num ${SNUM} ${BNUM} `
+		local SNUM=$2 # INT. Must >= 0. Small-end of Random Num you want. Must >= 0.
+		local BNUM=$3 # INT. Must < (2^32)/2. Big-end of Random Num you want. Must < (2^32)/2.
+		local BNUM=$(( ${BNUM} +1 )) # Add ${BNUM} to the pool, make method become B/E Random.
+		local RSEED=$(od -An -N4 -tu4 /dev/urandom) # Gen random num B/E 0 - (2^32-1) as Seed. 
+		local SEEDMIN=$(( 4294967295 % ( ${BNUM} - ${SNUM} ) )) # ${SEED} =< ${SEEDMIN} will cause redundant modulus.
+		while [ ${RSEED} -le ${SEEDMIN} ]; do
+			local RSEED=$(od -An -N4 -tu4 /dev/urandom) # If ${SEED} =< ${SEEDMIN}, Reshake ${RSEED} till isn't.
+		done
+		echo $(( ${RSEED} % ( ${BNUM} - ${SNUM} ) + ${SNUM} )) # Format Same as $((RANDOM)) in Bash.
+	;;
+	esac
+
 }
 
 edging () {
 
 	# Sleep time (s) before initial request to server. Range better EQ to ..watchdog().while.else.echo .
-	[ $1 ] && local EDGING_TIME=$1 || local EDGING_TIME=$((RANDOM % 600)) # Random num B/E 0 - 600 (10 min)
+	[ $1 ] && local EDGING_TIME=$1 || local EDGING_TIME=$(utils radom_num 0 600) # Random num B/E 0 - 600 (10 min)
 
 	echo "Edging Mode is On. Delay [${EDGING_TIME}]s before Simping [${MODEL}]".
 	echo
@@ -333,10 +348,10 @@ watchdog() {
 			rm -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online # Delete online flag file
 
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
-			sleep $((RANDOM % (121) + 240)) # Random num B/E 240 - 360
+			sleep $(utils radom_num 240 360) # Random num B/E 240 - 360
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
-			sleep $((RANDOM % (241) + 480)) # Random num B/E 480 - 720
+			sleep $(utils radom_num 480 720) # Random num B/E 480 - 720
 		fi
 	done
 }
