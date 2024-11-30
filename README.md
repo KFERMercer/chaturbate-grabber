@@ -18,6 +18,7 @@
 
 <div align="center"><h2>Key Advantages:</h2></div>
 
+<br>
 
 - ### **Lightweight.** [Pythonless](https://m.media-amazon.com/images/I/71CmeuB3XXL._AC_UF1000,1000_QL80_.jpg), but far superior Performance and Energy efficiency. Written by most basic `sh` syntax with full POSIX compatibility.
 
@@ -52,9 +53,9 @@
 
 ### Raw Environment:
 
-> Traditional way to runn. All platforms available. - running directly on naked system environment, dependencies are loaded in the system.
+> Traditional way to run. All platforms available. - running directly on naked system environment, dependencies are loaded in the system.
 
-> **Termux supported.**
+> **Termux are Supported!!**
 
    1. Make sure that `curl`, `ffmpeg` is installed on your OS.
 
@@ -64,7 +65,7 @@
       git clone https://github.com/KFERMercer/chaturbate-grabber.git && cd chaturbate-grabber
       ```
 
-   3. Use the following command to run:
+   3. Takeoff:
 
       ```shell
       ctbcap
@@ -104,14 +105,12 @@
 
         ```shell
         docker run -it --rm \
-        -e TZ=Asia/Shanghai \
-        -e PLATFORM=chaturbate \
         -v /path/to/viddir:/save \
         -v /path/to/logdir:/log \
-        ctbcap:latest -h
+        ctbcap -h
         ```
 
-     - **Run as daemon**:
+     - **Run as Daemon (man!!)**:
 
        1. Custome your own docker-compose file:
 
@@ -184,7 +183,7 @@ catbcap -h
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
 
 # Docker run
-docker run -it -rm ctbcap -h
+docker run -it --rm ctbcap -h
 ```
 
 <br>
@@ -200,7 +199,7 @@ catbcap -f /path/to/viddir your_girl
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/viddir your_girl
 
 # Docker run
-docker run -it -rm -v /path/to/viddir:/save ctbcap your_girl
+docker run -it --rm -v /path/to/viddir:/save ctbcap your_girl
 ```
 
 <br>
@@ -216,7 +215,7 @@ catbcap -l your_girl
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -l your_girl
 
 # Docker run
-docker run -it -rm ctbcap -d your_girl
+docker run -it --rm ctbcap -l your_girl
 ```
 
 ##
