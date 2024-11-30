@@ -125,7 +125,7 @@ prepare_simping() {
 	shift $((${OPTIND} - 1))
 	[ -z "$1" ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && echo "$(hello)" && exit 0
 
-	MODEL=$1
+	[ -n "$1" ] && MODEL=$1
 	# Assume ${MODEL} contain some link form, process & cut invalid chars.
 	local MODEL_TEMP=$(echo ${MODEL} \
 		| tr '[:upper:]' '[:lower:]' \
