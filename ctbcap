@@ -64,7 +64,7 @@ prepare_simping() {
 		echo "			Link and disable recording"
 		echo "			procedure."
 		echo
-		echo "-o </path/to/viddir>	L[o]g Saving Path,"
+		echo "-o </path/to/logdir>	L[o]g Saving Path,"
 		echo "			Default is /\${PWD}/cap/log/ ,"
 		echo "			Don't Touch if Runs in Docker."
 		echo
@@ -125,6 +125,19 @@ prepare_simping() {
 	shift $((${OPTIND} - 1))
 	[ -z "$1" ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && echo "$(hello)" && exit 0
 
+	MODEL=$1
+	# Assume ${MODEL} contain some link form, process & cut invalid chars.
+	local MODEL_TEMP=$(echo ${MODEL} \
+		| tr '[:upper:]' '[:lower:]' \
+		| grep -oE 'http[s]?://[a-zA-Z]?+[.]?[a-zA-Z]+[.][a-zA-Z]+[/][^ /]+' \
+		| cut -d '/' -f4 \
+		| grep -oE '[a-zA-Z0-9_-]+' \
+		| head -n 1)
+	[ -n "${MODEL_TEMP}" ] && MODEL=${MODEL_TEMP}
+	# If ${MODEL} not link form, cut invalid chars.
+	[ -z "${MODEL_TEMP}" ] && MODEL=$(echo ${MODEL} | tr '[:upper:]' '[:lower:]'| grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
+	[ -z "${MODEL}" ] && printf "(ERROR) Invalid Username or Link! [${MODEL}]\n\n" >&2 && exit 1
+
 	PLATFORM=$(echo ${PLATFORM} | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
 		chaturbate|ctb|cb)
@@ -139,19 +152,6 @@ prepare_simping() {
 			printf "(ERROR) Unknown Platform: [${PLATFORM}] ! \n\n" >&2 && exit 1
 		;;
 	esac
-
-	MODEL=$1
-	# Assume ${MODEL} contain some link form, process & cut invalid chars.
-	local MODEL_TEMP=$(echo ${MODEL} \
-		| tr '[:upper:]' '[:lower:]' \
-		| grep -oE 'http[s]?://[a-zA-Z]?+[.]?[a-zA-Z]+[.][a-zA-Z]+[/][^ /]+' \
-		| cut -d '/' -f4 \
-		| grep -oE '[a-zA-Z0-9_-]+' \
-		| head -n 1)
-	[ -n "${MODEL_TEMP}" ] && MODEL=${MODEL_TEMP}
-	# If ${MODEL} not link form, cut invalid chars.
-	[ -z "${MODEL_TEMP}" ] && MODEL=$(echo ${MODEL} | tr '[:upper:]' '[:lower:]'| grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
-	[ -z "${MODEL}" ] && printf "(ERROR) Invalid Username or Link! [${MODEL}]\n\n" >&2 && exit 1
 
 	SAVE_PATH=${SAVE_PATH%"/"}
 	LOG_PATH=${LOG_PATH%"/"}
@@ -415,6 +415,6 @@ prepare_simping $@
 
 [ "${LINK_MODE}" = "1" ] && fetch_m3u && exit 0
 
-watchdog | tee -a ${LOG_PATH}/${MODEL}-${PLATFORM}.log
+watchdog 2>&1 | tee -a ${LOG_PATH}/${MODEL}-${PLATFORM}.log
 
 exit 0
