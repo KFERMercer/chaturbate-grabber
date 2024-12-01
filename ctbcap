@@ -5,8 +5,8 @@
 # A simple webcam capturer for CB & SC.
 #
 
-CTBCAP_VERSION=2.0
-CTBCAP_RELEASE=6
+CTBCAP_VERSION=3.0
+CTBCAP_RELEASE=1
 
 # Recorded files saving path
 [ -n "${SAVE_PATH}" ] || SAVE_PATH="${PWD}/cap"
