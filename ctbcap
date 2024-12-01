@@ -8,10 +8,10 @@
 CTBCAP_VERSION=2.0
 CTBCAP_RELEASE=6
 
-# Streams saving path
+# Recorded files saving path
 [ -n "${SAVE_PATH}" ] || SAVE_PATH="${PWD}/cap"
 
-# Logs saving path
+# Log files saving path
 [ -n "${LOG_PATH}" ] || LOG_PATH="${SAVE_PATH}/log/"
 
 # Streamer's Username or Room Link
@@ -19,6 +19,9 @@ CTBCAP_RELEASE=6
 
 # Platform that streaming at. Choose <chaturbate> (default) or <stripchat>.
 [ -n "${PLATFORM}" ] || PLATFORM="chaturbate"
+
+# https://jnrbsn.github.io/user-agents/user-agents.json
+[ -n "${UA}" ] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
 
 # Edging Mode.
 # Delay initial requests to servers to avoid time-specific request waves caused by large-scale deployments.
@@ -30,9 +33,6 @@ CTBCAP_RELEASE=6
 
 # Link Mode. Only grab stream link. Inactive if not 1.
 [ "${LINK_MODE}" = "1" ] || LINK_MODE=
-
-# https://jnrbsn.github.io/user-agents/user-agents.json
-[ -n "${UA}" ] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
 
 # Check validity and process runtime variables.
 prepare_simping() {
@@ -48,41 +48,41 @@ prepare_simping() {
 		echo
 		echo "-e			[E]dging Mode."
 		echo "			Delay initial requests to"
-		echo "			servers by Random Time in"
-		echo "			10 min to avoid time-specific"
+		echo "			servers by Random Time in 10"
+		echo "			min to avoid time-specific"
 		echo "			request waves caused by"
 		echo "			large-scale deployments."
 		echo
-		echo "-f </path/to/viddir>	Video [f]ile Saving Path,"
-		echo "			Default is /\${PWD}/cap/ ."
-		echo "			Don't Touch if Runs in Docker."
+		echo "-f </path/to/recdir>	Recording [f]iles will save"
+		echo "			to this path."
+		echo "			Default: /\${PWD}/cap/"
+		echo "			NO Change if Runs in Docker."
 		echo
 		echo "-h			Get [H]elp for Commands."
 		echo
-		echo "-l			[L]ink Mode."
-		echo "			Try Only capture the Stream"
-		echo "			Link and disable recording"
-		echo "			procedure."
+		echo "-l			[L]ink Mode. Capture Stream"
+		echo "			Link but don't recording it."
 		echo
-		echo "-o </path/to/logdir>	L[o]g Saving Path,"
-		echo "			Default is /\${PWD}/cap/log/ ,"
-		echo "			Don't Touch if Runs in Docker."
+		echo "-o </path/to/logdir>	L[o]ging files will save to"
+		echo "			this path."
+		echo "			Default: <recdir>/log/"
+		echo "			NO Change if Runs in Docker."
 		echo
 		echo "-p <chaturbate|stripchat> Specifi Stream [P]latform"
 		echo "			to <chaturbate> (default) or"
-		echo "			<stripchat>, also support"
+		echo "			<stripchat>. also support"
 		echo "			<ctb|cb> / <stc|sc|st>."
 		echo "			Change if online detection"
 		echo "			goes wrong."
 		echo
-		echo "-v			Show version number and quit"
+		echo "-v			Show version info and quit."
 		echo
 		echo
 		echo "Chaturbate-Grabber (aka CtbCap) is made by KFERMercer"
 		echo "with Sweat and Cum. Please use Her under GPLv3, and"
 		echo "kindly ask you that don't use for any commercial "
 		echo "operations. If you like this toy, please visit the"
-		echo "official REPO to Star/Fork, Issue/PR are also open:"
+		echo "official REPO to Star/Fork, Issue/PR are also open."
 		echo "<https://github.com/KFERMercer/chaturbate-grabber>"
 		echo
 	}
@@ -92,30 +92,45 @@ prepare_simping() {
 		case ${OPT} in
 		d) DEBUG_MODE=1 ;;
 		e) EDGING_MODE=1 ;;
-		f) SAVE_PATH=${OPTARG} ;;
+		f)
+			[ "$(echo ${OPTARG} | cut -c1)" = "-" ] \
+			&& printf "(ERROR) No Recording Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
+			SAVE_PATH=${OPTARG}
+		;;
 		h) hello && exit 0 ;;
 		l) LINK_MODE=1 ;;
-		o) LOG_PATH=${OPTARG} ;;
-		p) PLATFORM=${OPTARG} ;;
+		o)
+			[ "$(echo ${OPTARG} | cut -c1)" = "-" ] \
+			&& printf "(ERROR) No Log Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
+			LOG_PATH=${OPTARG}
+		;;
+		p)
+			[ "$(echo ${OPTARG} | cut -c1)" = "-" ] \
+			&& printf "(ERROR) No Cut Time Specified!\n\nSee --help\n\n" >&2 && exit 1
+			PLATFORM=${OPTARG}
+		;;
 		v)
 			echo "Chaturbate-Grabber (aka CtbCap) v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}."
 			echo
-			echo "We defend the ideals of Communism and Anarky, Believe that the transmission"
-			echo "of knowledge and information cannot receive any perceived impediment."
+			echo "System Time: $(date)"
+			echo
+			echo "We defend the ideals of Communism and Anarky, Believe that the"
+			echo "transmissionof knowledge and information cannot receive any perceived"
+			echo "impediment."
 			echo
 			echo "Copyright (C) 2019-2024-, KFERMercer <https://github.com/KFERMercer>."
 			echo
-			echo "UA in Use: ${UA}"
+			echo "UA: ${UA}"
 			echo
 			exit 0
 		;;
 		\?)
-			printf "(ERROR) Invalid Option [$1] ! \n\n$(hello)\n\n" >&2
+			printf "(ERROR) Invalid Option [${OPTARG}] ! \n\nSee --help\n\n" >&2
 			exit 1
 		;;
 		:)
 			[ "${OPTARG}" = "f" ] \
-			&& printf "(ERROR) No Video Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
+			&& printf "(ERROR) No Recording Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
 			[ "${OPTARG}" = "o" ] \
 			&& printf "(ERROR) No Log Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
 			[ "${OPTARG}" = "p" ] \
@@ -126,6 +141,7 @@ prepare_simping() {
 	shift $((${OPTIND} - 1))
 
 	[ -n "$1" ] && MODEL=$1
+
 	# Assume ${MODEL} contain some link form, process & cut invalid chars.
 	local MODEL_TEMP=$(echo ${MODEL} \
 		| tr '[:upper:]' '[:lower:]' \
@@ -149,7 +165,7 @@ prepare_simping() {
 			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
 		;;
 		*)
-			printf "(ERROR) Unknown Platform: [${PLATFORM}] ! \n\n" >&2 && exit 1
+			printf "(ERROR) Unknown Platform: [${PLATFORM}] ! \n\nSee --help\n\n" >&2 && exit 1
 		;;
 	esac
 
@@ -265,7 +281,7 @@ fetch_m3u() {
 	case ${PLATFORM} in
 	chaturbate)
 		# Cheke of Model change to new name
-		if [ ${CONNECT_STATUS} -eq 404 ]; then
+		if [ ${CONNECT_STATUS} = 404 ]; then
 			MODEL_NEW_NAME=$(utils connect_dump "https://chaturbate.com/${MODEL}/")
 			local CONNECT_STATUS=$(echo ${MODEL_NEW_NAME} | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)
 			MODEL_NEW_NAME=$(echo ${MODEL_NEW_NAME} | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
@@ -294,7 +310,7 @@ fetch_m3u() {
 		fi
 	;;
 	stripchat)
-		if [ ${CONNECT_STATUS} -eq 404 ]; then
+		if [ ${CONNECT_STATUS} = 404 ]; then
 			# TODO: Name changing detection for Stripchat method.
 			printf "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 && exit 1
 		fi
@@ -335,7 +351,7 @@ grab_stream() {
 	echo >> ${FFMPEG_LOGFILE}
 
 	ffmpeg \
-	-user_agent "${UA}" \
+	-user_agent "\"${UA}\"" \
 	-i ${STREAM_LINK} \
 	-c copy \
 	-f segment \

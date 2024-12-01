@@ -57,7 +57,7 @@
 
 > **Termux are Supported!!**
 
-   1. Make sure that `curl`, `ffmpeg` is installed on your OS.
+   1. Make sure your OS has `curl` and `ffmpeg` command.
 
    2. Clone this repo to your local:
 
@@ -68,7 +68,7 @@
    3. Takeoff:
 
       ```shell
-      ctbcap
+      ./ctbcap
       ```
 
 <br>
@@ -105,10 +105,11 @@
 
         ```shell
         docker run -it --rm \
-        -v /path/to/viddir:/save \
+        -v /path/to/recdir:/save \
         -v /path/to/logdir:/log \
         ctbcap -h
         ```
+        > For more Container Parameters, See: [Container Parameters](#container-parameters)
 
      - **Run as Daemon (man!!)**:
 
@@ -162,7 +163,7 @@
 | MODEL | Streamer's username <br> or <br> stream link | `tri80085` <br> `s1mp_L0r3-87` <br> `https://chaturbate.com/your_sister` <br> `https://stripchat.com/dicklessman` <br> ... | - | Yes |
 | PLATFORM | `chaturbate`  <br> or <br> `stripchat` | `chaturbate` <br> `stripchat` | `chaturbate` | Yes <br> if not Chaturbate |
 | TZ | [TZ identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) | `UTC` <br> `Asia/Shanghai` <br> `Africa/Harare` <br> ... | `UTC` | No <br> if you [live in Greenwich](https://www.royalgreenwich.gov.uk/info/200258/parking_transport_and_streets/810/find_a_public_toilet_in_royal_greenwich) |
-| SAVE_PATH | Path of stream saves | `/path/to/savedir` | `/viddir` | No <br> if runs in Docker |
+| SAVE_PATH | Path of stream saves | `/path/to/savedir` | `/recdir` | No <br> if runs in Docker |
 | LOG_PATH | Path of logs | `/path/to/logdir` | `/logdir` | No <br> if runs in Docker |
 | EDGING_MODE | Inactive if not <br> `1` | `1` <br> `0` <br> ... | `uncles make me pee white` | No <br> if simping <br> less ~5 sluts |
 | DEBUG_MODE | Inactive if not <br> `1` | `1` <br> `-999` <br> `i was born form my sis` <br> `Whatever` | `your mom is so hot` | No |
@@ -193,13 +194,13 @@ docker run -it --rm ctbcap -h
 
 ```shell
 # Raw ENV
-catbcap -f /path/to/viddir your_girl
+catbcap -f /path/to/recdir your_girl
 
 # In One-Command run:
-sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/viddir your_girl
+sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir your_girl
 
 # Docker run
-docker run -it --rm -v /path/to/viddir:/save ctbcap your_girl
+docker run -it --rm -v /path/to/recdir:/save ctbcap your_girl
 ```
 
 <br>
