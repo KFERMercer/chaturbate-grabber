@@ -20,6 +20,10 @@ CTBCAP_RELEASE=6
 # Platform that streaming at. Choose <chaturbate> (default) or <stripchat>.
 [ -n "${PLATFORM}" ] || PLATFORM="chaturbate"
 
+# Used as number of seconds to cut the recording file in real time.
+# Don't cut if set to 0.
+[ -n "${CUT_TIME}" ] || CUT_TIME=3600
+
 # https://jnrbsn.github.io/user-agents/user-agents.json
 [ -n "${UA}" ] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
 
@@ -42,6 +46,12 @@ prepare_simping() {
 		echo
 		echo "<username|url>		Streamer's Username or Chat"
 		echo "			Room Link."
+		echo
+		echo "-c <int number>		Will be use as number of"
+		echo "			<seconds> to [c]ut recording"
+		echo "			file at real time. Don't cut"
+		echo "			if set to 0."
+		echo "			Default: 3600 (30 min)."
 		echo
 		echo "-d			[D]ebug Mode."
 		echo "			Show the raw crawler data."
@@ -88,8 +98,9 @@ prepare_simping() {
 	}
 	
 	[ -z "$1" ] && [ -z ${MODEL} ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && echo "$(hello)" && exit 0
-	while getopts ':def:hlo:p:v' OPT; do
+	while getopts ':c:def:hlo:p:v' OPT; do
 		case ${OPT} in
+		c) CUT_TIME=${OPTARG} ;;
 		d) DEBUG_MODE=1 ;;
 		e) EDGING_MODE=1 ;;
 		f)
@@ -129,6 +140,8 @@ prepare_simping() {
 			exit 1
 		;;
 		:)
+			[ "${OPTARG}" = "c" ] \
+			&& printf "(ERROR) No Cut Time Specified!\n\nSee --help\n\n" >&2 && exit 1
 			[ "${OPTARG}" = "f" ] \
 			&& printf "(ERROR) No Recording Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
 			[ "${OPTARG}" = "o" ] \
@@ -168,6 +181,10 @@ prepare_simping() {
 			printf "(ERROR) Unknown Platform: [${PLATFORM}] ! \n\nSee --help\n\n" >&2 && exit 1
 		;;
 	esac
+
+	CUT_TIME=$(echo ${CUT_TIME} | cut -c -9) #Cut to INT range
+	[ -z "$(echo ${CUT_TIME} | grep -oE '^[0-9]+$')" ] \
+		&& printf "(ERROR) Cut Time Must be Some INT Number! [${OPTARG}]\n\n" >&2 && exit 1
 
 	SAVE_PATH=${SAVE_PATH%"/"}
 	LOG_PATH=${LOG_PATH%"/"}
@@ -354,12 +371,17 @@ grab_stream() {
 	-user_agent "\"${UA}\"" \
 	-i ${STREAM_LINK} \
 	-c copy \
-	-f segment \
-	-segment_time 1800 \
-	-segment_start_number 1 \
-	-reset_timestamps 1 \
 	-loglevel warning \
-	${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%03d.mkv \
+	$( [ "${CUT_TIME}" = 0 ] \
+		&& printf "
+			${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}.mkv" \
+		|| printf "
+			-f segment \
+			-segment_time ${CUT_TIME} \
+			-segment_start_number 1 \
+			-reset_timestamps 1 \
+			${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%%03d.mkv" \
+	) \
 	>> ${FFMPEG_LOGFILE} 2>&1
 }
 

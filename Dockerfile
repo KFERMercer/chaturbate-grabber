@@ -17,6 +17,7 @@ ENV LOG_PATH="/log"
 ENV SAVE_PATH="/save"
 ENV MODEL=""
 ENV PLATFORM="chaturbate"
+ENV CUT_TIME=3600
 ENV EDGING_MODE="uncle makes me pee white"
 ENV DEBUG_MODE="your mom is so hot"
 

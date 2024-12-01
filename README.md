@@ -156,16 +156,17 @@
 
 <br>
 
-### Container Variables
+### Container Parameters
 
-|  Variable | Value Type | Value Examples | Default | Necessary to Change |
+|  Parameter | Value Type | Value Examples | Default | Necessary to Change |
 | :-: | :-: | :- | :-: | :-: |
 | MODEL | Streamer's username <br> or <br> stream link | `tri80085` <br> `s1mp_L0r3-87` <br> `https://chaturbate.com/your_sister` <br> `https://stripchat.com/dicklessman` <br> ... | - | Yes |
 | PLATFORM | `chaturbate`  <br> or <br> `stripchat` | `chaturbate` <br> `stripchat` | `chaturbate` | Yes <br> if not Chaturbate |
+| CUT_TIME | INT Number | `0` <br> `1800` <br> `3600` <br> ... | `3600` | No |
 | TZ | [TZ identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) | `UTC` <br> `Asia/Shanghai` <br> `Africa/Harare` <br> ... | `UTC` | No <br> if you [live in Greenwich](https://www.royalgreenwich.gov.uk/info/200258/parking_transport_and_streets/810/find_a_public_toilet_in_royal_greenwich) |
-| SAVE_PATH | Path of stream saves | `/path/to/savedir` | `/recdir` | No <br> if runs in Docker |
-| LOG_PATH | Path of logs | `/path/to/logdir` | `/logdir` | No <br> if runs in Docker |
-| EDGING_MODE | Inactive if not <br> `1` | `1` <br> `0` <br> ... | `uncles make me pee white` | No <br> if simping <br> less ~5 sluts |
+| SAVE_PATH | Path of stream saves | `/path/to/savedir` | `/recdir` | No |
+| LOG_PATH | Path of logs | `/path/to/logdir` | `/logdir` | No |
+| EDGING_MODE | Inactive if not <br> `1` | `1` <br> `0` <br> ... | `uncles make me pee white` | No |
 | DEBUG_MODE | Inactive if not <br> `1` | `1` <br> `-999` <br> `i was born form my sis` <br> `Whatever` | `your mom is so hot` | No |
 
 <br>

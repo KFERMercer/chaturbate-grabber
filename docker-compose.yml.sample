@@ -8,6 +8,7 @@ services:
       MODEL: modelname_1 # Change modelname to yours.
       PLATFORM: chaturbate # What platform are model streaming at. choose [ chaturbate / stripchat ].
       TZ: Asia/Shanghai # Naming saved files & logs by using this timezone. see <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List>.
+      CUT_TIME: 3600 # Used as number of seconds to cut recording file in real time. Don't cut if set to 0.
       EDGING_MODE: "uncle makes me pee white" # Edging Mode. Inactive if not 1. Delay initial requests to servers to avoid time-specific request waves caused by large-scale deployments.
       DEBUG_MODE: "your mom is so hot" # Debug Mode. Inactive if not 1.
     volumes:
@@ -27,6 +28,7 @@ services:
       MODEL: modelname_2
       # PLATFORM: chaturbate
       # TZ: Asia/Shanghai
+      # CUT_TIME: 3600
       # EDGING_MODE: "uncle makes me pee white"
       # DEBUG_MODE: "your mom is so hot"
     # volumes:
