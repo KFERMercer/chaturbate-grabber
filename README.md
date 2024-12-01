@@ -207,6 +207,38 @@ docker run -it --rm -v /path/to/recdir:/save ctbcap your_girl
 <br>
 <br>
 
+> Simping your girl's stream and don't cut the file (cut the files every 1800 seconds by default):
+
+```shell
+# Raw ENV
+catbcap -f /path/to/recdir -c 0 your_girl
+
+# In One-Command run:
+sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir -c 0 your_girl
+
+# Docker run
+docker run -it --rm -v /path/to/recdir:/save ctbcap -c 0 your_girl
+```
+
+<br>
+<br>
+
+> Simping your girl's stream and cut the files by every 3600 seconds (1 hr):
+
+```shell
+# Raw ENV
+catbcap -f /path/to/recdir -c 3600 your_girl
+
+# In One-Command run:
+sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir -c 3600 your_girl
+
+# Docker run
+docker run -it --rm -v /path/to/recdir:/save ctbcap -c 3600 your_girl
+```
+
+<br>
+<br>
+
 > Just wanna check if your girl is online:
 
 ```shell
