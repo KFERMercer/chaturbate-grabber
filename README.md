@@ -65,7 +65,7 @@
       git clone https://github.com/KFERMercer/chaturbate-grabber.git && cd chaturbate-grabber
       ```
 
-   3. Takeoff:
+   3. Launch:
 
       ```shell
       ./ctbcap
@@ -109,7 +109,7 @@
         -v /path/to/logdir:/log \
         ctbcap -h
         ```
-        > For more Container Parameters, See: [Container Parameters](#container-parameters)
+        > For more Container Arguments, See: [Container Arguments](#container-arguments)
 
      - **Run as Daemon (man!!)**:
 
@@ -156,15 +156,15 @@
 
 <br>
 
-### Container Parameters
+### Container Arguments
 
-|  Parameter | Value Type | Value Examples | Default | Necessary to Change |
+|  Arguments | Value Type | Value Examples | Default | Necessary to Change |
 | :-: | :-: | :- | :-: | :-: |
 | MODEL | Streamer's username <br> or <br> stream link | `tri80085` <br> `s1mp_L0r3-87` <br> `https://chaturbate.com/your_sister` <br> `https://stripchat.com/dicklessman` <br> ... | - | Yes |
 | PLATFORM | `chaturbate`  <br> or <br> `stripchat` | `chaturbate` <br> `stripchat` | `chaturbate` | Yes <br> if not Chaturbate |
 | CUT_TIME | INT Number | `0` <br> `1800` <br> `3600` <br> ... | `3600` | No |
 | TZ | [TZ identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) | `UTC` <br> `Asia/Shanghai` <br> `Africa/Harare` <br> ... | `UTC` | No <br> if you [live in Greenwich](https://www.royalgreenwich.gov.uk/info/200258/parking_transport_and_streets/810/find_a_public_toilet_in_royal_greenwich) |
-| SAVE_PATH | Path of stream saves | `/path/to/savedir` | `/recdir` | No |
+| SAVE_PATH | Path of record saves | `/path/to/savedir` | `/recdir` | No |
 | LOG_PATH | Path of logs | `/path/to/logdir` | `/logdir` | No |
 | EDGING_MODE | Inactive if not <br> `1` | `1` <br> `0` <br> ... | `uncles make me pee white` | No |
 | DEBUG_MODE | Inactive if not <br> `1` | `1` <br> `-999` <br> `i was born form my sis` <br> `Whatever` | `your mom is so hot` | No |
@@ -207,7 +207,7 @@ docker run -it --rm -v /path/to/recdir:/save ctbcap your_girl
 <br>
 <br>
 
-> Simping your girl's stream and don't cut the file (cut the files every 1800 seconds by default):
+> Simping your girl's stream and don't cut the file (cut the files every 3600 seconds by default):
 
 ```shell
 # Raw ENV
@@ -223,17 +223,17 @@ docker run -it --rm -v /path/to/recdir:/save ctbcap -c 0 your_girl
 <br>
 <br>
 
-> Simping your girl's stream and cut the files by every 3600 seconds (1 hr):
+> Simping your girl's stream and cut the files by every 1800 seconds (30 min):
 
 ```shell
 # Raw ENV
-catbcap -f /path/to/recdir -c 3600 your_girl
+catbcap -f /path/to/recdir -c 1800 your_girl
 
 # In One-Command run:
-sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir -c 3600 your_girl
+sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir -c 1800 your_girl
 
 # Docker run
-docker run -it --rm -v /path/to/recdir:/save ctbcap -c 3600 your_girl
+docker run -it --rm -v /path/to/recdir:/save ctbcap -c 1800 your_girl
 ```
 
 <br>

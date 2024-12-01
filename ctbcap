@@ -51,7 +51,7 @@ prepare_simping() {
 		echo "			<seconds> to [c]ut recording"
 		echo "			file at real time. Don't cut"
 		echo "			if set to 0."
-		echo "			Default: 3600 (30 min)."
+		echo "			Default: 3600 (60 min)."
 		echo
 		echo "-d			[D]ebug Mode."
 		echo "			Show the raw crawler data."
