@@ -41,8 +41,8 @@ CTBCAP_RELEASE=1
 # Check validity and process runtime variables.
 prepare_simping() {
 
-	hello() {
-		echo "Usage: ctbcap [options...] <streamer username or url>"
+	help() {
+		echo "Usage: ctbcap [options...] <username|url>"
 		echo
 		echo "<username|url>		Streamer's Username or Chat"
 		echo "			Room Link."
@@ -97,7 +97,7 @@ prepare_simping() {
 		echo
 	}
 	
-	[ -z "$1" ] && [ -z ${MODEL} ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && echo "$(hello)" && exit 0
+	[ -z "$1" ] && [ -z ${MODEL} ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && echo "$(help)" && exit 0
 	while getopts ':c:def:hlo:p:v' OPT; do
 		case ${OPT} in
 		c) CUT_TIME=${OPTARG} ;;
@@ -108,7 +108,7 @@ prepare_simping() {
 			&& printf "(ERROR) No Recording Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
 			SAVE_PATH=${OPTARG}
 		;;
-		h) hello && exit 0 ;;
+		h) help && exit 0 ;;
 		l) LINK_MODE=1 ;;
 		o)
 			[ "$(echo ${OPTARG} | cut -c1)" = "-" ] \
@@ -184,7 +184,7 @@ prepare_simping() {
 
 	CUT_TIME=$(echo ${CUT_TIME} | cut -c -9) #Cut to INT range
 	[ -z "$(echo ${CUT_TIME} | grep -oE '^[0-9]+$')" ] \
-		&& printf "(ERROR) Cut Time Must be Some INT Number! [${OPTARG}]\n\n" >&2 && exit 1
+		&& printf "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]\n\n" >&2 && exit 1
 
 	SAVE_PATH=${SAVE_PATH%"/"}
 	LOG_PATH=${LOG_PATH%"/"}
@@ -223,13 +223,13 @@ utils() {
 	# RE-Implement RANDOM NUM Tool on POSIX Shell (B/E).
 	radom_num)
 		# Usage: ` utils radom_num ${SNUM} ${BNUM} `
-		local SNUM=$2 # INT. Must >= 0. Small-end of Random Num you want. Must >= 0.
-		local BNUM=$3 # INT. Must < (2^32)/2. Big-end of Random Num you want. Must < (2^32)/2.
-		local BNUM=$(( ${BNUM} +1 )) # Add ${BNUM} to the pool, make method become B/E Random.
+		local SNUM=$2 # INT. Must >= 0. Small-end of Random Num you want.
+		local BNUM=$3 # INT. Must < (2^32)/2. Big-end of Random Num you want.
+		local BNUM=$(( ${BNUM} + 1 )) # Add ${BNUM} to the pool, make method become B/E Random.
 		local RSEED=$(od -An -N4 -tu4 /dev/urandom) # Gen random num B/E 0 - (2^32-1) as Seed. 
-		local SEEDMIN=$(( 4294967295 % ( ${BNUM} - ${SNUM} ) )) # ${SEED} =< ${SEEDMIN} will cause redundant modulus.
+		local SEEDMIN=$(( 4294967295 % ( ${BNUM} - ${SNUM} ) )) # ${SEED} <= ${SEEDMIN} will cause redundant modulus.
 		while [ ${RSEED} -le ${SEEDMIN} ]; do
-			local RSEED=$(od -An -N4 -tu4 /dev/urandom) # If ${SEED} =< ${SEEDMIN}, Reshake ${RSEED} till isn't.
+			local RSEED=$(od -An -N4 -tu4 /dev/urandom) # If ${SEED} <= ${SEEDMIN}, Reshake ${RSEED} till isn't.
 		done
 		echo $(( ${RSEED} % ( ${BNUM} - ${SNUM} ) + ${SNUM} )) # Format Same as $((RANDOM)) in Bash.
 	;;

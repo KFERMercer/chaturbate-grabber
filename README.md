@@ -1,18 +1,10 @@
-<br>
-
-```text
-     ┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐
-     │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘
-     └─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─
-    8=====================================================D
-                  Simping Stream from CB & SC
-```
+<div align="center"><h1>Chaturbate-Grabber - Simping Stream from CB & SC</h1></div>
 
 <br>
 
 <div align="center"><h3><code>Chaturbate-Grabber</code> / <code>CtbCap</code> is a Easy to use, Extremely lightweight, yet Functional and Reliable <code>Chaturbate</code> & <code>StripChat</code> Recorder and watch bot.</h3></div>
 
-<div align="center"><p><a href="#command-examples">Command Examples</a></p></div>
+<div align="center"><p><strong><a href="#command-examples">Command Examples</a></strong></p></div>
 
 <br>
 
@@ -20,13 +12,13 @@
 
 <br>
 
-- ### **Lightweight.** [Pythonless](https://m.media-amazon.com/images/I/71CmeuB3XXL._AC_UF1000,1000_QL80_.jpg), but far superior Performance and Energy efficiency. Written by most basic `sh` syntax with full POSIX compatibility.
+- ### **Lightweight** - [Pythonless](https://m.media-amazon.com/images/I/71CmeuB3XXL._AC_UF1000,1000_QL80_.jpg), but far superior Performance and Energy efficiency. Written by most basic `sh` syntax with full POSIX compatibility.
 
-- ### **All platforms available.** All functions are available with just require `curl` & `ffmpeg`.
+- ### **All platforms available** - All functions are available with just require `curl` & `ffmpeg`.
 
     #### Considering all the things mentioned and their platform versatility, this pretty much means you can run it on any device with only need internet connection: your Phone, Refrigerator, Slipper, TV remote, [Buttplug](https://news.berkeley.edu/wp-content/uploads/2017/10/SaguaroCardon750.jpg), even [your boss's wig](https://m.media-amazon.com/images/I/71+B81wFylL._SX466_.jpg).
 
-- ### **Multifunction.** Auto Recording, Auto Monitoring, Auto Stopping, Large-scale deploy... Just find by yourself.
+- ### **Multifunction** - Auto Recording, Auto Monitoring, Auto Stopping, Large-scale deploy... Just find by yourself.
 
 <br>
 
@@ -45,6 +37,8 @@
       ```
       > Options follows @. e.g `sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -el -f ~ yourwife`
 
+      > **Termux is Supported.**
+
 <br>
 
 ##
@@ -53,9 +47,9 @@
 
 ### Raw Environment:
 
-> Traditional way to run. All platforms available. - running directly on naked system environment, dependencies are loaded in the system.
+> Traditional way to run. All platforms available. - running directly on naked system environment, dependencies will load into the system.
 
-> **Termux are Supported!!**
+> **Termux is Supported.**
 
    1. Make sure your OS has `curl` and `ffmpeg` command.
 
@@ -70,6 +64,21 @@
       ```shell
       ./ctbcap
       ```
+
+### Follow update:
+
+  1. Go to local repo:
+
+      ```shell
+      cd chaturbate-grabber
+      ```
+
+  2. Update repo to newest commit:
+
+      ```shell
+      git pull --rebase
+      ```
+
 
 <br>
 
@@ -107,6 +116,7 @@
         docker run -it --rm \
         -v /path/to/recdir:/save \
         -v /path/to/logdir:/log \
+        -e TZ=UTC \
         ctbcap -h
         ```
         > For more Container Arguments, See: [Container Arguments](#container-arguments)
@@ -156,16 +166,14 @@
 
 <br>
 
-### Container Arguments
+### Container Arguments:
 
 |  Arguments | Value Type | Value Examples | Default | Necessary to Change |
 | :-: | :-: | :- | :-: | :-: |
-| MODEL | Streamer's username <br> or <br> stream link | `tri80085` <br> `s1mp_L0r3-87` <br> `https://chaturbate.com/your_sister` <br> `https://stripchat.com/dicklessman` <br> ... | - | Yes |
+| MODEL | Streamer's username <br> or <br> chatroom url | `tri80085` <br> `s1mp_L0r3-87` <br> `https://chaturbate.com/your_sister` <br> `https://stripchat.com/dicklessman` <br> ... | - | Yes |
 | PLATFORM | `chaturbate`  <br> or <br> `stripchat` | `chaturbate` <br> `stripchat` | `chaturbate` | Yes <br> if not Chaturbate |
-| CUT_TIME | INT Number | `0` <br> `1800` <br> `3600` <br> ... | `3600` | No |
+| CUT_TIME | INT Number | `0` <br> `1800` <br> `1801` <br> ... | `3600` | No |
 | TZ | [TZ identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) | `UTC` <br> `Asia/Shanghai` <br> `Africa/Harare` <br> ... | `UTC` | No <br> if you [live in Greenwich](https://www.royalgreenwich.gov.uk/info/200258/parking_transport_and_streets/810/find_a_public_toilet_in_royal_greenwich) |
-| SAVE_PATH | Path of record saves | `/path/to/savedir` | `/save` | No |
-| LOG_PATH | Path of logs | `/path/to/logdir` | `/log` | No |
 | EDGING_MODE | Inactive if not <br> `1` | `1` <br> `0` <br> ... | `uncles make me pee white` | No |
 | DEBUG_MODE | Inactive if not <br> `1` | `1` <br> `-999` <br> `i was born form my sis` <br> `Whatever` | `your mom is so hot` | No |
 
@@ -179,7 +187,7 @@
 
 ```shell
 # Raw ENV
-catbcap -h
+./ctbcap -h
 
 # In One-Command run:
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
@@ -195,7 +203,7 @@ docker run -it --rm ctbcap -h
 
 ```shell
 # Raw ENV
-catbcap -f /path/to/recdir your_girl
+./ctbcap -f /path/to/recdir your_girl
 
 # In One-Command run:
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir your_girl
@@ -211,7 +219,7 @@ docker run -it --rm -v /path/to/recdir:/save ctbcap your_girl
 
 ```shell
 # Raw ENV
-catbcap -f /path/to/recdir -c 0 your_girl
+./ctbcap -f /path/to/recdir -c 0 your_girl
 
 # In One-Command run:
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir -c 0 your_girl
@@ -227,7 +235,7 @@ docker run -it --rm -v /path/to/recdir:/save ctbcap -c 0 your_girl
 
 ```shell
 # Raw ENV
-catbcap -f /path/to/recdir -c 1800 your_girl
+./ctbcap -f /path/to/recdir -c 1800 your_girl
 
 # In One-Command run:
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir -c 1800 your_girl
@@ -243,7 +251,7 @@ docker run -it --rm -v /path/to/recdir:/save ctbcap -c 1800 your_girl
 
 ```shell
 # Raw ENV
-catbcap -l your_girl
+./ctbcap -l your_girl
 
 # In One-Command run:
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -l your_girl
