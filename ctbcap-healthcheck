@@ -43,8 +43,8 @@ esac
 FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null)
 # If Model currently online, set HTTP Status Code of m3u8 link as flag
 if [ -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online ]; then
-    STREAM_LINK=$(sed -n '1p' ${LOG_PATH}/${MODEL}-${PLATFORM}.online)
-    UA=$(sed -n '2p' ${LOG_PATH}/${MODEL}-${PLATFORM}.online)
+    STREAM_LINK=$(cat ${LOG_PATH}/${MODEL}-${PLATFORM}.online)
+    UA=$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')
     [ -z "${UA}" ] && echo "(ERROR) UA does not exist!" && exit 1
     # Has ffmpeg process, but m3u8 link are unavailable --> err
     M3U8_RESPONSE=$(curl ${STREAM_LINK} -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')

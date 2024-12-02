@@ -393,7 +393,6 @@ watchdog() {
 
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
 			echo ${STREAM_LINK} > ${LOG_PATH}/${MODEL}-${PLATFORM}.online # Build online flag file
-			echo ${UA} >> ${LOG_PATH}/${MODEL}-${PLATFORM}.online
 
 			grab_stream
 			# If recording interrupt by first time
