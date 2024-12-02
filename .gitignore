@@ -1,6 +1,9 @@
 compose.yml
 docker-compose.yml
-log
-dev
-temp
+compose.yaml
+docker-compose.yaml
 cap
+dev
+log
+rec
+temp
