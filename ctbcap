@@ -155,7 +155,7 @@ prepare_simping() {
 
 	[ -n "$1" ] && MODEL=$1
 	[ -z ${MODEL} ] && printf "(ERROR) No Username or URL Specified!\n\nSee --help\n\n" >&2 && exit 1
-	# Assume ${MODEL} contain some link form, process & cut invalid chars.
+	# Assume ${MODEL} contain some URL form, process & cut invalid chars.
 	local MODEL_TEMP=$(echo ${MODEL} \
 		| tr '[:upper:]' '[:lower:]' \
 		| grep -oE 'http[s]?://[a-zA-Z]?+[.]?[a-zA-Z]+[.][a-zA-Z]+[/][^ /]+' \
@@ -163,7 +163,7 @@ prepare_simping() {
 		| grep -oE '[a-zA-Z0-9_-]+' \
 		| head -n 1)
 	[ -n "${MODEL_TEMP}" ] && MODEL=${MODEL_TEMP}
-	# If ${MODEL} not link form, cut invalid chars.
+	# If ${MODEL} not URL form, cut invalid chars.
 	[ -z "${MODEL_TEMP}" ] && MODEL=$(echo ${MODEL} | tr '[:upper:]' '[:lower:]'| grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
 	[ -z "${MODEL}" ] && printf "(ERROR) Invalid Username or URL! [${MODEL}]\n\n" >&2 && exit 1
 
@@ -274,7 +274,7 @@ fetch_m3u() {
 		# Do nothing. leave to platform method to deal with.
 	;;
 	404)
-		# ↓↓↓ Only effects on Link Mode. Of not this mode, leave to platform method to handle.
+		# ↓↓↓ Only effects on Link Mode. if not in this mode, leave to platform method to handle.
 		[ "${LINK_MODE}" = "1" ] \
 			&& printf "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 \
 			&& exit 1
@@ -298,7 +298,7 @@ fetch_m3u() {
 	# Core methods by each Platform:
 	case ${PLATFORM} in
 	chaturbate)
-		# Cheke of Model change to new name
+		# Cheke if Model change to new name
 		if [ ${CONNECT_STATUS} = 404 ]; then
 			MODEL_NEW_NAME=$(utils connect_dump "https://chaturbate.com/${MODEL}/")
 			local CONNECT_STATUS=$(echo ${MODEL_NEW_NAME} | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)
