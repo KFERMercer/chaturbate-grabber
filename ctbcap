@@ -14,7 +14,7 @@ CTBCAP_RELEASE=1
 # Log files saving path
 [ -n "${LOG_PATH}" ] || LOG_PATH="${SAVE_PATH}/log/"
 
-# Streamer's Username or Room Link
+# Streamer's Username or Room URL.
 [ -n "${MODEL}" ] || MODEL=
 
 # Platform that streaming at. Choose <chaturbate> (default) or <stripchat>.
@@ -45,7 +45,7 @@ prepare_simping() {
 		echo "Usage: ctbcap [options...] <username|url>"
 		echo
 		echo "<username|url>		Streamer's Username or Chat"
-		echo "			Room Link."
+		echo "			Room URL."
 		echo
 		echo "-c <int number>		Will be use as number of"
 		echo "			<seconds> to [c]ut recording"
@@ -154,7 +154,7 @@ prepare_simping() {
 	shift $((${OPTIND} - 1))
 
 	[ -n "$1" ] && MODEL=$1
-
+	[ -z ${MODEL} ] && printf "(ERROR) No Username or URL Specified!\n\nSee --help\n\n" >&2 && exit 1
 	# Assume ${MODEL} contain some link form, process & cut invalid chars.
 	local MODEL_TEMP=$(echo ${MODEL} \
 		| tr '[:upper:]' '[:lower:]' \
@@ -165,7 +165,7 @@ prepare_simping() {
 	[ -n "${MODEL_TEMP}" ] && MODEL=${MODEL_TEMP}
 	# If ${MODEL} not link form, cut invalid chars.
 	[ -z "${MODEL_TEMP}" ] && MODEL=$(echo ${MODEL} | tr '[:upper:]' '[:lower:]'| grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
-	[ -z "${MODEL}" ] && printf "(ERROR) Invalid Username or Link! [${MODEL}]\n\n" >&2 && exit 1
+	[ -z "${MODEL}" ] && printf "(ERROR) Invalid Username or URL! [${MODEL}]\n\n" >&2 && exit 1
 
 	PLATFORM=$(echo ${PLATFORM} | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
@@ -244,8 +244,9 @@ edging () {
 
 	echo "Edging Mode is On. Delay [${EDGING_TIME}]s before Simping [${MODEL}]".
 	echo
-	echo "Considering we won't send any requests to [${PLATFORM}] server until Edging is over,"
-	echo "So plase make sure that [${MODEL}] exists on [${PLATFORM}]. "
+	echo "Considering we won't send any requests to [${PLATFORM}]"
+	echo "server until Edging is over, So plase make sure that"
+	echo "[${MODEL}] exists on [${PLATFORM}]. "
 	echo
 	echo "Edging..."
 	echo
