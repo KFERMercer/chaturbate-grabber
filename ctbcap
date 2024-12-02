@@ -6,7 +6,7 @@
 #
 
 CTBCAP_VERSION=3.0
-CTBCAP_RELEASE=1
+CTBCAP_RELEASE=2
 
 # Recorded files saving path
 [ -n "${SAVE_PATH}" ] || SAVE_PATH="${PWD}/rec"
