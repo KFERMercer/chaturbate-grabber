@@ -268,7 +268,7 @@ fetch_m3u() {
 	[ -z "${MODEL_NEW_NAME}" ] && local CONNECT_DUMP=$(utils connect_dump ${LINK})
 	[ -n "${MODEL_NEW_NAME}" ] && local CONNECT_DUMP=$(utils connect_dump ${LINK_NEW_NAME})
 	# Reuse ${CONNECT_DUMP} to get HTTP status code at the time.
-	local CONNECT_STATUS=$(echo ${CONNECT_DUMP} | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)
+	local CONNECT_STATUS="$(echo "${CONNECT_DUMP}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
 	case ${CONNECT_STATUS} in
 	2*|3*)
 		# Do nothing. leave to platform method to deal with.
@@ -334,7 +334,7 @@ fetch_m3u() {
 		fi
 
 		if [ -n "$(echo ${CONNECT_DUMP} | grep -o '"isCamAvailable":true')" ]; then
-			local STREAMNAME=$(echo ${CONNECT_DUMP} | sed 's|.*"streamName":"||'| sed 's|".*||')
+			local STREAMNAME="$(echo "${CONNECT_DUMP}" | grep '"streamName":' | head -n 1 | sed 's|.*"streamName":"||'| sed 's|".*||')"
 			STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
 			STREAM_LINK=$(utils connect_dump ${STREAM_LINK_GENERIC} | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)
 		else
