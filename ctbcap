@@ -298,14 +298,14 @@ fetch_m3u() {
 		# Cheke if Model change to new name
 		if [ "${CONNECT_STATUS}" = 404 ]; then
 			MODEL_NEW_NAME=$(utils connect_dump "https://chaturbate.com/${MODEL}/")
-			local CONNECT_STATUS="$(echo "${MODEL_NEW_NAME}" | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
+			local CONNECT_STATUS="$(echo "${MODEL_NEW_NAME}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
 			MODEL_NEW_NAME=$(echo "${MODEL_NEW_NAME}" | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
 			LINK_NEW_NAME=$(echo "${LINK}" | sed "s|${MODEL}|${MODEL_NEW_NAME}|g")
 			[ -n "${MODEL_NEW_NAME}" ] \
 				&& echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2 \
 				&& sleep 5 \
 				&& local CONNECT_DUMP="$(utils connect_dump "${LINK_NEW_NAME}")" \
-				&& local CONNECT_STATUS="$(echo "${CONNECT_DUMP}" | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
+				&& local CONNECT_STATUS="$(echo "${CONNECT_DUMP}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
 			[ -z "${MODEL_NEW_NAME}" ] && \
 				printf "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 && exit 1
 		else
