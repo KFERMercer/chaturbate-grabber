@@ -137,7 +137,7 @@
           docker compose up -d --remove-orphans
 
           # stop the daemon:
-          docker compose down
+          docker compose down --remove-orphans
           ```
 
 ### Follow update:
@@ -258,6 +258,19 @@ sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grab
 
 # Docker run
 docker run -it --rm ctbcap -l your_girl
+```
+
+<br>
+<br>
+
+> Check the status of compose daemons:
+
+```shell
+# All daemons:
+docker compose -f /path/to/local/repo/compose.yml logs -f
+
+# Single model:
+docker compose -f /path/to/local/repo/compose.yml logs -f your_girl
 ```
 
 ##
