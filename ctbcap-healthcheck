@@ -9,8 +9,9 @@
 [ -z "${MODEL}" ] || [ -z "${PLATFORM}" ] || [ -z "${SAVE_PATH}" ] || [ -z "${LOG_PATH}" ] && exit 0
 
 # Process ${MODEL}
+# TODO: Model may change their name, consider using realtime name.
 # Assume ${MODEL} contain some link form, process & cut invalid chars.
-MODEL_TEMP=$(echo ${MODEL} \
+MODEL_TEMP=$(echo "${MODEL}" \
     | tr '[:upper:]' '[:lower:]' \
     | grep -oE 'http[s]?://[a-zA-Z]?+[.]?[a-zA-Z]+[.][a-zA-Z]+[/][^ /]+' \
     | cut -d '/' -f4 \
@@ -18,11 +19,11 @@ MODEL_TEMP=$(echo ${MODEL} \
     | head -n 1)
 [ -n "${MODEL_TEMP}" ] && MODEL=${MODEL_TEMP}
 # If ${MODEL} not link form, cut invalid chars.
-[ -z "${MODEL_TEMP}" ] && MODEL=$(echo ${MODEL} | tr '[:upper:]' '[:lower:]'| grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
+[ -z "${MODEL_TEMP}" ] && MODEL=$(echo "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
 [ -z "${MODEL}" ] && echo "(ERROR) Invalid Username or Link!" && exit 1
 
 # Process $PLATFORM
-PLATFORM=$(echo ${PLATFORM} | tr '[:upper:]' '[:lower:]')
+PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
 case ${PLATFORM} in 
     chaturbate|ctb|cb)
         PLATFORM=chaturbate
@@ -36,19 +37,18 @@ case ${PLATFORM} in
 esac
 
 # Is directories writable?
-[ ! -w ${SAVE_PATH} ] && echo "(ERROR) SAVE_PATH are unwritable!" && exit 1
-[ ! -w ${LOG_PATH} ] && echo "(ERROR) LOG_PATH are unwritable!" && exit 1
+[ ! -w "${SAVE_PATH}" ] && echo "(ERROR) SAVE_PATH are unwritable!" && exit 1
+[ ! -w "${LOG_PATH}" ] && echo "(ERROR) LOG_PATH are unwritable!" && exit 1
 
-# Flag of ffmpeg process
-FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null)
 # If Model currently online, set HTTP Status Code of m3u8 link as flag
-if [ -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online ]; then
-    STREAM_LINK=$(cat ${LOG_PATH}/${MODEL}-${PLATFORM}.online)
-    UA=$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')
+if [ -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online" ]; then
+    STREAM_LINK="$(cat "${LOG_PATH}/${MODEL}-${PLATFORM}.online")"
+    UA="$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')"
     [ -z "${UA}" ] && echo "(ERROR) UA does not exist!" && exit 1
     # Has ffmpeg process, but m3u8 link are unavailable --> err
-    M3U8_RESPONSE=$(curl ${STREAM_LINK} -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')
-    [ -z "${M3U8_RESPONSE}" ] && echo "(ERROR) FFMPEG process did not exit correctly!" && exit 1
+    FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null)
+    M3U8_RESPONSE=$(curl "${STREAM_LINK}" -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')
+    [ -n "${FFMPEG_PROCESS}" ] && [ -z "${M3U8_RESPONSE}" ] && echo "(ERROR) FFMPEG process did not exit correctly!" && exit 1
 fi
 
 echo "Everything is OK!"

@@ -97,26 +97,26 @@ prepare_simping() {
 		echo
 	}
 	
-	[ -z "$1" ] && [ -z ${MODEL} ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && echo "$(help)" && exit 0
+	[ -z "$1" ] && [ -z "${MODEL}" ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && "$(help)" && exit 0
 	while getopts ':c:def:hlo:p:v' OPT; do
 		case ${OPT} in
 		c) CUT_TIME=${OPTARG} ;;
 		d) DEBUG_MODE=1 ;;
 		e) EDGING_MODE=1 ;;
 		f)
-			[ "$(echo ${OPTARG} | cut -c1)" = "-" ] \
+			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] \
 			&& printf "(ERROR) No Recording Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
 			SAVE_PATH=${OPTARG}
 		;;
 		h) help && exit 0 ;;
 		l) LINK_MODE=1 ;;
 		o)
-			[ "$(echo ${OPTARG} | cut -c1)" = "-" ] \
+			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] \
 			&& printf "(ERROR) No Log Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
 			LOG_PATH=${OPTARG}
 		;;
 		p)
-			[ "$(echo ${OPTARG} | cut -c1)" = "-" ] \
+			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] \
 			&& printf "(ERROR) No Cut Time Specified!\n\nSee --help\n\n" >&2 && exit 1
 			PLATFORM=${OPTARG}
 		;;
@@ -151,23 +151,23 @@ prepare_simping() {
 		;;
 		esac
 	done
-	shift $((${OPTIND} - 1))
+	shift $((OPTIND - 1))
 
 	[ -n "$1" ] && MODEL=$1
-	[ -z ${MODEL} ] && printf "(ERROR) No Username or URL Specified!\n\nSee --help\n\n" >&2 && exit 1
+	[ -z "${MODEL}" ] && printf "(ERROR) No Username or URL Specified!\n\nSee --help\n\n" >&2 && exit 1
 	# Assume ${MODEL} contain some URL form, process & cut invalid chars.
-	local MODEL_TEMP=$(echo ${MODEL} \
+	local MODEL_TEMP="$(echo "${MODEL}" \
 		| tr '[:upper:]' '[:lower:]' \
 		| grep -oE 'http[s]?://[a-zA-Z]?+[.]?[a-zA-Z]+[.][a-zA-Z]+[/][^ /]+' \
 		| cut -d '/' -f4 \
 		| grep -oE '[a-zA-Z0-9_-]+' \
-		| head -n 1)
+		| head -n 1)"
 	[ -n "${MODEL_TEMP}" ] && MODEL=${MODEL_TEMP}
 	# If ${MODEL} not URL form, cut invalid chars.
-	[ -z "${MODEL_TEMP}" ] && MODEL=$(echo ${MODEL} | tr '[:upper:]' '[:lower:]'| grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
+	[ -z "${MODEL_TEMP}" ] && MODEL=$(echo "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
 	[ -z "${MODEL}" ] && printf "(ERROR) Invalid Username or URL! [${MODEL}]\n\n" >&2 && exit 1
 
-	PLATFORM=$(echo ${PLATFORM} | tr '[:upper:]' '[:lower:]')
+	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
 		chaturbate|ctb|cb)
 			PLATFORM=chaturbate
@@ -182,16 +182,16 @@ prepare_simping() {
 		;;
 	esac
 
-	CUT_TIME=$(echo ${CUT_TIME} | cut -c -9) #Cut to INT range
-	[ -z "$(echo ${CUT_TIME} | grep -oE '^[0-9]+$')" ] \
+	CUT_TIME=$(echo "${CUT_TIME}" | cut -c -9) #Cut to INT range
+	[ -z "$(echo "${CUT_TIME}" | grep -oE '^[0-9]+$')" ] \
 		&& printf "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]\n\n" >&2 && exit 1
 
 	SAVE_PATH=${SAVE_PATH%"/"}
 	LOG_PATH=${LOG_PATH%"/"}
 	if [ "${LINK_MODE}" != "1" ]; then
-		mkdir -p ${LOG_PATH} ${SAVE_PATH} 2>/dev/null
-		[ ! -w ${SAVE_PATH} ] && printf "(ERROR) Cannot Access To [${SAVE_PATH}/] ! \n\n" >&2 && exit 1
-		[ ! -w ${LOG_PATH} ] && printf "(ERROR) Cannot Access To [${LOG_PATH}/] ! \n\n" >&2 && exit 1
+		mkdir -p "${LOG_PATH}" "${SAVE_PATH}" 2>/dev/null
+		[ ! -w "${SAVE_PATH}" ] && printf "(ERROR) Cannot Access To [${SAVE_PATH}/] ! \n\n" >&2 && exit 1
+		[ ! -w "${LOG_PATH}" ] && printf "(ERROR) Cannot Access To [${LOG_PATH}/] ! \n\n" >&2 && exit 1
 	fi
 
 	echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
@@ -204,7 +204,7 @@ utils() {
 
 	case $1 in
 	connect_status)
-		curl $2 \
+		curl "$2" \
 		-4 -L -s -I \
 		-A "${UA}" \
 		--compressed \
@@ -213,7 +213,7 @@ utils() {
 		|| echo 000
 	;;
 	connect_dump)
-		curl $2 \
+		curl "$2" \
 		-4 -L -s -i\
 		-A "${UA}" \
 		--compressed \
@@ -225,24 +225,21 @@ utils() {
 		# Usage: ` utils radom_num ${SNUM} ${BNUM} `
 		local SNUM=$2 # INT. Must >= 0. Small-end of Random Num you want.
 		local BNUM=$3 # INT. Must < (2^32)/2. Big-end of Random Num you want.
-		local BNUM=$(( ${BNUM} + 1 )) # Add ${BNUM} to the pool, make method become B/E Random.
+		local BNUM=$(( BNUM + 1 )) # Add ${BNUM} to the pool, make method become B/E Random.
 		local RSEED=$(od -An -N4 -tu4 /dev/urandom) # Gen random num B/E 0 - (2^32-1) as Seed. 
-		local SEEDMIN=$(( 4294967295 % ( ${BNUM} - ${SNUM} ) )) # ${SEED} <= ${SEEDMIN} will cause redundant modulus.
-		while [ ${RSEED} -le ${SEEDMIN} ]; do
+		local SEEDMIN=$(( 4294967295 % ( BNUM - SNUM ) )) # ${SEED} <= ${SEEDMIN} will cause redundant modulus.
+		while [ "${RSEED}" -le "${SEEDMIN}" ]; do
 			local RSEED=$(od -An -N4 -tu4 /dev/urandom) # If ${SEED} <= ${SEEDMIN}, Reshake ${RSEED} till isn't.
 		done
-		echo $(( ${RSEED} % ( ${BNUM} - ${SNUM} ) + ${SNUM} )) # Format Same as $((RANDOM)) in Bash.
+		echo $(( RSEED % ( BNUM - SNUM ) + SNUM )) # Format Same as $((RANDOM)) in Bash.
 	;;
 	esac
 
 }
 
-edging () {
+edging() {
 
-	# Sleep time (s) before initial request to server. Range better EQ to ..watchdog().while.else.echo .
-	[ $1 ] && local EDGING_TIME=$1 || local EDGING_TIME=$(utils radom_num 0 600) # Random num B/E 0 - 600 (10 min)
-
-	echo "Edging Mode is On. Delay [${EDGING_TIME}]s before Simping [${MODEL}]".
+	echo "Edging Mode is On. Delay [$1]s before Simping [${MODEL}]".
 	echo
 	echo "Considering we won't send any requests to [${PLATFORM}]"
 	echo "server until Edging is over, So plase make sure that"
@@ -251,7 +248,7 @@ edging () {
 	echo "Edging..."
 	echo
 
-	sleep ${EDGING_TIME}
+	sleep $1
 
 	echo "Edging Enough...Cum..."
 	echo
@@ -262,11 +259,11 @@ edging () {
 # If dont have ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, return 1.
 fetch_m3u() {
 
-	rm -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online
+	rm -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online"
 	unset STREAM_LINK_GENERIC STREAM_LINK
 
-	[ -z "${MODEL_NEW_NAME}" ] && local CONNECT_DUMP=$(utils connect_dump ${LINK})
-	[ -n "${MODEL_NEW_NAME}" ] && local CONNECT_DUMP=$(utils connect_dump ${LINK_NEW_NAME})
+	[ -z "${MODEL_NEW_NAME}" ] && local CONNECT_DUMP="$(utils connect_dump "${LINK}")"
+	[ -n "${MODEL_NEW_NAME}" ] && local CONNECT_DUMP="$(utils connect_dump "${LINK_NEW_NAME}")"
 	# Reuse ${CONNECT_DUMP} to get HTTP status code at the time.
 	local CONNECT_STATUS="$(echo "${CONNECT_DUMP}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
 	case ${CONNECT_STATUS} in
@@ -299,16 +296,16 @@ fetch_m3u() {
 	case ${PLATFORM} in
 	chaturbate)
 		# Cheke if Model change to new name
-		if [ ${CONNECT_STATUS} = 404 ]; then
+		if [ "${CONNECT_STATUS}" = 404 ]; then
 			MODEL_NEW_NAME=$(utils connect_dump "https://chaturbate.com/${MODEL}/")
-			local CONNECT_STATUS=$(echo ${MODEL_NEW_NAME} | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)
-			MODEL_NEW_NAME=$(echo ${MODEL_NEW_NAME} | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
-			LINK_NEW_NAME=$(echo ${LINK} | sed "s|${MODEL}|${MODEL_NEW_NAME}|g")
+			local CONNECT_STATUS="$(echo "${MODEL_NEW_NAME}" | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
+			MODEL_NEW_NAME=$(echo "${MODEL_NEW_NAME}" | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
+			LINK_NEW_NAME=$(echo "${LINK}" | sed "s|${MODEL}|${MODEL_NEW_NAME}|g")
 			[ -n "${MODEL_NEW_NAME}" ] \
 				&& echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2 \
 				&& sleep 5 \
-				&& local CONNECT_DUMP=$(utils connect_dump ${LINK_NEW_NAME}) \
-				&& local CONNECT_STATUS=$(echo ${CONNECT_DUMP} | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)
+				&& local CONNECT_DUMP="$(utils connect_dump "${LINK_NEW_NAME}")" \
+				&& local CONNECT_STATUS="$(echo "${CONNECT_DUMP}" | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
 			[ -z "${MODEL_NEW_NAME}" ] && \
 				printf "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 && exit 1
 		else
@@ -317,26 +314,26 @@ fetch_m3u() {
 		fi
 
 		# Check if online:
-		local ROOM_STATUS=$(echo ${CONNECT_DUMP} | grep -oE '"room_status":[ ]?"[^"]+"' | cut -d '"' -f4)
-		if [ -n "$(echo ${CONNECT_DUMP} | grep -oE 'http[s]?://edge[^ ]+\.m3u8')" ]; then
-			STREAM_LINK_GENERIC=$(echo ${CONNECT_DUMP} | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
-			STREAM_LINK=$(utils connect_dump ${STREAM_LINK_GENERIC} | tail -n 1)
-			[ -n "${STREAM_LINK}" ] && STREAM_LINK=$(echo ${STREAM_LINK_GENERIC} | sed 's|playlist.m3u8.*||')${STREAM_LINK}
+		local ROOM_STATUS="$(echo "${CONNECT_DUMP}" | grep -oE '"room_status":[ ]?"[^"]+"' | cut -d '"' -f4)"
+		if [ -n "$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8')" ]; then
+			STREAM_LINK_GENERIC=$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
+			STREAM_LINK=$(utils connect_dump "${STREAM_LINK_GENERIC}" | tail -n 1)
+			[ -n "${STREAM_LINK}" ] && STREAM_LINK=$(echo "${STREAM_LINK_GENERIC}" | sed 's|playlist.m3u8.*||')${STREAM_LINK}
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is ${ROOM_STATUS} now. [${CONNECT_STATUS}]"
 			return 1
 		fi
 	;;
 	stripchat)
-		if [ ${CONNECT_STATUS} = 404 ]; then
+		if [ "${CONNECT_STATUS}" = 404 ]; then
 			# TODO: Name changing detection for Stripchat method.
 			printf "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 && exit 1
 		fi
 
-		if [ -n "$(echo ${CONNECT_DUMP} | grep -o '"isCamAvailable":true')" ]; then
+		if [ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true')" ]; then
 			local STREAMNAME="$(echo "${CONNECT_DUMP}" | grep '"streamName":' | head -n 1 | sed 's|.*"streamName":"||'| sed 's|".*||')"
 			STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
-			STREAM_LINK=$(utils connect_dump ${STREAM_LINK_GENERIC} | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)
+			STREAM_LINK=$(utils connect_dump "${STREAM_LINK_GENERIC}" | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
 			return 1
@@ -346,7 +343,7 @@ fetch_m3u() {
 
 	# If successfully grabed ${STREAM_LINK_GENERIC} ${STREAM_LINK}, show them.
 	if [ -n "${STREAM_LINK}" ]; then
-		echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is Online now! [$([ -n "${ROOM_STATUS}" ] && echo ${ROOM_STATUS} || echo online)]"
+		echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is online now! [$([ -n "${ROOM_STATUS}" ] && echo "${ROOM_STATUS}" || echo online)]"
 		echo "[$(date "+%Y%m%d-%H%M%S")] Successfully Captured Stream Link:"
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_LINK_GENERIC}"
 		echo "[$(date "+%Y%m%d-%H%M%S")] Highest Definition Stream Link:"
@@ -354,7 +351,7 @@ fetch_m3u() {
 		[ "${LINK_MODE}" = "1" ] && echo
 		return 0
 	else
-		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch stream link! [$(utils connect_status ${STREAM_LINK_GENERIC})]"
+		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch stream link! [$(utils connect_status "${STREAM_LINK_GENERIC}")]"
 	fi
 
 }
@@ -364,13 +361,15 @@ grab_stream() {
 	local FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
 	local CAPTURE_TIME=$(date "+%Y%m%d-%H%M%S")
 
-	echo >> ${FFMPEG_LOGFILE}
-	echo "========== [${CAPTURE_TIME}] ==========" >> ${FFMPEG_LOGFILE}
-	echo >> ${FFMPEG_LOGFILE}
+	{
+		echo
+		echo "========== [${CAPTURE_TIME}] =========="
+		echo
+	} >> ${FFMPEG_LOGFILE}
 
 	ffmpeg \
 	-user_agent "${UA}" \
-	-i ${STREAM_LINK} \
+	-i "${STREAM_LINK}" \
 	-c copy \
 	-loglevel warning \
 	$( [ "${CUT_TIME}" = 0 ] \
@@ -392,13 +391,13 @@ watchdog() {
 		if [ -n "${STREAM_LINK}" ]; then
 
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
-			echo ${STREAM_LINK} > ${LOG_PATH}/${MODEL}-${PLATFORM}.online # Build online flag file
+			echo "${STREAM_LINK}" > "${LOG_PATH}/${MODEL}-${PLATFORM}.online" # Build online flag file
 
 			grab_stream
 			# If recording interrupt by first time
 			while true; do
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
-				local STREAM_TEMP_STATUS=$(utils connect_status ${STREAM_LINK})
+				local STREAM_TEMP_STATUS="$(utils connect_status "${STREAM_LINK}")"
 				case ${STREAM_TEMP_STATUS} in
 					2*|3*)
 						# Reconnect.
@@ -412,7 +411,7 @@ watchdog() {
 				esac
 			done
 
-			rm -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online # Delete online flag file
+			rm -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online" # Delete online flag file
 
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
 			sleep $(utils radom_num 240 360) # Random num B/E 240 - 360
@@ -424,7 +423,7 @@ watchdog() {
 }
 
 sock_washer() {
-	rm -f ${LOG_PATH}/${MODEL}-${PLATFORM}.online
+	rm -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online"
 	echo
 	echo "BYE (. Y .) BYE"
 	echo
@@ -449,10 +448,11 @@ prepare_simping $@
 
 [ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
-[ "${EDGING_MODE}" = "1" ] && edging
+# Sleep time (s) before initial request to server. Range better EQ to watchdog().while.else.echo .
+[ "${EDGING_MODE}" = "1" ] && edging $(utils radom_num 0 600)
 
 [ "${LINK_MODE}" = "1" ] && fetch_m3u && exit 0
 
-watchdog 2>&1 | tee -a ${LOG_PATH}/${MODEL}-${PLATFORM}.log
+watchdog 2>&1 | tee -a "${LOG_PATH}/${MODEL}-${PLATFORM}.log"
 
 exit 0
