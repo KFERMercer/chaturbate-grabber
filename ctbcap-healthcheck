@@ -37,15 +37,15 @@ case ${PLATFORM} in
 esac
 
 # Is directories writable?
-[ ! -w "${SAVE_PATH}" ] && echo "(ERROR) SAVE_PATH are unwritable!" && exit 1
-[ ! -w "${LOG_PATH}" ] && echo "(ERROR) LOG_PATH are unwritable!" && exit 1
+[ ! -w "${SAVE_PATH}" ] && echo "(ERROR) SAVE_PATH is unwritable!" && exit 1
+[ ! -w "${LOG_PATH}" ] && echo "(ERROR) LOG_PATH is unwritable!" && exit 1
 
 # If Model currently online, set HTTP Status Code of m3u8 link as flag
 if [ -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online" ]; then
     STREAM_LINK="$(cat "${LOG_PATH}/${MODEL}-${PLATFORM}.online")"
     UA="$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')"
     [ -z "${UA}" ] && echo "(ERROR) UA does not exist!" && exit 1
-    # Has ffmpeg process, but m3u8 link are unavailable --> err
+    # Has ffmpeg process, but m3u8 link is unavailable --> err
     FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null)
     M3U8_RESPONSE=$(curl "${STREAM_LINK}" -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')
     [ -n "${FFMPEG_PROCESS}" ] && [ -z "${M3U8_RESPONSE}" ] && echo "(ERROR) FFMPEG process did not exit correctly!" && exit 1

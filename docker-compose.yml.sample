@@ -15,9 +15,9 @@ services:
       - /path/to/recdir:/save # Recorded files save path mapping.
       - /path/to/logdir:/log # Log files save path mapping.
 
-  # Wathing more model with add more blocks:
+  # Watching more model with add more blocks:
 
-  # Only need modifing values that different from template.
+  # Only need modifying values that different from template.
   modelname_2:
     <<: *template-config
     container_name: ctbcap-modelname_2

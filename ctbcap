@@ -78,7 +78,7 @@ prepare_simping() {
 		echo "			Default: <recdir>/log/"
 		echo "			NO Change if Runs in Docker."
 		echo
-		echo "-p <chaturbate|stripchat> Specifi Stream [P]latform"
+		echo "-p <chaturbate|stripchat> Specify Stream [P]latform"
 		echo "			to <chaturbate> (default) or"
 		echo "			<stripchat>. also support"
 		echo "			<ctb|cb> / <stc|sc|st>."
@@ -221,8 +221,8 @@ utils() {
 		2>/dev/null | tr -d '\r'
 	;;
 	# RE-Implement RANDOM NUM Tool on POSIX Shell (B/E).
-	radom_num)
-		# Usage: ` utils radom_num ${SNUM} ${BNUM} `
+	random_num)
+		# Usage: ` utils random_num ${SNUM} ${BNUM} `
 		local SNUM=$2 # INT. Must >= 0. Small-end of Random Num you want.
 		local BNUM=$3 # INT. Must < (2^32)/2. Big-end of Random Num you want.
 		local BNUM=$(( BNUM + 1 )) # Add ${BNUM} to the pool, make method become B/E Random.
@@ -242,7 +242,7 @@ edging() {
 	echo "Edging Mode is On. Delay [$1]s before Simping [${MODEL}]".
 	echo
 	echo "Considering we won't send any requests to [${PLATFORM}]"
-	echo "server until Edging is over, So plase make sure that"
+	echo "server until Edging is over, So please make sure that"
 	echo "[${MODEL}] exists on [${PLATFORM}]. "
 	echo
 	echo "Edging..."
@@ -295,7 +295,7 @@ fetch_m3u() {
 	# Core methods by each Platform:
 	case ${PLATFORM} in
 	chaturbate)
-		# Cheke if Model change to new name
+		# Check if Model change to new name
 		if [ "${CONNECT_STATUS}" = 404 ]; then
 			MODEL_NEW_NAME=$(utils connect_dump "https://chaturbate.com/${MODEL}/")
 			local CONNECT_STATUS="$(echo "${MODEL_NEW_NAME}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
@@ -414,10 +414,10 @@ watchdog() {
 			rm -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online" # Delete online flag file
 
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
-			sleep $(utils radom_num 240 360) # Random num B/E 240 - 360
+			sleep $(utils random_num 240 360) # Random num B/E 240 - 360
 		else
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
-			sleep $(utils radom_num 480 720) # Random num B/E 480 - 720
+			sleep $(utils random_num 480 720) # Random num B/E 480 - 720
 		fi
 	done
 }
@@ -449,7 +449,7 @@ prepare_simping $@
 [ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
 # Sleep time (s) before initial request to server. Range better EQ to watchdog().while.else.echo .
-[ "${EDGING_MODE}" = "1" ] && edging $(utils radom_num 0 600)
+[ "${EDGING_MODE}" = "1" ] && edging $(utils random_num 0 600)
 
 [ "${LINK_MODE}" = "1" ] && fetch_m3u && exit 0
 
