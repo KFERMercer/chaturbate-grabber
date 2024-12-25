@@ -125,9 +125,9 @@ prepare_simping() {
 			echo
 			echo "System Time: $(date)"
 			echo
-			echo "We defend the ideals of Communism and Anarky, Believe that the"
-			echo "transmissionof knowledge and information cannot receive any perceived"
-			echo "impediment."
+			echo "We defend the ideals of Communism and Anarky, Believe"
+			echo "the transmission of knowledge and information cannot"
+			echo "receive any perceived impediment."
 			echo
 			echo "Copyright (C) 2019-2024-, KFERMercer <https://github.com/KFERMercer>."
 			echo
@@ -239,7 +239,8 @@ utils() {
 
 edging() {
 
-	echo "Edging Mode is On. Delay [$1]s before Simping [${MODEL}]".
+	echo "Edging Mode is On."
+	echo "Delay [$1]s before Simping [${MODEL}]".
 	echo
 	echo "Considering we won't send any requests to [${PLATFORM}]"
 	echo "server until Edging is over, So please make sure that"
@@ -435,6 +436,8 @@ sock_washer() {
 trap 'sock_washer' HUP INT QUIT TERM
 
 echo
+# Multi-line message should not be larger than 55 columns per line.:
+#     ↓                     55 columns                      ↓
 echo "8=====================================================D"
 echo " ┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐"
 echo " │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘"
