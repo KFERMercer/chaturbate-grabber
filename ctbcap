@@ -17,7 +17,7 @@ CTBCAP_RELEASE=3
 # Streamer's Username or Room URL.
 [ -n "${MODEL}" ] || MODEL=
 
-# Platform that streaming at. Choose <chaturbate> (default) or <stripchat>.
+# Platform that streaming at. Choose "chaturbate" or "stripchat".
 [ -n "${PLATFORM}" ] || PLATFORM="chaturbate"
 
 # Used as number of seconds to cut the recording file in real time.
@@ -81,7 +81,7 @@ prepare_simping() {
 		echo "-p <chaturbate|stripchat> Specify Stream [P]latform"
 		echo "			to <chaturbate> (default) or"
 		echo "			<stripchat>. also support"
-		echo "			<ctb|cb> / <stc|sc|st>."
+		echo "			<ctb|cb> or <stc|sc|st>."
 		echo "			Change if online detection"
 		echo "			goes wrong."
 		echo
@@ -129,7 +129,7 @@ prepare_simping() {
 			echo "the transmission of knowledge and information cannot"
 			echo "receive any perceived impediment."
 			echo
-			echo "Copyright (C) 2019-2024-, KFERMercer <https://github.com/KFERMercer>."
+			echo "Copyright (C) 2019- , KFERMercer <github.com/KFERMercer>."
 			echo
 			echo "UA: ${UA}"
 			echo
