@@ -368,6 +368,7 @@ grab_stream() {
 		echo
 	} >> ${FFMPEG_LOGFILE}
 
+	# shellcheck disable=SC2046
 	ffmpeg \
 	-user_agent "${UA}" \
 	-i "${STREAM_LINK}" \
