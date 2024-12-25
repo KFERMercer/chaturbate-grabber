@@ -444,7 +444,7 @@ echo "8=====================================================D"
 echo "              Simping Stream from CB & SC"
 echo
 
-prepare_simping $@
+prepare_simping "$@"
 
 [ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
