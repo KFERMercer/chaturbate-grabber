@@ -271,6 +271,10 @@ fetch_m3u() {
 	2*|3*)
 		# Do nothing. leave to platform method to deal with.
 	;;
+	401)
+		echo "[$(date "+%Y%m%d-%H%M%S")] Room [${MODEL}] might require password. [${CONNECT_STATUS}]" >&2
+		return 1
+	;;
 	404)
 		# ↓↓↓ Only effects on Link Mode. if not in this mode, leave to platform method to handle.
 		[ "${LINK_MODE}" = "1" ] \
