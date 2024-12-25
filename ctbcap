@@ -96,8 +96,8 @@ prepare_simping() {
 		echo "<https://github.com/KFERMercer/chaturbate-grabber>"
 		echo
 	}
-	
-	[ -z "$1" ] && [ -z "${MODEL}" ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && "$(help)" && exit 0
+
+	[ -z "$1" ] && [ -z "${MODEL}" ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && echo "$(help)" && exit 0
 	while getopts ':c:def:hlo:p:v' OPT; do
 		case ${OPT} in
 		c) CUT_TIME=${OPTARG} ;;
