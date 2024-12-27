@@ -8,35 +8,40 @@
 CTBCAP_VERSION=3.0
 CTBCAP_RELEASE=3
 
-# Recorded files saving path
-[ -n "${SAVE_PATH}" ] || SAVE_PATH="${PWD}/rec"
+# Command Options > Environment Variables > Default Arguments
+defaulting_args() {
 
-# Log files saving path
-[ -n "${LOG_PATH}" ] || LOG_PATH="${SAVE_PATH}/log/"
+	# Recorded files saving path
+	[ -n "${SAVE_PATH}" ] || SAVE_PATH="${PWD}/rec"
 
-# Streamer's Username or Room URL.
-[ -n "${MODEL}" ] || MODEL=
+	# Log files saving path
+	[ -n "${LOG_PATH}" ] || LOG_PATH="${SAVE_PATH}/log/"
 
-# Platform that streaming at. Choose "chaturbate" or "stripchat".
-[ -n "${PLATFORM}" ] || PLATFORM="chaturbate"
+	# Streamer's Username or Room URL.
+	[ -n "${MODEL}" ] || MODEL=
 
-# Used as number of seconds to cut the recording file in real time.
-# Don't cut if set to 0.
-[ -n "${CUT_TIME}" ] || CUT_TIME=3600
+	# Platform that streaming at. Choose "chaturbate" or "stripchat".
+	[ -n "${PLATFORM}" ] || PLATFORM="chaturbate"
 
-# https://jnrbsn.github.io/user-agents/user-agents.json
-[ -n "${UA}" ] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+	# Used as number of seconds to cut the recording file in real time.
+	# Don't cut if set to 0.
+	[ -n "${CUT_TIME}" ] || CUT_TIME=3600
 
-# Edging Mode.
-# Delay initial requests to servers to avoid time-specific request waves caused by large-scale deployments.
-# Inactive if not 1.
-[ "${EDGING_MODE}" = "1" ] || EDGING_MODE=
+	# https://jnrbsn.github.io/user-agents/user-agents.json
+	[ -n "${UA}" ] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
 
-# Debug Mode. Inactive if not 1.
-[ "${DEBUG_MODE}" = "1" ] || DEBUG_MODE=
+	# Edging Mode.
+	# Delay initial requests to servers to avoid time-specific request waves caused by large-scale deployments.
+	# Inactive if not 1.
+	[ "${EDGING_MODE}" = "1" ] || EDGING_MODE=
 
-# Link Mode. Only grab stream link. Inactive if not 1.
-[ "${LINK_MODE}" = "1" ] || LINK_MODE=
+	# Debug Mode. Inactive if not 1.
+	[ "${DEBUG_MODE}" = "1" ] || DEBUG_MODE=
+
+	# Link Mode. Only grab stream link. Inactive if not 1.
+	[ "${LINK_MODE}" = "1" ] || LINK_MODE=
+
+}
 
 # Check validity and process runtime variables.
 prepare_simping() {
@@ -186,8 +191,10 @@ prepare_simping() {
 		esac
 	done
 	shift $((OPTIND - 1))
-
 	[ -n "$1" ] && MODEL=$1
+
+	defaulting_args
+
 	[ -z "${MODEL}" ] \
 		&& echo "(ERROR) No Username or URL Specified!" >&2 \
 		&& echo >&2 \
