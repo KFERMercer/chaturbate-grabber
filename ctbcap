@@ -186,13 +186,8 @@ prepare_simping() {
 	[ -z "$(echo "${CUT_TIME}" | grep -oE '^[0-9]+$')" ] \
 		&& printf "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]\n\n" >&2 && exit 1
 
-	SAVE_PATH=${SAVE_PATH%"/"}
-	LOG_PATH=${LOG_PATH%"/"}
-	if [ "${LINK_MODE}" != "1" ]; then
-		mkdir -p "${LOG_PATH}" "${SAVE_PATH}" 2>/dev/null
-		[ ! -w "${SAVE_PATH}" ] && printf "(ERROR) Cannot Access To [${SAVE_PATH}/] ! \n\n" >&2 && exit 1
-		[ ! -w "${LOG_PATH}" ] && printf "(ERROR) Cannot Access To [${LOG_PATH}/] ! \n\n" >&2 && exit 1
-	fi
+	SAVE_PATH="$(realpath -m "${SAVE_PATH}" 2>/dev/null)"
+	LOG_PATH="$(realpath -m "${LOG_PATH}" 2>/dev/null)"
 
 	echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
 	echo
@@ -235,6 +230,17 @@ utils() {
 	;;
 	esac
 
+}
+
+init_dir() {
+	printf '%s\n' "$@" | while IFS='' read -r DIR ; do
+		[ -z "${DIR%"/"}" ] && printf "(ERROR) Root directory are not allowed! \n\n" >&2 && return 1
+		mkdir -p "${DIR}" 1>/dev/null 2>&1
+		[ ! -e "${DIR}" ] && printf "(ERROR) Unable to create directory [${DIR}] ! \n\n" >&2 && return 1
+		[ ! -d "${DIR}" ] && printf "(ERROR) [${DIR}] is not a directory! \n\n" >&2 && return 1
+		[ ! -w "${DIR}" ] && printf "(ERROR) Cannot Write To [${DIR}/] ! \n\n" >&2 && return 1
+		true
+	done || exit 1
 }
 
 edging() {
@@ -456,11 +462,13 @@ prepare_simping "$@"
 
 [ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
+[ "${LINK_MODE}" = "1" ] && fetch_m3u && exit 0
+
+init_dir "${SAVE_PATH}" "${LOG_PATH}"
+
 # Sleep time (s) before initial request to server. Range better EQ to watchdog().while.else.echo .
 [ "${EDGING_MODE}" = "1" ] && edging $(utils random_num 0 600)
 
-[ "${LINK_MODE}" = "1" ] && fetch_m3u && exit 0
-
-watchdog 2>&1 | tee -a "${LOG_PATH}/${MODEL}-${PLATFORM}.log"
+watchdog 2>&1 | tee -a "${LOG_PATH}/${MODEL}-${PLATFORM}.log" 2>/dev/null
 
 exit 0
