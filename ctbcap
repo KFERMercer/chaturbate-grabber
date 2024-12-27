@@ -282,10 +282,7 @@ fetch_m3u() {
 		return 1
 	;;
 	404)
-		# ↓↓↓ Only effects on Link Mode. if not in this mode, leave to platform method to handle.
-		[ "${LINK_MODE}" = "1" ] \
-			&& printf "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 \
-			&& exit 1
+		# Do nothing. leave to platform method to deal with.
 	;;
 	4*)
 		echo "[$(date "+%Y%m%d-%H%M%S")] You might gotten blocked by CAPTCHA. [${CONNECT_STATUS}]" >&2
@@ -293,12 +290,10 @@ fetch_m3u() {
 	;;
 	000)
 		echo "[$(date "+%Y%m%d-%H%M%S")] Internet Connection Error. [${CONNECT_STATUS}]" >&2
-		[ "${LINK_MODE}" = "1" ] && echo >&2 && exit 1
 		return 1
 	;;
 	1*|5*|*)
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now. [${CONNECT_STATUS}]" >&2
-		[ "${LINK_MODE}" = "1" ] && echo >&2 && exit 1
 		return 1
 	;;
 	esac
@@ -359,7 +354,6 @@ fetch_m3u() {
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_LINK_GENERIC}"
 		echo "[$(date "+%Y%m%d-%H%M%S")] Highest Definition Stream Link:"
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_LINK}"
-		[ "${LINK_MODE}" = "1" ] && echo
 		return 0
 	else
 		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch stream link! [$(utils connect_status "${STREAM_LINK_GENERIC}")]"
@@ -462,7 +456,9 @@ prepare_simping "$@"
 
 [ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
-[ "${LINK_MODE}" = "1" ] && fetch_m3u && exit 0
+if [ "${LINK_MODE}" = "1" ]; then
+	fetch_m3u && echo && exit 0 || echo && exit 1
+fi
 
 init_dir "${SAVE_PATH}" "${LOG_PATH}"
 
