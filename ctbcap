@@ -97,27 +97,47 @@ prepare_simping() {
 		echo
 	}
 
-	[ -z "$1" ] && [ -z "${MODEL}" ] && echo "(NOTICE) No Option Specified! Show Help Message..." && echo && echo "$(help)" && exit 0
+	[ -z "$1" ] && [ -z "${MODEL}" ] \
+		&& echo "(NOTICE) No Option Specified! Show Help Message..." \
+		&& echo \
+		&& help \
+		&& return 2
 	while getopts ':c:def:hlo:p:v' OPT; do
 		case ${OPT} in
-		c) CUT_TIME=${OPTARG} ;;
+		c) 
+			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] \
+				&& echo "(ERROR) No Cut Time Specified!" >&2 \
+				&& echo >&2 \
+				&& echo "See --help" >&2 \
+				&& return 1
+			CUT_TIME=${OPTARG}
+		;;
 		d) DEBUG_MODE=1 ;;
 		e) EDGING_MODE=1 ;;
 		f)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] \
-			&& printf "(ERROR) No Recording Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
+				&& echo "(ERROR) No Recording Saving Path Specified!" >&2 \
+				&& echo >&2 \
+				&& echo "See --help" >&2 \
+				&& return 1
 			SAVE_PATH=${OPTARG}
 		;;
-		h) help && exit 0 ;;
+		h) help && return 2 ;;
 		l) LINK_MODE=1 ;;
 		o)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] \
-			&& printf "(ERROR) No Log Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
+				&& echo "(ERROR) No Log Saving Path Specified!" >&2 \
+				&& echo >&2 \
+				&& echo "See --help" >&2 \
+				&& return 1
 			LOG_PATH=${OPTARG}
 		;;
 		p)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] \
-			&& printf "(ERROR) No Cut Time Specified!\n\nSee --help\n\n" >&2 && exit 1
+				&& echo "(ERROR) No Cut Time Specified!" >&2 \
+				&& echo >&2 \
+				&& echo "See --help" >&2 \
+				&& return 1
 			PLATFORM=${OPTARG}
 		;;
 		v)
@@ -133,28 +153,46 @@ prepare_simping() {
 			echo
 			echo "UA: ${UA}"
 			echo
-			exit 0
+			return 2
 		;;
 		\?)
-			printf "(ERROR) Invalid Option [${OPTARG}] ! \n\nSee --help\n\n" >&2
-			exit 1
+			echo "(ERROR) Invalid Option [${OPTARG}] !" >&2 \
+				&& echo >&2 \
+				&& echo "See --help" >&2 \
+				&& return 1
 		;;
 		:)
-			[ "${OPTARG}" = "c" ] \
-			&& printf "(ERROR) No Cut Time Specified!\n\nSee --help\n\n" >&2 && exit 1
+			[ "${OPTARG}" = "c" ]  \
+				&& echo "(ERROR) No Cut Time Specified!" >&2 \
+				&& echo >&2 \
+				&& echo "See --help" >&2 \
+				&& return 1
 			[ "${OPTARG}" = "f" ] \
-			&& printf "(ERROR) No Recording Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
+				&& echo "(ERROR) No Recording Saving Path Specified!" >&2 \
+				&& echo >&2 \
+				&& echo "See --help" >&2 \
+				&& return 1
 			[ "${OPTARG}" = "o" ] \
-			&& printf "(ERROR) No Log Saving Path Specified!\n\nSee --help\n\n" >&2 && exit 1
+				&& echo "(ERROR) No Log Saving Path Specified!" >&2 \
+				&& echo >&2 \
+				&& echo "See --help" >&2 \
+				&& return 1
 			[ "${OPTARG}" = "p" ] \
-			&& printf "(ERROR) No Platform Specified!\n\nSee --help\n\n" >&2 && exit 1
+				&& echo "(ERROR) No Platform Specified!" >&2 \
+				&& echo >&2 \
+				&& echo "See --help" >&2 \
+				&& return 1
 		;;
 		esac
 	done
 	shift $((OPTIND - 1))
 
 	[ -n "$1" ] && MODEL=$1
-	[ -z "${MODEL}" ] && printf "(ERROR) No Username or URL Specified!\n\nSee --help\n\n" >&2 && exit 1
+	[ -z "${MODEL}" ] \
+		&& echo "(ERROR) No Username or URL Specified!" >&2 \
+		&& echo >&2 \
+		&& echo "See --help" >&2 \
+		&& return 1
 	# Assume ${MODEL} contain some URL form, process & cut invalid chars.
 	local MODEL_TEMP="$(echo "${MODEL}" \
 		| tr '[:upper:]' '[:lower:]' \
@@ -165,7 +203,10 @@ prepare_simping() {
 	[ -n "${MODEL_TEMP}" ] && MODEL=${MODEL_TEMP}
 	# If ${MODEL} not URL form, cut invalid chars.
 	[ -z "${MODEL_TEMP}" ] && MODEL=$(echo "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
-	[ -z "${MODEL}" ] && printf "(ERROR) Invalid Username or URL! [${MODEL}]\n\n" >&2 && exit 1
+	[ -z "${MODEL}" ] && echo "(ERROR) Invalid Username or URL! [${MODEL}]" >&2 \
+		&& echo >&2 \
+		&& echo "See --help" >&2 \
+		&& return 1
 
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
@@ -178,20 +219,24 @@ prepare_simping() {
 			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
 		;;
 		*)
-			printf "(ERROR) Unknown Platform: [${PLATFORM}] ! \n\nSee --help\n\n" >&2 && exit 1
+			echo "(ERROR) Unknown Platform: [${PLATFORM}] !" >&2 \
+				&& echo >&2 \
+				&& echo "See --help" >&2 \
+				&& return 1
 		;;
 	esac
 
 	CUT_TIME=$(echo "${CUT_TIME}" | cut -c -9) #Cut to INT range
 	[ -z "$(echo "${CUT_TIME}" | grep -oE '^[0-9]+$')" ] \
-		&& printf "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]\n\n" >&2 && exit 1
+		&& echo "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]" >&2 \
+		&& echo >&2 \
+		&& echo "See --help" >&2 \
+		&& return 1
 
 	SAVE_PATH="$(realpath -m "${SAVE_PATH}" 2>/dev/null)"
 	LOG_PATH="$(realpath -m "${LOG_PATH}" 2>/dev/null)"
 
-	echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
-	echo
-
+	return 0
 }
 
 # Power Tools
@@ -234,19 +279,23 @@ utils() {
 
 init_dir() {
 	printf '%s\n' "$@" | while IFS='' read -r DIR ; do
-		[ -z "${DIR%"/"}" ] && printf "(ERROR) Root directory are not allowed! \n\n" >&2 && return 1
+		[ -z "${DIR%"/"}" ] && echo "(ERROR) Root directory are not allowed!" >&2 && return 1
 		mkdir -p "${DIR}" 1>/dev/null 2>&1
-		[ ! -e "${DIR}" ] && printf "(ERROR) Unable to create directory [${DIR}] ! \n\n" >&2 && return 1
-		[ ! -d "${DIR}" ] && printf "(ERROR) [${DIR}] is not a directory! \n\n" >&2 && return 1
-		[ ! -w "${DIR}" ] && printf "(ERROR) Cannot Write To [${DIR}/] ! \n\n" >&2 && return 1
+		[ ! -e "${DIR}" ] && echo "(ERROR) Unable to create directory [${DIR}] !" >&2 && return 1
+		[ ! -d "${DIR}" ] && echo "(ERROR) [${DIR}] is not a directory!" >&2 && return 1
+		[ ! -w "${DIR}" ] && echo "(ERROR) Cannot Write To [${DIR}/] !" >&2 && return 1
 		true
-	done || exit 1
+	done
+	return $?
 }
 
+# Sleep time (s) before initial request to server. Range better EQ to watchdog().while.case.1).echo .
 edging() {
+	local EDGING_TIME=$(utils random_num 0 600)
 
 	echo "Edging Mode is On."
-	echo "Delay [$1]s before Simping [${MODEL}]".
+	echo
+	echo "Delay [${EDGING_TIME}]s before Simping [${MODEL}]".
 	echo
 	echo "Considering we won't send any requests to [${PLATFORM}]"
 	echo "server until Edging is over, So please make sure that"
@@ -255,15 +304,15 @@ edging() {
 	echo "Edging..."
 	echo
 
-	sleep $1
+	sleep ${EDGING_TIME}
 
 	echo "Edging Enough...Cum..."
 	echo
-
 }
 
 # Fetch ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, show them & return 0.
-# If dont have ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, return 1.
+# If no ${STREAM_LINK}, return 1.
+# If Can't find chatroom at all, return 2.
 fetch_m3u() {
 
 	rm -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online"
@@ -306,14 +355,14 @@ fetch_m3u() {
 			MODEL_NEW_NAME=$(utils connect_dump "https://chaturbate.com/${MODEL}/")
 			local CONNECT_STATUS="$(echo "${MODEL_NEW_NAME}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
 			MODEL_NEW_NAME=$(echo "${MODEL_NEW_NAME}" | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
-			LINK_NEW_NAME=$(echo "${LINK}" | sed "s|${MODEL}|${MODEL_NEW_NAME}|g")
 			[ -n "${MODEL_NEW_NAME}" ] \
 				&& echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2 \
+				&& LINK_NEW_NAME=$(echo "${LINK}" | sed "s|${MODEL}|${MODEL_NEW_NAME}|g") \
 				&& sleep 5 \
 				&& local CONNECT_DUMP="$(utils connect_dump "${LINK_NEW_NAME}")" \
 				&& local CONNECT_STATUS="$(echo "${CONNECT_DUMP}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
 			[ -z "${MODEL_NEW_NAME}" ] && \
-				printf "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 && exit 1
+				echo "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2 && return 2
 		else
 			[ -n "${MODEL_NEW_NAME}" ] \
 				&& echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]." >&2
@@ -333,7 +382,7 @@ fetch_m3u() {
 	stripchat)
 		if [ "${CONNECT_STATUS}" = 404 ]; then
 			# TODO: Name changing detection for Stripchat method.
-			printf "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}] \n\n" >&2 && exit 1
+			echo "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2 && return 2
 		fi
 
 		if [ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true')" ]; then
@@ -357,8 +406,10 @@ fetch_m3u() {
 		return 0
 	else
 		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch stream link! [$(utils connect_status "${STREAM_LINK_GENERIC}")]"
+		return 1
 	fi
 
+	return 0
 }
 
 grab_stream() {
@@ -394,8 +445,9 @@ grab_stream() {
 watchdog() {
 	while true; do
 		fetch_m3u
-		if [ -n "${STREAM_LINK}" ]; then
-
+		# See the notes above fetch_m3u() .
+		case $? in
+		0)
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
 			echo "${STREAM_LINK}" > "${LOG_PATH}/${MODEL}-${PLATFORM}.online" # Build online flag file
 
@@ -405,15 +457,15 @@ watchdog() {
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
 				local STREAM_TEMP_STATUS="$(utils connect_status "${STREAM_LINK}")"
 				case ${STREAM_TEMP_STATUS} in
-					2*|3*)
-						# Reconnect.
-						echo "[$(date "+%Y%m%d-%H%M%S")] Restart recording... [${STREAM_TEMP_STATUS}]"
-						grab_stream
-					;;
-					*)
-						echo "[$(date "+%Y%m%d-%H%M%S")] Stream Link closed... [${STREAM_TEMP_STATUS}]"
-						break
-					;;
+				2*|3*)
+					# Reconnect.
+					echo "[$(date "+%Y%m%d-%H%M%S")] Restart recording... [${STREAM_TEMP_STATUS}]"
+					grab_stream
+				;;
+				*)
+					echo "[$(date "+%Y%m%d-%H%M%S")] Stream Link closed... [${STREAM_TEMP_STATUS}]"
+					break
+				;;
 				esac
 			done
 
@@ -421,10 +473,19 @@ watchdog() {
 
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
 			sleep $(utils random_num 240 360) # Random num B/E 240 - 360
-		else
+		;;
+		1)
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
 			sleep $(utils random_num 480 720) # Random num B/E 480 - 720
-		fi
+		;;
+		2)
+			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 1 hr..."
+			sleep $(utils random_num 3300 3900) # Random num B/E 3300 - 3900
+		;;
+		*)
+			echo "Logic is dead. It's tinfoil hat time."
+		;;
+		esac
 	done
 }
 
@@ -452,18 +513,32 @@ echo "8=====================================================D"
 echo "              Simping Stream from CB & SC"
 echo
 
+# Add a blank line to error output.
+errtail() { echo >&2 ; exit 1; }
+
 prepare_simping "$@"
+case $? in
+0)
+	echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
+	echo
+;;
+2)
+	exit 0
+;;
+1|*)
+	errtail
+;;
+esac
 
 [ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
 if [ "${LINK_MODE}" = "1" ]; then
-	fetch_m3u && echo && exit 0 || echo && exit 1
+	fetch_m3u && echo && exit 0 || errtail
 fi
 
-init_dir "${SAVE_PATH}" "${LOG_PATH}"
+init_dir "${SAVE_PATH}" "${LOG_PATH}" || errtail
 
-# Sleep time (s) before initial request to server. Range better EQ to watchdog().while.else.echo .
-[ "${EDGING_MODE}" = "1" ] && edging $(utils random_num 0 600)
+[ "${EDGING_MODE}" = "1" ] && edging
 
 watchdog 2>&1 | tee -a "${LOG_PATH}/${MODEL}-${PLATFORM}.log" 2>/dev/null
 
