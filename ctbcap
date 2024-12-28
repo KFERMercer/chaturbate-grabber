@@ -45,6 +45,19 @@ defaulting_args() {
 
 doc() {
 	case "$1" in
+	neon)
+		echo
+		# Multi-line message should not be larger than 55 columns per line:
+		#     ↓                     55 columns                      ↓
+		echo "8=====================================================D"
+		echo " ┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐"
+		echo " │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘"
+		echo " └─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─"
+		echo "                        v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}"
+		echo "8=====================================================D"
+		echo "              Simping Stream from CB & SC"
+		echo
+	;;
 	help)
 		echo "Usage: ctbcap [options...] <username|url>"
 		echo
@@ -516,20 +529,10 @@ sock_washer() {
 
 trap 'sock_washer' HUP INT QUIT TERM
 
-echo
-# Multi-line message should not be larger than 55 columns per line:
-#     ↓                     55 columns                      ↓
-echo "8=====================================================D"
-echo " ┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐"
-echo " │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘"
-echo " └─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─"
-echo "                        v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}"
-echo "8=====================================================D"
-echo "              Simping Stream from CB & SC"
-echo
-
 # Add a blank line to error output.
 errtail() { echo >&2; exit 1; }
+
+doc neon
 
 prepare_simping "$@"
 case $? in
