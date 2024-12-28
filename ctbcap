@@ -130,50 +130,55 @@ doc() {
 	esac
 }
 
-# Check validity and process runtime variables.
-prepare_simping() {
+# Produce Runtime Variables.
+genesis_juicer() {
 
-	[ -z "$1" ] && [ -z "${MODEL}" ] \
-		&& echo "(NOTICE) No Option Specified! Show Help Message..." \
-		&& echo \
-		&& doc help \
-		&& return 2
+	[ -z "$1" ] && [ -z "${MODEL}" ] && {
+		echo "(NOTICE) No Option Specified! Show Help Message..."
+		echo
+		doc help
+		return 2
+	}
 	while getopts ':c:def:hlo:p:v' OPT; do
 		case ${OPT} in
 		c) 
-			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] \
-				&& echo "(ERROR) No Cut Time Specified!" >&2 \
-				&& echo >&2 \
-				&& echo "See --help" >&2 \
-				&& return 1
+			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
+				echo "(ERROR) No Cut Time Specified!" >&2
+				echo >&2
+				echo "See [ $0 -h ] for help." >&2
+				return 1
+			}
 			CUT_TIME=${OPTARG}
 		;;
 		d) DEBUG_MODE=1 ;;
 		e) EDGING_MODE=1 ;;
 		f)
-			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] \
-				&& echo "(ERROR) No Recording Saving Path Specified!" >&2 \
-				&& echo >&2 \
-				&& echo "See --help" >&2 \
-				&& return 1
+			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
+				echo "(ERROR) No Recording Saving Path Specified!" >&2
+				echo >&2
+				echo "See [ $0 -h ] for help." >&2
+				return 1
+			}
 			SAVE_PATH=${OPTARG}
 		;;
 		h) doc help && return 2 ;;
 		l) LINK_MODE=1 ;;
 		o)
-			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] \
-				&& echo "(ERROR) No Log Saving Path Specified!" >&2 \
-				&& echo >&2 \
-				&& echo "See --help" >&2 \
-				&& return 1
+			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
+				echo "(ERROR) No Log Saving Path Specified!" >&2
+				echo >&2
+				echo "See [ $0 -h ] for help." >&2
+				return 1
+			}
 			LOG_PATH=${OPTARG}
 		;;
 		p)
-			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] \
-				&& echo "(ERROR) No Cut Time Specified!" >&2 \
-				&& echo >&2 \
-				&& echo "See --help" >&2 \
-				&& return 1
+			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
+				echo "(ERROR) No Cut Time Specified!" >&2
+				echo >&2
+				echo "See [ $0 -h ] for help." >&2
+				return 1
+			}
 			PLATFORM=${OPTARG}
 		;;
 		v)
@@ -182,32 +187,36 @@ prepare_simping() {
 			return 2
 		;;
 		\?)
-			echo "(ERROR) Invalid Option [${OPTARG}] !" >&2 \
-				&& echo >&2 \
-				&& echo "See --help" >&2 \
-				&& return 1
+			echo "(ERROR) Invalid Option [${OPTARG}] !" >&2
+			echo >&2
+			echo "See [ $0 -h ] for help."
+			return 1
 		;;
 		:)
-			[ "${OPTARG}" = "c" ]  \
-				&& echo "(ERROR) No Cut Time Specified!" >&2 \
-				&& echo >&2 \
-				&& echo "See --help" >&2 \
-				&& return 1
-			[ "${OPTARG}" = "f" ] \
-				&& echo "(ERROR) No Recording Saving Path Specified!" >&2 \
-				&& echo >&2 \
-				&& echo "See --help" >&2 \
-				&& return 1
-			[ "${OPTARG}" = "o" ] \
-				&& echo "(ERROR) No Log Saving Path Specified!" >&2 \
-				&& echo >&2 \
-				&& echo "See --help" >&2 \
-				&& return 1
-			[ "${OPTARG}" = "p" ] \
-				&& echo "(ERROR) No Platform Specified!" >&2 \
-				&& echo >&2 \
-				&& echo "See --help" >&2 \
-				&& return 1
+			[ "${OPTARG}" = "c" ] && {
+				echo "(ERROR) No Cut Time Specified!" >&2
+				echo >&2
+				echo "See [ $0 -h ] for help." >&2
+				return 1
+			}
+			[ "${OPTARG}" = "f" ] && {
+				echo "(ERROR) No Recording Saving Path Specified!" >&2
+				echo >&2
+				echo "See [ $0 -h ] for help." >&2
+				return 1
+			}
+			[ "${OPTARG}" = "o" ] && {
+				echo "(ERROR) No Log Saving Path Specified!" >&2
+				echo >&2
+				echo "See [ $0 -h ] for help." >&2
+				return 1
+			}
+			[ "${OPTARG}" = "p" ] && {
+				echo "(ERROR) No Platform Specified!" >&2
+				echo >&2
+				echo "See [ $0 -h ] for help." >&2
+				return 1
+			}
 		;;
 		esac
 	done
@@ -216,25 +225,29 @@ prepare_simping() {
 
 	defaulting_args
 
-	[ -z "${MODEL}" ] \
-		&& echo "(ERROR) No Username or URL Specified!" >&2 \
-		&& echo >&2 \
-		&& echo "See --help" >&2 \
-		&& return 1
+	[ -z "${MODEL}" ] && {
+		echo "(ERROR) No Username or URL Specified!" >&2
+		echo >&2
+		echo "See [ $0 -h ] for help." >&2
+		return 1
+	}
 	# Assume ${MODEL} contain some URL form, process & cut invalid chars.
-	local MODEL_TEMP="$(echo "${MODEL}" \
+	local _MODEL="$(echo "${MODEL}" \
 		| tr '[:upper:]' '[:lower:]' \
 		| grep -oE 'http[s]?://[a-zA-Z]?+[.]?[a-zA-Z]+[.][a-zA-Z]+[/][^ /]+' \
 		| cut -d '/' -f4 \
 		| grep -oE '[a-zA-Z0-9_-]+' \
 		| head -n 1)"
-	[ -n "${MODEL_TEMP}" ] && MODEL=${MODEL_TEMP}
+	[ -n "${_MODEL}" ] && MODEL="${_MODEL}"
 	# If ${MODEL} not URL form, cut invalid chars.
-	[ -z "${MODEL_TEMP}" ] && MODEL=$(echo "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-zA-Z0-9_-]+' | head -n 1)
-	[ -z "${MODEL}" ] && echo "(ERROR) Invalid Username or URL! [${MODEL}]" >&2 \
-		&& echo >&2 \
-		&& echo "See --help" >&2 \
-		&& return 1
+	[ -z "${_MODEL}" ] && local _MODEL="$(echo "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-zA-Z0-9_-]+' | head -n 1)"
+	[ -z "${_MODEL}" ] && {
+		echo "(ERROR) Invalid Username or URL! [${MODEL}]" >&2
+		echo >&2
+		echo "See [ $0 -h ] for help." >&2
+		return 1
+	}
+	[ -n "${_MODEL}" ] && MODEL="${_MODEL}"
 
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
@@ -247,19 +260,20 @@ prepare_simping() {
 			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
 		;;
 		*)
-			echo "(ERROR) Unknown Platform: [${PLATFORM}] !" >&2 \
-				&& echo >&2 \
-				&& echo "See --help" >&2 \
-				&& return 1
+			echo "(ERROR) Unknown Platform: [${PLATFORM}] !" >&2
+			echo >&2
+			echo "See [ $0 -h ] for help." >&2
+			return 1
 		;;
 	esac
 
 	CUT_TIME=$(echo "${CUT_TIME}" | cut -c -9) #Cut to INT range
-	[ -z "$(echo "${CUT_TIME}" | grep -oE '^[0-9]+$')" ] \
-		&& echo "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]" >&2 \
-		&& echo >&2 \
-		&& echo "See --help" >&2 \
-		&& return 1
+	[ -z "$(echo "${CUT_TIME}" | grep -oE '^[0-9]+$')" ] && {
+		echo "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]" >&2
+		echo >&2
+		echo "See [ $0 -h ] for help." >&2
+		return 1
+	}
 
 	SAVE_PATH="$(realpath -m "${SAVE_PATH}" 2>/dev/null)"
 	LOG_PATH="$(realpath -m "${LOG_PATH}" 2>/dev/null)"
@@ -383,14 +397,17 @@ fetch_m3u() {
 			MODEL_NEW_NAME=$(utils connect_dump "https://chaturbate.com/${MODEL}/")
 			local CONNECT_STATUS="$(echo "${MODEL_NEW_NAME}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
 			MODEL_NEW_NAME=$(echo "${MODEL_NEW_NAME}" | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
-			[ -n "${MODEL_NEW_NAME}" ] \
-				&& echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2 \
-				&& LINK_NEW_NAME=$(echo "${LINK}" | sed "s|${MODEL}|${MODEL_NEW_NAME}|g") \
-				&& sleep 5 \
-				&& local CONNECT_DUMP="$(utils connect_dump "${LINK_NEW_NAME}")" \
-				&& local CONNECT_STATUS="$(echo "${CONNECT_DUMP}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
-			[ -z "${MODEL_NEW_NAME}" ] && \
-				echo "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2 && return 2
+			[ -n "${MODEL_NEW_NAME}" ] && {
+				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2
+				LINK_NEW_NAME=$(echo "${LINK}" | sed "s|${MODEL}|${MODEL_NEW_NAME}|g")
+				sleep 5
+				local CONNECT_DUMP="$(utils connect_dump "${LINK_NEW_NAME}")"
+				local CONNECT_STATUS="$(echo "${CONNECT_DUMP}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
+			}
+			[ -z "${MODEL_NEW_NAME}" ] && {
+				echo "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2
+				return 2
+			}
 		else
 			[ -n "${MODEL_NEW_NAME}" ] \
 				&& echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]." >&2
@@ -517,47 +534,43 @@ watchdog() {
 	done
 }
 
-sock_washer() {
-	rm -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online"
-	echo
-	echo "BYE (. Y .) BYE"
-	echo
-	exit 0
+{ # Execution Entry
+	trap '{
+		rm -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online"
+		echo
+		echo "BYE (. Y .) BYE"
+		echo
+		exit 0
+	}' HUP INT QUIT TERM
+
+	doc neon
+
+	genesis_juicer "$@"
+	case $? in
+	0)
+		echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
+		echo
+	;;
+	2)
+		exit 0
+	;;
+	1|*)
+		echo >&2
+		exit 1
+	;;
+	esac
+
+	[ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
+
+	if [ "${LINK_MODE}" = "1" ]; then
+		fetch_m3u && { echo; exit 0; } || { echo >&2; exit 1; }
+	fi
+
+	init_dir "${SAVE_PATH}" "${LOG_PATH}" || { echo >&2; exit 1; }
+
+	[ "${EDGING_MODE}" = "1" ] && edging
+
+	watchdog 2>&1 | tee -a "${LOG_PATH}/${MODEL}-${PLATFORM}.log" 2>/dev/null
 }
-
-# Execution Entry
-
-trap 'sock_washer' HUP INT QUIT TERM
-
-# Add a blank line to error output.
-errtail() { echo >&2; exit 1; }
-
-doc neon
-
-prepare_simping "$@"
-case $? in
-0)
-	echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
-	echo
-;;
-2)
-	exit 0
-;;
-1|*)
-	errtail
-;;
-esac
-
-[ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
-
-if [ "${LINK_MODE}" = "1" ]; then
-	fetch_m3u && echo && exit 0 || errtail
-fi
-
-init_dir "${SAVE_PATH}" "${LOG_PATH}" || errtail
-
-[ "${EDGING_MODE}" = "1" ] && edging
-
-watchdog 2>&1 | tee -a "${LOG_PATH}/${MODEL}-${PLATFORM}.log" 2>/dev/null
 
 exit 0
