@@ -15,7 +15,7 @@ defaulting_args() {
 	[ -n "${SAVE_PATH}" ] || SAVE_PATH="${PWD}/rec"
 
 	# Log files saving path
-	[ -n "${LOG_PATH}" ] || LOG_PATH="${SAVE_PATH}/log/"
+	[ -n "${LOG_PATH}" ] || LOG_PATH="${SAVE_PATH}/log"
 
 	# Streamer's Username or Room URL.
 	[ -n "${MODEL}" ] || MODEL=
@@ -43,10 +43,9 @@ defaulting_args() {
 
 }
 
-# Check validity and process runtime variables.
-prepare_simping() {
-
-	help() {
+doc() {
+	case "$1" in
+	help)
 		echo "Usage: ctbcap [options...] <username|url>"
 		echo
 		echo "<username|url>		Streamer's Username or Chat"
@@ -100,12 +99,31 @@ prepare_simping() {
 		echo "official REPO to Star/Fork, Issue/PR are also open."
 		echo "<https://github.com/KFERMercer/chaturbate-grabber>"
 		echo
-	}
+	;;
+	ver)
+		echo "Chaturbate-Grabber (aka CtbCap) v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}."
+		echo
+		echo "System Time: $(date)"
+		echo
+		echo "We defend the ideals of Communism and Anarky, Believe"
+		echo "the transmission of knowledge and information cannot"
+		echo "receive any perceived impediment."
+		echo
+		echo "Copyright (C) 2019- , KFERMercer <github.com/KFERMercer>."
+		echo
+		echo "UA: ${UA}"
+		echo
+	;;
+	esac
+}
+
+# Check validity and process runtime variables.
+prepare_simping() {
 
 	[ -z "$1" ] && [ -z "${MODEL}" ] \
 		&& echo "(NOTICE) No Option Specified! Show Help Message..." \
 		&& echo \
-		&& help \
+		&& doc help \
 		&& return 2
 	while getopts ':c:def:hlo:p:v' OPT; do
 		case ${OPT} in
@@ -127,7 +145,7 @@ prepare_simping() {
 				&& return 1
 			SAVE_PATH=${OPTARG}
 		;;
-		h) help && return 2 ;;
+		h) doc help && return 2 ;;
 		l) LINK_MODE=1 ;;
 		o)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] \
@@ -145,21 +163,7 @@ prepare_simping() {
 				&& return 1
 			PLATFORM=${OPTARG}
 		;;
-		v)
-			echo "Chaturbate-Grabber (aka CtbCap) v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}."
-			echo
-			echo "System Time: $(date)"
-			echo
-			echo "We defend the ideals of Communism and Anarky, Believe"
-			echo "the transmission of knowledge and information cannot"
-			echo "receive any perceived impediment."
-			echo
-			echo "Copyright (C) 2019- , KFERMercer <github.com/KFERMercer>."
-			echo
-			echo "UA: ${UA}"
-			echo
-			return 2
-		;;
+		v) doc ver && return 2 ;;
 		\?)
 			echo "(ERROR) Invalid Option [${OPTARG}] !" >&2 \
 				&& echo >&2 \
@@ -269,7 +273,7 @@ utils() {
 	;;
 	# RE-Implement RANDOM NUM Tool on POSIX Shell (B/E).
 	random_num)
-		# Usage: ` utils random_num ${SNUM} ${BNUM} `
+		# Usage: ` utils random_num <SNUM> <BNUM> `
 		local SNUM=$2 # INT. Must >= 0. Small-end of Random Num you want.
 		local BNUM=$3 # INT. Must < (2^32)/2. Big-end of Random Num you want.
 		local BNUM=$(( BNUM + 1 )) # Add ${BNUM} to the pool, make method become B/E Random.
@@ -509,7 +513,7 @@ sock_washer() {
 trap 'sock_washer' HUP INT QUIT TERM
 
 echo
-# Multi-line message should not be larger than 55 columns per line.:
+# Multi-line message should not be larger than 55 columns per line:
 #     ↓                     55 columns                      ↓
 echo "8=====================================================D"
 echo " ┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐"
@@ -521,7 +525,7 @@ echo "              Simping Stream from CB & SC"
 echo
 
 # Add a blank line to error output.
-errtail() { echo >&2 ; exit 1; }
+errtail() { echo >&2; exit 1; }
 
 prepare_simping "$@"
 case $? in
