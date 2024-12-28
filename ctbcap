@@ -163,7 +163,11 @@ prepare_simping() {
 				&& return 1
 			PLATFORM=${OPTARG}
 		;;
-		v) doc ver && return 2 ;;
+		v)
+			defaulting_args
+			doc ver
+			return 2
+		;;
 		\?)
 			echo "(ERROR) Invalid Option [${OPTARG}] !" >&2 \
 				&& echo >&2 \
