@@ -471,22 +471,22 @@ grab_stream() {
 
 	# Core FFmpeg method. 
 	# After making any changes, must confirm the compatibility of tailored FFmpeg in Dockerfile.
-	# 
-	# shellcheck disable=SC2046
 	ffmpeg \
 	-user_agent "${UA}" \
 	-i "${STREAM_LINK}" \
 	-c copy \
-	-loglevel warning \
+	$( [ -z "${DEBUG_MODE}" ] && \
+		printf "%s" "-loglevel warning" \
+	) \
 	$( [ "${CUT_TIME}" = 0 ] \
-		&& printf "
+		&& printf "%s" "
 			${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}.mkv" \
-		|| printf "
+		|| printf "%s" "
 			-f segment \
 			-segment_time ${CUT_TIME} \
 			-segment_start_number 1 \
 			-reset_timestamps 1 \
-			${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%%03d.mkv" \
+			${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%03d.mkv" \
 	) \
 	>> ${FFMPEG_LOGFILE} 2>&1
 }
