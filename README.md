@@ -278,6 +278,14 @@ docker compose -f /path/to/local/repo/compose.yml logs -f
 docker compose -f /path/to/local/repo/compose.yml logs -f your_girl
 ```
 
+<div align="center"><h2>Branchs Explains</h2></div>
+
+<br>
+
+[`master`](https://github.com/KFERMercer/chaturbate-grabber/tree/master): Main Branch. Use this branch for practical purposes.
+
+[`dev`](https://github.com/KFERMercer/chaturbate-grabber/tree/dev): Development Branch. Includes latest features and optimizations, But it may be unstable.
+
 ##
 
 <p align="center"><code>(. Y .)</code></p>
