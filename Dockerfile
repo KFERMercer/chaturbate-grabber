@@ -3,11 +3,59 @@
 # By doing so, it will significantly reduce the size of final image. ( 140MB -> 18MB )
 # Requires 1GB of free space on file system to build.
 # 
-# If you don't want to compile ffmpeg, use ./fat.dockerfile with:
-# `docker build -t ctbcap . -f fat.dockerfile`
+# If you don't want to compile FFmpeg:
+# `docker build --build-arg BUILD_TARGET=fat --target fat -t ctbcap .`
 # 
 
-FROM alpine:latest AS builder
+# Default target
+ARG BUILD_TARGET=minimal
+
+FROM alpine:latest AS mother
+
+RUN apk add --no-cache curl tini tzdata
+
+RUN <<EOT
+    mkdir -p /save /log
+    chmod 777 /save /log
+EOT
+
+FROM mother AS fat
+
+ARG BUILD_TARGET
+
+RUN <<EOT
+    [ ${BUILD_TARGET} = "fat" ] || {
+        echo "Shipping fat build"
+        exit 0
+    }
+    apk add --no-cache ffmpeg
+EOT
+
+USER 1000:1000
+
+ENV TZ="UTC"
+ENV LOG_PATH="/log"
+ENV SAVE_PATH="/save"
+ENV MODEL=""
+ENV PLATFORM="chaturbate"
+ENV CUT_TIME=3600
+ENV EDGING_MODE="uncle makes me pee white"
+ENV DEBUG_MODE="your mom is so hot"
+
+HEALTHCHECK \
+    --interval=300s \
+    --timeout=30s \
+    --start-period=300s \
+    --start-interval=300s \
+    --retries=3 \
+    CMD ["ctbcap-healthcheck"]
+
+COPY ./ctbcap-healthcheck /usr/bin/
+COPY ./ctbcap /usr/bin/
+
+ENTRYPOINT ["tini", "-g", "--", "ctbcap"]
+
+FROM mother AS builder
 
 RUN <<EOT
     apk add --no-cache \
@@ -52,19 +100,9 @@ EOT
 
 RUN make -j$(nproc)
 
-FROM alpine:latest AS runner
-
-RUN apk add --no-cache curl tini tzdata
-
-RUN <<EOT
-    mkdir -p /save /log
-    chmod 777 /save /log
-EOT
+FROM mother AS minimal
 
 COPY --from=builder /tmp/ffmpeg_bin/ffmpeg /usr/bin/
-
-COPY ./ctbcap-healthcheck /usr/bin/
-COPY ./ctbcap /usr/bin/
 
 USER 1000:1000
 
@@ -84,5 +122,8 @@ HEALTHCHECK \
     --start-interval=300s \
     --retries=3 \
     CMD ["ctbcap-healthcheck"]
+
+COPY ./ctbcap-healthcheck /usr/bin/
+COPY ./ctbcap /usr/bin/
 
 ENTRYPOINT ["tini", "-g", "--", "ctbcap"]
