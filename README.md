@@ -107,6 +107,11 @@
       ```shell
       docker build -t ctbcap ./
       ```
+      > It will build a minimal FFmpeg tailored for ctbcap on-the-fly in Docker for minimizes the image size. (~ 18MB)
+
+      > You can also chose Pre-built FFmpeg from Alpine repos to avoids compilation on low-power devices. But it will increases image size significantly. (~ 140MB)<br>
+      > Use this command to use Pre-built FFmpeg:<br>
+      > `docker build --build-arg BUILD_TARGET=fat --target fat -t ctbcap .`
 
   4. RUN SIMP RUN!
 
