@@ -25,7 +25,7 @@ ARG BUILD_TARGET
 
 RUN <<EOT
     [ ${BUILD_TARGET} = "fat" ] || {
-        echo "Shipping fat build"
+        echo "Skipping fat build"
         exit 0
     }
     apk add --no-cache ffmpeg

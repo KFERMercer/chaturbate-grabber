@@ -90,7 +90,7 @@ doc() {
 		echo "-l			[L]ink Mode. Capture Stream"
 		echo "			Link but don't recording it."
 		echo
-		echo "-o </path/to/logdir>	L[o]ging files will save to"
+		echo "-o </path/to/logdir>	L[o]gging files will save to"
 		echo "			this path."
 		echo "			Default: <recdir>/log/"
 		echo "			NO Change if Runs in Docker."
