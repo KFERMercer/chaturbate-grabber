@@ -7,9 +7,6 @@
 # `docker build --build-arg BUILD_TARGET=fat --target fat -t ctbcap .`
 # 
 
-# Default target
-ARG BUILD_TARGET=minimal
-
 FROM alpine:latest AS mother
 
 RUN apk add --no-cache curl tini tzdata
