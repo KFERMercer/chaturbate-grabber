@@ -126,7 +126,7 @@
        1. Custome your own docker-compose file:
 
           ```shell
-          cat ./docker-compose.yml.sample > ./compose.yml
+          cat ./docker-compose.sample.yml > ./compose.yml
           ```
           Then edit `./compose.yml` to configure.
 
