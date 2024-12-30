@@ -122,7 +122,7 @@ doc() {
 		echo "the transmission of knowledge and information cannot"
 		echo "receive any perceived impediment."
 		echo
-		echo "Copyright (C) 2019- , KFERMercer <github.com/KFERMercer>."
+		echo "Copyright (C) 2019-, KFERMercer <github.com/KFERMercer>"
 		echo
 		echo "UA: ${UA}"
 		echo
@@ -304,7 +304,7 @@ utils() {
 	;;
 	# RE-Implement RANDOM NUM Tool on POSIX Shell (B/E).
 	random_num)
-		# Usage: ` utils random_num <SNUM> <BNUM> `
+		# Usage: `utils random_num <SNUM> <BNUM>`
 		local SNUM=$2 # INT. Must >= 0. Small-end of Random Num you want.
 		local BNUM=$3 # INT. Must < (2^32)/2. Big-end of Random Num you want.
 		local BNUM=$(( BNUM + 1 )) # Add ${BNUM} to the pool, make method become B/E Random.
@@ -352,6 +352,7 @@ edging() {
 	echo
 }
 
+# Core platform methods.
 # Fetch ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, show them & return 0.
 # If no ${STREAM_LINK}, return 1.
 # If Can't find chatroom at all, return 2.
@@ -468,6 +469,9 @@ grab_stream() {
 		echo
 	} >> ${FFMPEG_LOGFILE}
 
+	# Core FFmpeg method. 
+	# After making any changes, must confirm the compatibility of tailored FFmpeg in Dockerfile.
+	# 
 	# shellcheck disable=SC2046
 	ffmpeg \
 	-user_agent "${UA}" \
@@ -516,14 +520,17 @@ watchdog() {
 
 			rm -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online" # Delete online flag file
 
+			# Too short time may cause the platform to enable CAPTCHA to you.
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
 			sleep $(utils random_num 240 360) # Random num B/E 240 - 360
 		;;
 		1)
+			# Too short time may cause the platform to enable CAPTCHA to you.
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
 			sleep $(utils random_num 480 720) # Random num B/E 480 - 720
 		;;
 		2)
+			# Too short time may cause the platform to enable CAPTCHA to you.
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 1 hr..."
 			sleep $(utils random_num 3300 3900) # Random num B/E 3300 - 3900
 		;;

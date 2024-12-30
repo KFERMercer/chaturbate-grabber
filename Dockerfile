@@ -1,5 +1,5 @@
 # 
-# This Dockerfile will automatically compile ffmpeg with only necessary components.
+# This Dockerfile will build a minimal FFmpeg tailored for ctbcap.
 # By doing so, it will significantly reduce the size of final image. ( 140MB -> 18MB )
 # Requires 1GB of free space on file system to build.
 # 

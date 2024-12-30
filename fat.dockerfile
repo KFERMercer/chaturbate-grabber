@@ -1,7 +1,8 @@
 # 
-# Download ffmpeg from repository instead of compiling it.
-# Will significantly increase the size of image.
+# Install FFmpeg package from repository instead of compiling it.
+# This will significantly increase the size of final image.
 # 
+# Use this Dockerfile with:
 # `docker build -t ctbcap . -f fat.dockerfile`
 # 
 
