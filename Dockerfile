@@ -1,4 +1,6 @@
 # 
+# Copyright (C) 2019-2025 KFERMercer <https://github.com/KFERMercer>
+# 
 # This Dockerfile will build a minimal FFmpeg tailored for ctbcap.
 # By doing so, it will significantly reduce the size of final image. ( 140MB -> 18MB )
 # Requires 1GB of free space on file system to build.
