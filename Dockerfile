@@ -11,12 +11,16 @@
 
 FROM alpine:latest AS mother
 
+LABEL org.opencontainers.image.authors="KFERMercer <https://github.com/KFERMercer>"
+LABEL org.opencontainers.image.description="A simple webcam capturer for CB & SC."
+LABEL org.opencontainers.image.title="ctbcap"
+LABEL org.opencontainers.image.url="https://github.com/KFERMercer/chaturbate-grabber"
+LABEL org.opencontainers.image.source="https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/refs/heads/master/Dockerfile"
+LABEL org.opencontainers.image.licenses="GPL-3.0-or-later"
+
 RUN apk add --no-cache curl tini tzdata
 
-RUN <<EOT
-    mkdir -p /save /log
-    chmod 777 /save /log
-EOT
+RUN mkdir -p -m 777 /save /log
 
 FROM mother AS fat
 
