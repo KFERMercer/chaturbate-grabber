@@ -97,7 +97,13 @@ RUN <<EOT
         --enable-protocol=hls,http,https,file
 EOT
 
-RUN make -j$(nproc)
+RUN <<EOT
+    make -j$(nproc)
+    [ -e ./ffmpeg ] || {
+        echo "Failed to build FFmpeg!"
+        exit 1
+    }
+EOT
 
 FROM mother AS minimal
 
