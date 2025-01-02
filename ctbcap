@@ -137,7 +137,7 @@ genesis_juicer() {
 	}
 	while getopts ':c:def:hlo:p:v' OPT; do
 		case ${OPT} in
-		c) 
+		c)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
 				echo "(ERROR) No Cut Time Specified!" >&2
 				echo >&2
@@ -296,7 +296,7 @@ utils() {
 		local SNUM=$2 # INT. Must >= 0. Small-end of Random Num you want.
 		local BNUM=$3 # INT. Must < (2^32)/2. Big-end of Random Num you want.
 		local BNUM=$(( BNUM + 1 )) # Add ${BNUM} to the pool, make method become B/E Random.
-		local RSEED=$(od -An -N4 -tu4 /dev/urandom) # Gen random num B/E 0 - (2^32-1) as Seed. 
+		local RSEED=$(od -An -N4 -tu4 /dev/urandom) # Gen random num B/E 0 - (2^32-1) as Seed.
 		local SEEDMIN=$(( 4294967295 % ( BNUM - SNUM ) )) # ${SEED} <= ${SEEDMIN} will cause redundant modulus.
 		while [ "${RSEED}" -le "${SEEDMIN}" ]; do
 			local RSEED=$(od -An -N4 -tu4 /dev/urandom) # If ${SEED} <= ${SEEDMIN}, Reshake ${RSEED} till isn't.
@@ -350,7 +350,7 @@ edging() {
 # Fetch ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, show them & return 0.
 # If no ${STREAM_LINK}, return 1.
 # If chatroom is changed to new name, return 2.
-# If Can't find chatroom at all, return 3.
+# If can't find chatroom at all, return 3.
 fetch_m3u() {
 
 	rm -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online"
@@ -418,10 +418,11 @@ fetch_m3u() {
 		fi
 	;;
 	stripchat)
-		if [ "${CONNECT_STATUS}" = 404 ]; then
+		[ "${CONNECT_STATUS}" = 404 ] && {
 			# TODO: Name changing detection for Stripchat method.
-			echo "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2 && return 3
-		fi
+			echo "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2
+			return 3
+		}
 
 		if [ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true')" ]; then
 			local STREAMNAME="$(echo "${CONNECT_DUMP}" | grep '"streamName":' | head -n 1 | sed 's|.*"streamName":"||'| sed 's|".*||')"
@@ -461,7 +462,7 @@ grab_stream() {
 		echo
 	} >> ${FFMPEG_LOGFILE}
 
-	# Core FFmpeg method. 
+	# Core FFmpeg method.
 	# After making any changes, must confirm the compatibility of tailored FFmpeg in Dockerfile.
 	ffmpeg \
 		-user_agent "${UA}" \
@@ -519,15 +520,13 @@ watchdog() {
 		1)
 			# Too short time may cause the platform to enable CAPTCHA to you.
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
-			sleep $(utils random_num 480 720) # Random num B/E 480 - 720
+			sleep $(utils random_num 480 720)
 		;;
-		2)
-			sleep $(utils random_num 4 6) # Random num B/E 3 - 7
-		;;
+		2) sleep $(utils random_num 4 6) ;;
 		3)
 			# Too short time may cause the platform to enable CAPTCHA to you.
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 1 hr..."
-			sleep $(utils random_num 3300 3900) # Random num B/E 3300 - 3900
+			sleep $(utils random_num 3300 3900)
 		;;
 		*)
 			echo "Logic is dead. It's tinfoil hat time."
@@ -568,7 +567,7 @@ watchdog() {
 		fetch_m3u
 		case $? in
 		2)
-			sleep $(utils random_num 4 6) # Random num B/E 3 - 7
+			sleep $(utils random_num 4 6)
 			fetch_m3u && { echo; exit 0; } || { echo >&2; exit 1; }
 		;;
 		0) echo; exit 0 ;;
@@ -580,9 +579,7 @@ watchdog() {
 
 	init_dir "${SAVE_PATH}" "${LOG_PATH}" || { echo >&2; exit 1; }
 
-	[ "${EDGING_MODE}" = "1" ] && edging
-
-	echo
+	[ "${EDGING_MODE}" = "1" ] && { edging; echo; }
 
 	watchdog 2>&1 | tee -a "${LOG_PATH}/${MODEL}-${PLATFORM}.log" 2>/dev/null
 }
