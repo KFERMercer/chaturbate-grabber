@@ -315,6 +315,13 @@ utils() {
 		done
 		echo $(( RSEED % ( BNUM - SNUM ) + SNUM )) # Format Same as $((RANDOM)) in Bash.
 	;;
+	check_depend)
+		command -v "$2" 1>/dev/null 2>&1 || {
+			echo "(ERROR) Command [$2] not found! Check \$PATH or install it." >&2
+			return 1
+		}
+		return 0
+	;;
 	esac
 
 }
@@ -569,9 +576,13 @@ watchdog() {
 
 	[ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
+	utils check_depend curl || { echo >&2; exit 1; }
+
 	[ "${LINK_MODE}" = "1" ] && {
 		fetch_m3u && { echo; exit 0; } || { echo >&2; exit 1; }
 	}
+
+	utils check_depend ffmpeg || { echo >&2; exit 1; }
 
 	init_dir "${SAVE_PATH}" "${LOG_PATH}" || { echo >&2; exit 1; }
 
