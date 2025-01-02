@@ -46,7 +46,6 @@ defaulting_args() {
 doc() {
 	case "$1" in
 	neon)
-		echo
 		# Multi-line message should not be larger than 55 columns per line:
 		#     ↓                     55 columns                      ↓
 		echo "8=====================================================D"
@@ -56,7 +55,6 @@ doc() {
 		echo "                        v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}"
 		echo "8=====================================================D"
 		echo "              Simping Stream from CB & SC"
-		echo
 	;;
 	help)
 		echo "Usage: ctbcap [options...] <username|url>"
@@ -111,21 +109,19 @@ doc() {
 		echo "operations. If you like this toy, please visit the"
 		echo "official REPO to Star/Fork, Issue/PR are also open."
 		echo "<https://github.com/KFERMercer/chaturbate-grabber>"
-		echo
 	;;
 	ver)
 		echo "Chaturbate-Grabber (aka CtbCap) v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}."
 		echo
-		echo "System Time: $(date)"
+		echo "System Time: $(date "+%Y%m%d-%H%M%S")"
 		echo
 		echo "We defend the ideals of Communism and Anarky, Believe"
 		echo "the transmission of knowledge and information cannot"
 		echo "receive any perceived impediment."
 		echo
-		echo "Copyright (C) 2019-, KFERMercer <github.com/KFERMercer>"
+		echo "Copyright (C) 2019-2025 KFERMercer <https://github.com/KFERMercer>"
 		echo
 		echo "UA: ${UA}"
-		echo
 	;;
 	esac
 }
@@ -287,20 +283,27 @@ utils() {
 	case $1 in
 	connect_status)
 		curl "$2" \
-		-4 -L -s -I \
-		-A "${UA}" \
-		--compressed \
-		--connect-timeout 5 --retry 5 --retry-delay 2 \
-		2>/dev/null | head -n 1 | grep -oE '[0-9]{3}' \
+			-4 -L -s -I \
+			-A "${UA}" \
+			--compressed \
+			--connect-timeout 5 --retry 5 --retry-delay 2 \
+			2>/dev/null | head -n 1 | grep -oE '[0-9]{3}' \
 		|| echo 000
 	;;
 	connect_dump)
 		curl "$2" \
-		-4 -L -s -i\
-		-A "${UA}" \
-		--compressed \
-		--connect-timeout 5 --retry 5 --retry-delay 2 \
-		2>/dev/null | tr -d '\r'
+			-4 -L -s -i\
+			-A "${UA}" \
+			--compressed \
+			--connect-timeout 5 --retry 5 --retry-delay 2 \
+			2>/dev/null | tr -d '\r'
+	;;
+	# Reuse results of connect_dump to get HTTP status code at the time.
+	dump2status)
+		echo "$2" \
+			| head -n 1 \
+			| cut -c -15 \
+			| grep -oE '[0-9]{3}' || echo 000
 	;;
 	# RE-Implement RANDOM NUM Tool on POSIX Shell (B/E).
 	random_num)
@@ -356,22 +359,21 @@ edging() {
 	sleep ${EDGING_TIME}
 
 	echo "Edging Enough...Cum..."
-	echo
 }
 
 # Core platform methods.
 # Fetch ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, show them & return 0.
 # If no ${STREAM_LINK}, return 1.
-# If Can't find chatroom at all, return 2.
+# If chatroom is changed to new name, return 2.
+# If Can't find chatroom at all, return 3.
 fetch_m3u() {
 
 	rm -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online"
 	unset STREAM_LINK_GENERIC STREAM_LINK
 
-	[ -z "${MODEL_NEW_NAME}" ] && local CONNECT_DUMP="$(utils connect_dump "${LINK}")"
-	[ -n "${MODEL_NEW_NAME}" ] && local CONNECT_DUMP="$(utils connect_dump "${LINK_NEW_NAME}")"
-	# Reuse ${CONNECT_DUMP} to get HTTP status code at the time.
-	local CONNECT_STATUS="$(echo "${CONNECT_DUMP}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
+	[ -n "${LINK_NEW_NAME}" ] && local CONNECT_DUMP="$(utils connect_dump "${LINK_NEW_NAME}")"
+	[ -z "${LINK_NEW_NAME}" ] && local CONNECT_DUMP="$(utils connect_dump "${LINK}")"
+	local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
 	case ${CONNECT_STATUS} in
 	2*|3*)
 		# Do nothing. leave to platform method to deal with.
@@ -401,25 +403,23 @@ fetch_m3u() {
 	case ${PLATFORM} in
 	chaturbate)
 		# Check if Model change to new name
-		if [ "${CONNECT_STATUS}" = 404 ]; then
-			MODEL_NEW_NAME=$(utils connect_dump "https://chaturbate.com/${MODEL}/")
-			local CONNECT_STATUS="$(echo "${MODEL_NEW_NAME}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
-			MODEL_NEW_NAME=$(echo "${MODEL_NEW_NAME}" | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
+		[ "${CONNECT_STATUS}" = 404 ] && {
+			local CONNECT_DUMP=$(utils connect_dump "https://chaturbate.com/${MODEL}/")
+			local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
+			MODEL_NEW_NAME=$(echo "${CONNECT_DUMP}" | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
 			[ -n "${MODEL_NEW_NAME}" ] && {
-				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2
 				LINK_NEW_NAME=$(echo "${LINK}" | sed "s|${MODEL}|${MODEL_NEW_NAME}|g")
-				sleep 5
-				local CONNECT_DUMP="$(utils connect_dump "${LINK_NEW_NAME}")"
-				local CONNECT_STATUS="$(echo "${CONNECT_DUMP}" | head -n 1 | cut -c -15 | grep -oE '[0-9]{3}' || echo 000)"
+				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2
+				return 2
 			}
 			[ -z "${MODEL_NEW_NAME}" ] && {
 				echo "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2
-				return 2
+				return 3
 			}
-		else
-			[ -n "${MODEL_NEW_NAME}" ] \
-				&& echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]." >&2
-		fi
+		}
+
+		[ -n "${MODEL_NEW_NAME}" ] \
+			&& echo "[$(date "+%Y%m%d-%H%M%S")] (NOTICE) Due to name change, [${MODEL_NEW_NAME}] will now be used for actual requests." >&2
 
 		# Check if online:
 		local ROOM_STATUS="$(echo "${CONNECT_DUMP}" | grep -oE '"room_status":[ ]?"[^"]+"' | cut -d '"' -f4)"
@@ -435,7 +435,7 @@ fetch_m3u() {
 	stripchat)
 		if [ "${CONNECT_STATUS}" = 404 ]; then
 			# TODO: Name changing detection for Stripchat method.
-			echo "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2 && return 2
+			echo "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2 && return 3
 		fi
 
 		if [ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true')" ]; then
@@ -479,22 +479,22 @@ grab_stream() {
 	# Core FFmpeg method. 
 	# After making any changes, must confirm the compatibility of tailored FFmpeg in Dockerfile.
 	ffmpeg \
-	-user_agent "${UA}" \
-	-i "${STREAM_LINK}" \
-	-c copy \
-	$( [ -z "${DEBUG_MODE}" ] && \
-		printf "%s" "-loglevel warning" \
-	) \
-	$( [ "${CUT_TIME}" = 0 ] \
-		&& printf "%s" "
-			${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}.mkv" \
-		|| printf "%s" "
-			-f segment \
-			-segment_time ${CUT_TIME} \
-			-segment_start_number 1 \
-			-reset_timestamps 1 \
-			${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%03d.mkv" \
-	) \
+		-user_agent "${UA}" \
+		-i "${STREAM_LINK}" \
+		-c copy \
+		$( [ -z "${DEBUG_MODE}" ] && \
+			printf "%s" "-loglevel warning" \
+		) \
+		$( [ "${CUT_TIME}" = 0 ] \
+			&& printf "%s" "
+				${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}.mkv" \
+			|| printf "%s" "
+				-f segment \
+				-segment_time ${CUT_TIME} \
+				-segment_start_number 1 \
+				-reset_timestamps 1 \
+				${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%03d.mkv" \
+		) \
 	>> ${FFMPEG_LOGFILE} 2>&1
 }
 
@@ -537,6 +537,9 @@ watchdog() {
 			sleep $(utils random_num 480 720) # Random num B/E 480 - 720
 		;;
 		2)
+			sleep $(utils random_num 4 6) # Random num B/E 3 - 7
+		;;
+		3)
 			# Too short time may cause the platform to enable CAPTCHA to you.
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 1 hr..."
 			sleep $(utils random_num 3300 3900) # Random num B/E 3300 - 3900
@@ -557,29 +560,35 @@ watchdog() {
 		exit 0
 	}' HUP INT QUIT TERM
 
+	echo
 	doc neon
+	echo
 
 	genesis_juicer "$@"
 	case $? in
 	0)
 		echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
-		echo
 	;;
-	2)
-		exit 0
-	;;
-	1|*)
-		echo >&2
-		exit 1
-	;;
+	2) echo; exit 0 ;;
+	*) echo >&2; exit 1 ;;
 	esac
+
+	echo
 
 	[ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
 	utils check_depend curl || { echo >&2; exit 1; }
 
 	[ "${LINK_MODE}" = "1" ] && {
-		fetch_m3u && { echo; exit 0; } || { echo >&2; exit 1; }
+		fetch_m3u
+		case $? in
+		2)
+			sleep $(utils random_num 4 6) # Random num B/E 3 - 7
+			fetch_m3u && { echo; exit 0; } || { echo >&2; exit 1; }
+		;;
+		0) echo; exit 0 ;;
+		*) echo >&2; exit 1 ;;
+		esac
 	}
 
 	utils check_depend ffmpeg || { echo >&2; exit 1; }
@@ -587,6 +596,8 @@ watchdog() {
 	init_dir "${SAVE_PATH}" "${LOG_PATH}" || { echo >&2; exit 1; }
 
 	[ "${EDGING_MODE}" = "1" ] && edging
+
+	echo
 
 	watchdog 2>&1 | tee -a "${LOG_PATH}/${MODEL}-${PLATFORM}.log" 2>/dev/null
 }
