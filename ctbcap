@@ -569,9 +569,9 @@ watchdog() {
 
 	[ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
-	if [ "${LINK_MODE}" = "1" ]; then
+	[ "${LINK_MODE}" = "1" ] && {
 		fetch_m3u && { echo; exit 0; } || { echo >&2; exit 1; }
-	fi
+	}
 
 	init_dir "${SAVE_PATH}" "${LOG_PATH}" || { echo >&2; exit 1; }
 
