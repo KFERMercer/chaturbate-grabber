@@ -118,7 +118,7 @@
      - Run once:
 
         ```shell
-        docker run -it --rm \
+        docker run --rm \
         -v /path/to/recdir:/save \
         -v /path/to/logdir:/log \
         -e TZ=UTC \
@@ -198,7 +198,7 @@
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
 
 # Docker run
-docker run -it --rm ctbcap -h
+docker run --rm ctbcap -h
 ```
 
 <br>
@@ -214,7 +214,7 @@ docker run -it --rm ctbcap -h
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir your_girl
 
 # Docker run
-docker run -it --rm -v /path/to/recdir:/save ctbcap your_girl
+docker run --rm -v /path/to/recdir:/save ctbcap your_girl
 ```
 
 <br>
@@ -230,7 +230,7 @@ docker run -it --rm -v /path/to/recdir:/save ctbcap your_girl
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir -c 0 your_girl
 
 # Docker run
-docker run -it --rm -v /path/to/recdir:/save ctbcap -c 0 your_girl
+docker run --rm -v /path/to/recdir:/save ctbcap -c 0 your_girl
 ```
 
 <br>
@@ -246,7 +246,7 @@ docker run -it --rm -v /path/to/recdir:/save ctbcap -c 0 your_girl
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir -c 1800 your_girl
 
 # Docker run
-docker run -it --rm -v /path/to/recdir:/save ctbcap -c 1800 your_girl
+docker run --rm -v /path/to/recdir:/save ctbcap -c 1800 your_girl
 ```
 
 <br>
@@ -262,7 +262,7 @@ docker run -it --rm -v /path/to/recdir:/save ctbcap -c 1800 your_girl
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -l your_girl
 
 # Docker run
-docker run -it --rm ctbcap -l your_girl
+docker run --rm ctbcap -l your_girl
 ```
 
 <br>
