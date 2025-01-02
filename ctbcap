@@ -189,30 +189,15 @@ genesis_juicer() {
 			return 1
 		;;
 		:)
-			[ "${OPTARG}" = "c" ] && {
-				echo "(ERROR) No Cut Time Specified!" >&2
-				echo >&2
-				echo "See [ $0 -h ] for help." >&2
-				return 1
-			}
-			[ "${OPTARG}" = "f" ] && {
-				echo "(ERROR) No Recording Saving Path Specified!" >&2
-				echo >&2
-				echo "See [ $0 -h ] for help." >&2
-				return 1
-			}
-			[ "${OPTARG}" = "o" ] && {
-				echo "(ERROR) No Log Saving Path Specified!" >&2
-				echo >&2
-				echo "See [ $0 -h ] for help." >&2
-				return 1
-			}
-			[ "${OPTARG}" = "p" ] && {
-				echo "(ERROR) No Platform Specified!" >&2
-				echo >&2
-				echo "See [ $0 -h ] for help." >&2
-				return 1
-			}
+			case "${OPTARG}" in
+			c) echo "(ERROR) No Cut Time Specified!" >&2 ;;
+			f) echo "(ERROR) No Recording Saving Path Specified!" >&2 ;;
+			o) echo "(ERROR) No Log Saving Path Specified!" >&2 ;;
+			p) echo "(ERROR) No Platform Specified!" >&2 ;;
+			esac
+			echo >&2
+			echo "See [ $0 -h ] for help." >&2
+			return 1
 		;;
 		esac
 	done
