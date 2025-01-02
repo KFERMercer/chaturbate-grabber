@@ -69,7 +69,7 @@ RUN <<EOT
         curl -s -L "https://ffmpeg.org/releases/" \
             | grep -oE 'ffmpeg-[0-9]+.*.tar.xz' \
             | sed 's|\.tar.xz.*||' \
-            | sort \
+            | sort -V \
             | tail -n 1 \
     )".tar.xz" -o ffmpeg.tar.xz
     tar -xf ffmpeg.tar.xz --strip-components 1
