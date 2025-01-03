@@ -44,7 +44,7 @@ defaulting_args() {
 }
 
 doc() {
-	case "$1" in
+	case $1 in
 	neon)
 		# Multi-line message should not be larger than 55 columns per line:
 		#     ↓                     55 columns                      ↓
@@ -179,7 +179,7 @@ genesis_juicer() {
 			return 1
 		;;
 		:)
-			case "${OPTARG}" in
+			case ${OPTARG} in
 			c) echo "(ERROR) No Cut Time Specified!" >&2 ;;
 			f) echo "(ERROR) No Recording Saving Path Specified!" >&2 ;;
 			o) echo "(ERROR) No Log Saving Path Specified!" >&2 ;;
@@ -210,14 +210,14 @@ genesis_juicer() {
 		| cut -d '/' -f4 \
 		| grep -oE '[a-z0-9_-]+' \
 		| head -n 1)"
-	[ -n "${_MODEL}" ] && MODEL="${_MODEL}"
+	[ -n "${_MODEL}" ] && MODEL=${_MODEL}
 	# If ${MODEL} not URL form, cut invalid chars.
 	[ -z "${_MODEL}" ] && local _MODEL="$(echo "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)"
 	[ -z "${_MODEL}" ] && {
 		echo "(ERROR) Invalid Username or URL! [${MODEL}]" >&2
 		return 1
 	}
-	[ -n "${_MODEL}" ] && MODEL="${_MODEL}"
+	[ -n "${_MODEL}" ] && MODEL=${_MODEL}
 
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
