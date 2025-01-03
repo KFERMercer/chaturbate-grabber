@@ -100,8 +100,8 @@
 
         ```shell
         docker run -t --rm \
-        -v /path/to/recdir:/save \
-        -v /path/to/logdir:/log \
+        -v </path/to/recdir>:/save \
+        -v </path/to/logdir>:/log \
         -e TZ=UTC \
         ctbcap -h
         ```
@@ -182,13 +182,13 @@ docker run -t --rm ctbcap -h
 
 ```shell
 # Raw ENV
-./ctbcap -f /path/to/recdir your_girl
+./ctbcap -f </path/to/recdir> your_girl
 
 # In One-Command run:
-sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir your_girl
+sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> your_girl
 
 # Docker run
-docker run -t --rm -v /path/to/recdir:/save ctbcap your_girl
+docker run -t --rm -v </path/to/recdir>:/save ctbcap your_girl
 ```
 
 <br>
@@ -197,13 +197,13 @@ docker run -t --rm -v /path/to/recdir:/save ctbcap your_girl
 
 ```shell
 # Raw ENV
-./ctbcap -f /path/to/recdir -c 0 your_girl
+./ctbcap -f </path/to/recdir> -c 0 your_girl
 
 # In One-Command run:
-sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir -c 0 your_girl
+sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> -c 0 your_girl
 
 # Docker run
-docker run -t --rm -v /path/to/recdir:/save ctbcap -c 0 your_girl
+docker run -t --rm -v </path/to/recdir>:/save ctbcap -c 0 your_girl
 ```
 
 <br>
@@ -212,13 +212,13 @@ docker run -t --rm -v /path/to/recdir:/save ctbcap -c 0 your_girl
 
 ```shell
 # Raw ENV
-./ctbcap -f /path/to/recdir -c 1800 your_girl
+./ctbcap -f </path/to/recdir> -c 1800 your_girl
 
 # In One-Command run:
-sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f /path/to/recdir -c 1800 your_girl
+sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> -c 1800 your_girl
 
 # Docker run
-docker run -t --rm -v /path/to/recdir:/save ctbcap -c 1800 your_girl
+docker run -t --rm -v </path/to/recdir>:/save ctbcap -c 1800 your_girl
 ```
 
 <br>
@@ -242,10 +242,10 @@ docker run -t --rm ctbcap -l your_girl
 
 ```shell
 # All daemons:
-docker compose -f /path/to/local/repo/compose.yml logs -f
+docker compose -f </path/to/local/repo/compose.yml> logs -f
 
 # Single model:
-docker compose -f /path/to/local/repo/compose.yml logs -f your_girl
+docker compose -f </path/to/local/repo/compose.yml> logs -f your_girl
 ```
 
 <div align="center"><h2>Branch Description</h2></div>
