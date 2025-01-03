@@ -156,7 +156,7 @@ genesis_juicer() {
 			}
 			SAVE_PATH=${OPTARG}
 		;;
-		h) doc help && return 2 ;;
+		h) doc help; return 2 ;;
 		l) LINK_MODE=1 ;;
 		o)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
@@ -304,14 +304,14 @@ utils() {
 
 init_dir() {
 	printf '%s\n' "$@" | while IFS='' read -r DIR ; do
-		[ -z "${DIR%"/"}" ] && echo "(ERROR) Root directory are not allowed!" >&2 && return 1
+		[ -z "${DIR%"/"}" ] && { echo "(ERROR) Root directory are not allowed!" >&2; return 1; }
 		mkdir -p "${DIR}" 1>/dev/null 2>&1
-		[ ! -e "${DIR}" ] && echo "(ERROR) Unable to create directory [${DIR}] !" >&2 && return 1
-		[ ! -d "${DIR}" ] && echo "(ERROR) [${DIR}] is not a directory!" >&2 && return 1
-		[ ! -w "${DIR}" ] && echo "(ERROR) Cannot Write To [${DIR}/] !" >&2 && return 1
+		[ ! -e "${DIR}" ] && { echo "(ERROR) Unable to create directory [${DIR}] !" >&2; return 1; }
+		[ ! -d "${DIR}" ] && { echo "(ERROR) [${DIR}] is not a directory!" >&2; return 1; }
+		[ ! -w "${DIR}" ] && { echo "(ERROR) Cannot Write To [${DIR}/] !" >&2; return 1; }
 		true
 	done
-	return $?
+	return 0
 }
 
 # Sleep time (s) before initial request to server. Range better EQ to watchdog().while.case.1).echo .
