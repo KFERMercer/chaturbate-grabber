@@ -111,21 +111,20 @@ doc() {
 		echo "<https://github.com/KFERMercer/chaturbate-grabber>"
 	;;
 	ver)
-		echo "Chaturbate-Grabber (aka CtbCap) v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}."
+		printf "ctbcap/${CTBCAP_VERSION}-r${CTBCAP_RELEASE} "
+		printf "Copyright (C) 2019-2025 KFERMercer <https://github.com/KFERMercer>\n"
 		echo
-		echo "Copyright (C) 2019-2025 KFERMercer <https://github.com/KFERMercer>"
-		echo
-		echo "We defend the ideals of Communism and Anarky, Believe"
-		echo "the transmission of knowledge and information cannot"
-		echo "receive any perceived impediment."
+		echo "UA: ${UA}"
 		echo
 		echo "Time-Mark: [$(date "+%Y%m%d-%H%M%S")] ($(date "+%Z"))"
 		echo
+		printf "cURL: "
+		printf "$(command -v "curl" 1>/dev/null 2>&1 || echo "N/A")"
+		printf "$(curl -V 2>/dev/null | head -n 1 | grep -oE '[0-9][^ ]+' | head -n 1)\n"
+		echo
 		printf "FFmpeg: "
 		printf "$(command -v "ffmpeg" 1>/dev/null 2>&1 || echo "N/A")"
-		printf "$(ffmpeg -version 2>/dev/null | head -n 1 | grep -oE '[0-9].+')\n"
-		echo
-		echo "UA: ${UA}"
+		printf "$(ffmpeg -version 2>/dev/null | head -n 1 | grep -oE '[0-9][^ ]+' | head -n 1)\n"
 	;;
 	esac
 }

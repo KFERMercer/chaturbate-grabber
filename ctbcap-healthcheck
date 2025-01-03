@@ -44,7 +44,7 @@ esac
 # If Model currently online, set HTTP Status Code of m3u8 link as flag
 [ -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online" ] && {
     STREAM_LINK="$(cat "${LOG_PATH}/${MODEL}-${PLATFORM}.online")"
-    [ -n "${UA}" ] || UA="$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')"
+    UA="$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')"
     [ -z "${UA}" ] && echo "(ERROR) UA does not exist!" && exit 1
     # Has ffmpeg process, but m3u8 link is unavailable --> err
     FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null)
