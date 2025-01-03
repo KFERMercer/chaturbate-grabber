@@ -51,7 +51,7 @@
       ./ctbcap
       ```
 
-### Follow update:
+### Follow Update:
 
   1. Go to local repo:
 
@@ -77,7 +77,7 @@
       git clone https://github.com/KFERMercer/chaturbate-grabber.git && cd chaturbate-grabber
       ```
 
-  2. Install & trigger some Docker-like shit in your OS.
+  2. Install & trigger some Docker-like shit in your OS:
 
       ```shell
       # <https://www.google.com/search?q=please+tell+me+how+to+use+docker+I+will+do+anything>
@@ -91,7 +91,7 @@
       > It will build a minimal FFmpeg tailored for ctbcap on-the-fly in Docker for minimizes the image size. (~ 18MB)
 
       > You can also chose Pre-built FFmpeg from Alpine repos to avoids compilation on low-power devices. But it will increases image size significantly. (~ 140MB)\
-      > Use this command to use Pre-built FFmpeg:\
+      > Use this command to use pre-built FFmpeg:\
       > `docker build --build-arg BUILD_TARGET=fat --target fat -t ctbcap ./`
 
   4. RUN SIMP RUN!
@@ -105,7 +105,7 @@
         -e TZ=UTC \
         ctbcap -h
         ```
-        > For more Container Arguments, See: [Container Arguments](#container-arguments)
+        > For more container arguments, See: [Container Arguments](#container-arguments)
 
      - **Run as Daemon (man!!)**:
 
@@ -126,7 +126,7 @@
           docker compose down --remove-orphans
           ```
 
-### Follow update:
+### Follow Update:
 
   1. Go to local repo:
 
@@ -140,7 +140,7 @@
       git pull --rebase
       ```
 
-  3. Rebuild image & upgrade container :
+  3. Rebuild image & upgrade containers:
 
       ```shell
       # Rebuild image
@@ -154,7 +154,7 @@
 
 | Arguments | Value Type | Value Examples | Default | Necessary to Change |
 | :-: | :-: | :- | :- | :-: |
-| MODEL | Streamer's username <br> or <br> chatroom URL | `tri80085` <br> `s1mp_L0r3-87` <br> `https://chaturbate.com/your_sister` <br> `https://stripchat.com/dicklessman` <br> ... | - | Yes |
+| MODEL | Streamer's Username <br> or <br> Chatroom URL | `tri80085` <br> `s1mp_L0r3-87` <br> `https://chaturbate.com/your_sister` <br> `https://stripchat.com/dicklessman` <br> ... | - | Yes |
 | PLATFORM | `chaturbate` <br> or <br> `stripchat` | `chaturbate` <br> `stripchat` | `chaturbate` | Yes <br> if not Chaturbate |
 | CUT_TIME | INT | `0` <br> `911` <br> `6324` <br> ... | `3600` | No |
 | TZ | [TZ identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) | `UTC` <br> `Asia/Shanghai` <br> `Africa/Harare` <br> ... | `UTC` | No <br> if you [live in Greenwich](https://www.royalgreenwich.gov.uk/info/200258/parking_transport_and_streets/810/find_a_public_toilet_in_royal_greenwich) |
@@ -163,7 +163,7 @@
 
 <div align="center"><h2>Command Examples</h2></div>
 
-> Get Help for Commands:
+> Get help for commands:
 
 ```shell
 # Raw ENV
