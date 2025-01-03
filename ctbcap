@@ -140,8 +140,6 @@ genesis_juicer() {
 		c)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
 				echo "(ERROR) No Cut Time Specified!" >&2
-				echo >&2
-				echo "See [ $0 -h ] for help." >&2
 				return 1
 			}
 			CUT_TIME=${OPTARG}
@@ -151,8 +149,6 @@ genesis_juicer() {
 		f)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
 				echo "(ERROR) No Recording Saving Path Specified!" >&2
-				echo >&2
-				echo "See [ $0 -h ] for help." >&2
 				return 1
 			}
 			SAVE_PATH=${OPTARG}
@@ -162,8 +158,6 @@ genesis_juicer() {
 		o)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
 				echo "(ERROR) No Log Saving Path Specified!" >&2
-				echo >&2
-				echo "See [ $0 -h ] for help." >&2
 				return 1
 			}
 			LOG_PATH=${OPTARG}
@@ -171,8 +165,6 @@ genesis_juicer() {
 		p)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
 				echo "(ERROR) No Cut Time Specified!" >&2
-				echo >&2
-				echo "See [ $0 -h ] for help." >&2
 				return 1
 			}
 			PLATFORM=${OPTARG}
@@ -183,9 +175,7 @@ genesis_juicer() {
 			return 2
 		;;
 		\?)
-			echo "(ERROR) Invalid Option [${OPTARG}] !" >&2
-			echo >&2
-			echo "See [ $0 -h ] for help."
+			echo "(ERROR) Invalid Option: [${OPTARG}] !" >&2
 			return 1
 		;;
 		:)
@@ -195,21 +185,22 @@ genesis_juicer() {
 			o) echo "(ERROR) No Log Saving Path Specified!" >&2 ;;
 			p) echo "(ERROR) No Platform Specified!" >&2 ;;
 			esac
-			echo >&2
-			echo "See [ $0 -h ] for help." >&2
 			return 1
 		;;
 		esac
 	done
 	shift $((OPTIND - 1))
+	[ -n "$2" ] && {
+		shift 1
+		echo "(ERROR) Invalid Inputs: [$*] !" >&2
+		return 1
+	}
 	[ -n "$1" ] && MODEL=$1
 
 	defaulting_args
 
 	[ -z "${MODEL}" ] && {
 		echo "(ERROR) No Username or URL Specified!" >&2
-		echo >&2
-		echo "See [ $0 -h ] for help." >&2
 		return 1
 	}
 	# Assume ${MODEL} contain some URL form, process & cut invalid chars.
@@ -224,8 +215,6 @@ genesis_juicer() {
 	[ -z "${_MODEL}" ] && local _MODEL="$(echo "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)"
 	[ -z "${_MODEL}" ] && {
 		echo "(ERROR) Invalid Username or URL! [${MODEL}]" >&2
-		echo >&2
-		echo "See [ $0 -h ] for help." >&2
 		return 1
 	}
 	[ -n "${_MODEL}" ] && MODEL="${_MODEL}"
@@ -242,8 +231,6 @@ genesis_juicer() {
 	;;
 	*)
 		echo "(ERROR) Unknown Platform: [${PLATFORM}] !" >&2
-		echo >&2
-		echo "See [ $0 -h ] for help." >&2
 		return 1
 	;;
 	esac
@@ -251,8 +238,6 @@ genesis_juicer() {
 	CUT_TIME=$(echo "${CUT_TIME}" | cut -c -9) #Cut to INT range
 	[ -z "$(echo "${CUT_TIME}" | grep -oE '^[0-9]+$')" ] && {
 		echo "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]" >&2
-		echo >&2
-		echo "See [ $0 -h ] for help." >&2
 		return 1
 	}
 
@@ -554,7 +539,12 @@ watchdog() {
 		echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
 	;;
 	2) echo; exit 0 ;;
-	*) echo >&2; exit 1 ;;
+	*) 
+		echo >&2
+		echo "See [ $0 -h ] for help." >&2
+		echo >&2
+		exit 1
+	;;
 	esac
 
 	echo
