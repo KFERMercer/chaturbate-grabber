@@ -232,20 +232,20 @@ genesis_juicer() {
 
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
-		chaturbate|ctb|cb)
-			PLATFORM=chaturbate
-			LINK="https://chaturbate.com/api/chatvideocontext/${MODEL}/" # Must keep " / " at the end
-		;;
-		stripchat|stc|sc|st)
-			PLATFORM=stripchat
-			LINK="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
-		;;
-		*)
-			echo "(ERROR) Unknown Platform: [${PLATFORM}] !" >&2
-			echo >&2
-			echo "See [ $0 -h ] for help." >&2
-			return 1
-		;;
+	chaturbate|ctb|cb)
+		PLATFORM=chaturbate
+		LINK="https://chaturbate.com/api/chatvideocontext/${MODEL}/" # Must keep " / " at the end
+	;;
+	stripchat|stc|sc|st)
+		PLATFORM=stripchat
+		LINK="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
+	;;
+	*)
+		echo "(ERROR) Unknown Platform: [${PLATFORM}] !" >&2
+		echo >&2
+		echo "See [ $0 -h ] for help." >&2
+		return 1
+	;;
 	esac
 
 	CUT_TIME=$(echo "${CUT_TIME}" | cut -c -9) #Cut to INT range
