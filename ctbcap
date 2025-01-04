@@ -5,8 +5,8 @@
 # A simple webcam capturer for CB & SC.
 #
 
-CTBCAP_VERSION=3.0
-CTBCAP_RELEASE=4
+CTBCAP_VERSION=4.0
+CTBCAP_RELEASE=1
 
 # Command Options > Environment Variables > Default Arguments
 defaulting_args() {
