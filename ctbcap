@@ -340,8 +340,6 @@ edging() {
 # If chatroom is changed to new name, return 2.
 # If can't find chatroom at all, return 3.
 fetch_m3u() {
-
-	rm -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online"
 	unset STREAM_LINK_GENERIC STREAM_LINK
 
 	[ -n "${LINK_NEW_NAME}" ] && local CONNECT_DUMP="$(utils connect_dump "${LINK_NEW_NAME}")"
@@ -474,6 +472,7 @@ grab_stream() {
 
 watchdog() {
 	while true; do
+		rm -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online" # Init online flag file status
 		fetch_m3u
 		# See the notes above fetch_m3u() .
 		case $? in
