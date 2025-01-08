@@ -114,9 +114,9 @@ doc() {
 		printf "ctbcap/${CTBCAP_VERSION}-r${CTBCAP_RELEASE} "
 		printf "Copyright (C) 2019-2025 KFERMercer <https://github.com/KFERMercer>\n"
 		echo
-		echo "UA: ${UA}"
-		echo
 		echo "Time-Mark: [$(date "+%Y%m%d-%H%M%S")] ($(date "+%Z"))"
+		echo
+		echo "UA: ${UA}"
 		echo
 		printf "cURL: "
 		printf "$(command -v "curl" 1>/dev/null 2>&1 || echo "N/A")"
@@ -125,6 +125,9 @@ doc() {
 		printf "FFmpeg: "
 		printf "$(command -v "ffmpeg" 1>/dev/null 2>&1 || echo "N/A")"
 		printf "$(ffmpeg -version 2>/dev/null | head -n 1 | grep -oE '[0-9][^ ]+' | head -n 1)\n"
+		echo
+		echo
+		echo "See [ $0 -h ] for Command Help."
 	;;
 	esac
 }
@@ -142,7 +145,7 @@ genesis_juicer() {
 		case ${OPT} in
 		c)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
-				echo "(ERROR) No Cut Time Specified!" >&2
+				echo "(ERROR) -c: No Cut Time Specified!" >&2
 				return 1
 			}
 			CUT_TIME=${OPTARG}
@@ -151,7 +154,7 @@ genesis_juicer() {
 		e) EDGING_MODE=1 ;;
 		f)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
-				echo "(ERROR) No Recording Saving Path Specified!" >&2
+				echo "(ERROR) -f: No Recording Saving Path Specified!" >&2
 				return 1
 			}
 			SAVE_PATH=${OPTARG}
@@ -160,14 +163,14 @@ genesis_juicer() {
 		l) LINK_MODE=1 ;;
 		o)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
-				echo "(ERROR) No Log Saving Path Specified!" >&2
+				echo "(ERROR) -o: No Log Saving Path Specified!" >&2
 				return 1
 			}
 			LOG_PATH=${OPTARG}
 		;;
 		p)
 			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
-				echo "(ERROR) No Cut Time Specified!" >&2
+				echo "(ERROR) -p: No Platform Specified!" >&2
 				return 1
 			}
 			PLATFORM=${OPTARG}
@@ -183,10 +186,10 @@ genesis_juicer() {
 		;;
 		:)
 			case ${OPTARG} in
-			c) echo "(ERROR) No Cut Time Specified!" >&2 ;;
-			f) echo "(ERROR) No Recording Saving Path Specified!" >&2 ;;
-			o) echo "(ERROR) No Log Saving Path Specified!" >&2 ;;
-			p) echo "(ERROR) No Platform Specified!" >&2 ;;
+			c) echo "(ERROR) -c: No Cut Time Specified!" >&2 ;;
+			f) echo "(ERROR) -f: No Recording Saving Path Specified!" >&2 ;;
+			o) echo "(ERROR) -o: No Log Saving Path Specified!" >&2 ;;
+			p) echo "(ERROR) -p: No Platform Specified!" >&2 ;;
 			esac
 			return 1
 		;;
