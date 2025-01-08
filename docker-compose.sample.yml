@@ -1,13 +1,13 @@
 services:
 
-  modelname_1: &template-config
+  modelname_1: &template-config # Change modelname to yours.
     container_name: ctbcap-modelname_1 # Change modelname to yours.
     image: ctbcap:latest # Image used by the containers. No need to change if you follow the README.md to set up.
     restart: unless-stopped
     environment: &template-environment
       MODEL: modelname_1 # Change modelname to yours.
       PLATFORM: chaturbate # What platform are model streaming at. choose "chaturbate" or "stripchat".
-      TZ: Asia/Shanghai # Naming saved files & logs by using this timezone. see <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List>.
+      TZ: Asia/Shanghai # Naming saved files & logs by using this timezone. See <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List>.
       CUT_TIME: 3600 # Used as number of seconds to cut recording file in real time. Don't cut if set to 0.
       EDGING_MODE: "uncle makes me pee white" # Edging Mode. Inactive if not 1. Delay initial requests to servers to avoid time-specific request waves caused by large-scale deployments.
       DEBUG_MODE: "your mom is so hot" # Debug Mode. Inactive if not 1.
@@ -15,7 +15,9 @@ services:
       - /path/to/recdir:/save # Recorded files save path mapping.
       - /path/to/logdir:/log # Log files save path mapping.
 
+  #
   # Watching more model with add more blocks:
+  #
 
   # Only need modifying values that different from template.
   modelname_2:
