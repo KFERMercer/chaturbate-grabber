@@ -276,7 +276,8 @@ utils() {
 		echo "$2" \
 			| head -n 1 \
 			| cut -c -15 \
-			| grep -oE '[0-9]{3}' || echo 000
+			| grep -oE '[0-9]{3}' \
+		|| echo 000
 	;;
 	# RE-Implement RANDOM NUM Tool on POSIX Shell (B/E).
 	random_num)
@@ -538,6 +539,7 @@ watchdog() {
 	case $? in
 	0)
 		echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
+		echo
 	;;
 	2) echo; exit 0 ;;
 	*) 
@@ -547,8 +549,6 @@ watchdog() {
 		exit 1
 	;;
 	esac
-
-	echo
 
 	[ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
