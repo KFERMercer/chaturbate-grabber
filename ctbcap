@@ -311,7 +311,6 @@ init_dir() {
 		[ ! -w "${DIR}" ] && { echo "(ERROR) Cannot Write To [${DIR}/] !" >&2; return 1; }
 		true
 	done
-	return 0
 }
 
 # Sleep time (s) before initial request to server. Range better EQ to watchdog().while.case.1).echo .
