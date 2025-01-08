@@ -1,6 +1,6 @@
 <div align="center"><h1>Chaturbate-Grabber - Simping Stream from CB & SC</h1></div>
 
-<div align="center"><p><code>Chaturbate-Grabber</code> | <code>CtbCap</code> is a functional, reliable, yet extremely easy to use and lightweight <strong>Recorder</strong> and <strong>Watch bot</strong> for <code>Chaturbate</code> & <code>StripChat</code>.</p></div>
+<div align="center"><p><code>Chaturbate-Grabber</code> | <code>CtbCap</code> Is a functional, reliable, yet extremely easy to use and lightweight <strong>Recorder</strong> and <strong>Watchbot</strong> for <code>Chaturbate</code> & <code>StripChat</code>.</p></div>
 
 <div align="center"><p><strong><a href="#command-examples">Command Examples</a></strong></p></div>
 
@@ -10,7 +10,7 @@
 
 - **All platforms available** - All functions are available with just require `curl` & `ffmpeg`.
 
-    Considering all the things mentioned and their platform versatility, this pretty much means you can run it on any device with only need internet connection: your phone, refrigerator, slipper, TV remote, [buttplug](https://news.berkeley.edu/wp-content/uploads/2017/10/SaguaroCardon750.jpg), even [your boss's wig](https://m.media-amazon.com/images/I/71+B81wFylL._SX466_.jpg).
+    > Considering all the things mentioned and their platform versatility, this pretty much means you can run it on any device with only need internet connection: your phone, refrigerator, slipper, TV remote, [buttplug](https://news.berkeley.edu/wp-content/uploads/2017/10/SaguaroCardon750.jpg), even [your boss's wig](https://m.media-amazon.com/images/I/71+B81wFylL._SX466_.jpg).
 
 - **Multifunction** - Auto Recording; Auto Monitoring; Auto Stopping; Large-Scale Deploy... Just find by yourself.
 
@@ -25,7 +25,8 @@
       ```shell
       sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
       ```
-      > Options follows @. e.g `sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -el -f ~ yourwife`
+      > Put the options after the `@`, e.g:\
+      > `sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -ef ~/rec your_mom`
 
       > **Termux is Supported.**
 
@@ -67,7 +68,7 @@
 
 ##
 
-### Docker Container (Recommend):
+### Docker Container (Recommend) :
 
 > If you're using such platforms that have good support for Docker or similar, I highly recommend to use this method: More serious; High-Availability; Everything runs in containers; Easily configures lot of chatrooms at the same time.
 
@@ -96,7 +97,7 @@
 
   4. RUN SIMP RUN!
 
-     - Run once:
+     - Run once (Docker CLI) :
 
         ```shell
         docker run -t --rm \
@@ -105,7 +106,7 @@
         -e TZ=UTC \
         ctbcap -h
         ```
-        > For more container arguments, See: [Container Arguments](#container-arguments)
+        > For more container arguments, see: [Container Arguments](#container-arguments)
 
      - **Run as Daemon (man!!)**:
 
@@ -163,82 +164,85 @@
 
 <div align="center"><h2>Command Examples</h2></div>
 
-> Get help for commands:
+> ### Get help for commands:
 
 ```shell
-# Raw ENV
+# Raw ENV:
 ./ctbcap -h
 
-# In One-Command run:
+# One-Command Run:
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
 
-# Docker run
+# Docker CLI:
 docker run -t --rm ctbcap -h
 ```
 
-<br>
-
-> Simping your girl with nonstop:
+> ### Show version & components info:
 
 ```shell
-# Raw ENV
+# Raw ENV:
+./ctbcap -v
+
+# One-Command Run:
+sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -v
+
+# Docker CLI:
+docker run -t --rm ctbcap -v
+```
+
+> ### Simping your girl with nonstop:
+
+```shell
+# Raw ENV:
 ./ctbcap -f </path/to/recdir> your_girl
 
-# In One-Command run:
+# One-Command Run:
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> your_girl
 
-# Docker run
+# Docker CLI:
 docker run -t --rm -v </path/to/recdir>:/save ctbcap your_girl
 ```
 
-<br>
-
-> Simping your girl's stream and don't cut the file (cut the files every 3600 seconds by default):
+> ### Simping your girl's stream and don't cut the file (cut the files every 3600 seconds by default) :
 
 ```shell
-# Raw ENV
+# Raw ENV:
 ./ctbcap -f </path/to/recdir> -c 0 your_girl
 
-# In One-Command run:
+# One-Command Run:
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> -c 0 your_girl
 
-# Docker run
+# Docker CLI:
 docker run -t --rm -v </path/to/recdir>:/save ctbcap -c 0 your_girl
 ```
 
-<br>
-
-> Simping your girl's stream and cut the files by every 1800 seconds (30 min):
+> ### Simping your girl's stream and cut the files by every 1800 seconds (30 min) :
 
 ```shell
-# Raw ENV
+# Raw ENV:
 ./ctbcap -f </path/to/recdir> -c 1800 your_girl
 
-# In One-Command run:
+# One-Command Run:
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> -c 1800 your_girl
 
-# Docker run
+# Docker CLI:
 docker run -t --rm -v </path/to/recdir>:/save ctbcap -c 1800 your_girl
 ```
 
-<br>
-
-> Just wanna check if your girl is online:
+> ### Just wanna check if your girl is online:
 
 ```shell
-# Raw ENV
+# Raw ENV:
 ./ctbcap -l your_girl
 
-# In One-Command run:
+# One-Command Run:
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -l your_girl
 
-# Docker run
+# Docker CLI:
 docker run -t --rm ctbcap -l your_girl
 ```
 
-<br>
-
-> Check the status of compose daemons:
+> ### Check the status of compose daemons:
 
 ```shell
 # All daemons:
