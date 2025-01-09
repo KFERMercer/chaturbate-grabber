@@ -116,6 +116,8 @@ doc() {
 		echo
 		echo "Time-Mark: [$(date "+%Y%m%d-%H%M%S")] ($(date "+%Z"))"
 		echo
+		echo "USERINFO: [$(id)]"
+		echo
 		echo "UA: ${UA}"
 		echo
 		printf "cURL: "

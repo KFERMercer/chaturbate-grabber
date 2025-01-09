@@ -3,6 +3,7 @@ services:
   modelname_1: &template-config # Change modelname to yours.
     container_name: ctbcap-modelname_1 # Change modelname to yours.
     image: ctbcap:latest # Image used by the containers. No need to change if you follow the README.md to set up.
+    user: 1000:1000 # <UID>:<GID>. Specify the user (UID) and group (GID) that the ctbcap will run as.
     restart: unless-stopped
     environment: &template-environment
       MODEL: modelname_1 # Change modelname to yours.

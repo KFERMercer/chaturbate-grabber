@@ -101,11 +101,15 @@
 
         ```shell
         docker run -t --rm \
+        -u $(id -u):$(id -g) \
         -v </path/to/recdir>:/save \
         -v </path/to/logdir>:/log \
         -e TZ=UTC \
         ctbcap -h
         ```
+        > Option `-u <UID>:<GID>` allows you to specify the user (UID) and group (GID) that the container will run as. For example, `-u 65534:65534` will run the container as the 'nobody'. If you don't specify `-u`, the container will running as `1000:1000`.\
+        > `-u $(id -u):$(id -g)` Will use your current UID and GID.
+
         > For more container arguments, see: [Container Arguments](#container-arguments)
 
      - **Run as Daemon (man!!)**:
@@ -177,7 +181,7 @@ sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grab
 docker run -t --rm ctbcap -h
 ```
 
-> ### Show version & components info:
+> ### Show version & runtime info:
 
 ```shell
 # Raw ENV:
@@ -187,7 +191,7 @@ docker run -t --rm ctbcap -h
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -v
 
 # Docker CLI:
-docker run -t --rm ctbcap -v
+docker run -t --rm -u <UID>:<GID> ctbcap -v
 ```
 
 > ### Simping your girl with nonstop:
@@ -200,7 +204,7 @@ docker run -t --rm ctbcap -v
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> your_girl
 
 # Docker CLI:
-docker run -t --rm -v </path/to/recdir>:/save ctbcap your_girl
+docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save ctbcap your_girl
 ```
 
 > ### Simping your girl's stream and don't cut the file (cut the files every 3600 seconds by default) :
@@ -213,7 +217,7 @@ docker run -t --rm -v </path/to/recdir>:/save ctbcap your_girl
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> -c 0 your_girl
 
 # Docker CLI:
-docker run -t --rm -v </path/to/recdir>:/save ctbcap -c 0 your_girl
+docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save ctbcap -c 0 your_girl
 ```
 
 > ### Simping your girl's stream and cut the files by every 1800 seconds (30 min) :
@@ -226,7 +230,7 @@ docker run -t --rm -v </path/to/recdir>:/save ctbcap -c 0 your_girl
 sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> -c 1800 your_girl
 
 # Docker CLI:
-docker run -t --rm -v </path/to/recdir>:/save ctbcap -c 1800 your_girl
+docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save ctbcap -c 1800 your_girl
 ```
 
 > ### Just wanna check if your girl is online:
