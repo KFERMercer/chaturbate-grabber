@@ -12,11 +12,11 @@
 # TODO: Model may change their name, consider using realtime name.
 # Assume ${MODEL} contain some link form, process & cut invalid chars.
 _MODEL="$(echo "${MODEL}" \
-    | tr '[:upper:]' '[:lower:]' \
-    | grep -oE 'http[s]?://[a-z0-9-]?+[.]?[a-z0-9-]+[.][a-z]+[/][^ /]+' \
-    | cut -d '/' -f4 \
-    | grep -oE '[a-z0-9_-]+' \
-    | head -n 1)"
+	| tr '[:upper:]' '[:lower:]' \
+	| grep -oE 'http[s]?://[a-z0-9-]?+[.]?[a-z0-9-]+[.][a-z]+[/][^ /]+' \
+	| cut -d '/' -f4 \
+	| grep -oE '[a-z0-9_-]+' \
+	| head -n 1)"
 [ -n "${_MODEL}" ] && MODEL="${_MODEL}"
 # If ${MODEL} not URL form, cut invalid chars.
 [ -z "${_MODEL}" ] && _MODEL="$(echo "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)"
@@ -25,16 +25,16 @@ _MODEL="$(echo "${MODEL}" \
 
 # Process $PLATFORM
 PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
-case ${PLATFORM} in 
+case ${PLATFORM} in
 chaturbate|ctb|cb)
-    PLATFORM=chaturbate
+	PLATFORM=chaturbate
 ;;
 stripchat|stc|sc|st)
-    PLATFORM=stripchat
+	PLATFORM=stripchat
 ;;
 *)
-    echo "(ERROR) Invalid Platform!"
-    exit 1
+	echo "(ERROR) Invalid Platform!"
+	exit 1
 ;;
 esac
 
@@ -44,13 +44,13 @@ esac
 
 # If Model currently online, set HTTP Status Code of m3u8 link as flag
 [ -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online" ] && {
-    STREAM_LINK="$(cat "${LOG_PATH}/${MODEL}-${PLATFORM}.online")"
-    UA="$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')"
-    [ -z "${UA}" ] && { echo "(ERROR) UA does not exist!"; exit 1; }
-    # Has ffmpeg process, but m3u8 link is unavailable --> err
-    FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null)
-    M3U8_RESPONSE=$(curl "${STREAM_LINK}" -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')
-    [ -n "${FFMPEG_PROCESS}" ] && [ -z "${M3U8_RESPONSE}" ] && { echo "(ERROR) FFMPEG process did not exit correctly!"; exit 1; }
+	STREAM_LINK="$(cat "${LOG_PATH}/${MODEL}-${PLATFORM}.online")"
+	UA="$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')"
+	[ -z "${UA}" ] && { echo "(ERROR) UA does not exist!"; exit 1; }
+	# Has ffmpeg process, but m3u8 link is unavailable --> err
+	FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null)
+	M3U8_RESPONSE=$(curl "${STREAM_LINK}" -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')
+	[ -n "${FFMPEG_PROCESS}" ] && [ -z "${M3U8_RESPONSE}" ] && { echo "(ERROR) FFMPEG process did not exit correctly!"; exit 1; }
 }
 
 echo "Everything is OK!"
