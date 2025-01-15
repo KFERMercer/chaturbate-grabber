@@ -1,13 +1,13 @@
-# 
+#
 # Copyright (C) 2019-2025 KFERMercer <https://github.com/KFERMercer>
-# 
-# This Dockerfile will build a minimal FFmpeg tailored for ctbcap.
+#
+# This Dockerfile will build a minimal FFmpeg tailored for ctbcap in same time.
 # By doing so, it will significantly reduce the size of final image. ( 140MB -> 18MB )
 # Requires 1GB of free space on file system to build.
-# 
+#
 # If you don't want to compile FFmpeg:
 # `docker build --build-arg BUILD_TARGET=fat --target fat -t <name:tag> .\`
-# 
+#
 
 # Universal base for ctbcap and FFmpeg building.
 FROM alpine:latest AS mother
