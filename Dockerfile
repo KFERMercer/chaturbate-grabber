@@ -6,7 +6,7 @@
 # Requires 1GB of free space on file system to build.
 #
 # If you don't want to compile FFmpeg:
-# `docker build --build-arg BUILD_TARGET=fat --target fat -t <name:tag> .\`
+# `docker build --build-arg BUILD_TARGET=fat --target fat -t <name:tag> ./`
 #
 
 # Universal base for ctbcap and FFmpeg building.
@@ -25,7 +25,11 @@ LABEL org.opencontainers.image.url="https://github.com/KFERMercer/chaturbate-gra
 LABEL org.opencontainers.image.source="https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/refs/heads/master/Dockerfile"
 LABEL org.opencontainers.image.licenses="GPL-3.0-or-later"
 
-ARG BUILD_TARGET
+RUN <<EOT
+	apk add --no-cache tini tzdata
+	mkdir -p -m 777 /save
+	ln -s /save/log /log
+EOT
 
 ARG CUID=1000
 ARG CGID=1000
@@ -39,11 +43,63 @@ ENV CUT_TIME=3600
 ENV EDGING_MODE="uncle makes me pee white"
 ENV DEBUG_MODE="your mom is so hot"
 
-RUN <<EOT
-	apk add --no-cache tini tzdata
-	mkdir -p -m 777 /save
-	ln -s /save/log /log
-EOT
+COPY --chmod=755 <<-'EOF' /bin/healthcheck
+	#!/usr/bin/env sh
+
+	[ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
+
+	# Check for assignment of runtime variables
+	[ -z "${MODEL}" ] || [ -z "${PLATFORM}" ] || [ -z "${SAVE_PATH}" ] || [ -z "${LOG_PATH}" ] && exit 0
+
+	# Process ${MODEL}
+	# TODO: Model may change their name, consider using realtime name.
+	# Assume ${MODEL} contain some link form, process & cut invalid chars.
+	_MODEL="$(echo "${MODEL}" \
+		| tr '[:upper:]' '[:lower:]' \
+		| grep -oE 'http[s]?://[a-z0-9-]?+[.]?[a-z0-9-]+[.][a-z]+[/][^ /]+' \
+		| cut -d '/' -f4 \
+		| grep -oE '[a-z0-9_-]+' \
+		| head -n 1)"
+	[ -n "${_MODEL}" ] && MODEL="${_MODEL}"
+	# If ${MODEL} not URL form, cut invalid chars.
+	[ -z "${_MODEL}" ] && _MODEL="$(echo "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)"
+	[ -z "${_MODEL}" ] && { echo "(ERROR) Invalid Username or Link!"; exit 1; }
+	[ -n "${_MODEL}" ] && MODEL="${_MODEL}"
+
+	# Process $PLATFORM
+	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
+	case ${PLATFORM} in
+	chaturbate|ctb|cb)
+		PLATFORM=chaturbate
+	;;
+	stripchat|stc|sc|st)
+		PLATFORM=stripchat
+	;;
+	*)
+		echo "(ERROR) Invalid Platform!"
+		exit 1
+	;;
+	esac
+
+	# Is directories writable?
+	[ ! -w "${SAVE_PATH}" ] && { echo "(ERROR) SAVE_PATH is unwritable!"; exit 1; }
+	[ ! -w "${LOG_PATH}" ] && { echo "(ERROR) LOG_PATH is unwritable!"; exit 1; }
+
+	# If Model currently online, set HTTP Status Code of m3u8 link as flag
+	[ -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online" ] && {
+		STREAM_LINK="$(cat "${LOG_PATH}/${MODEL}-${PLATFORM}.online")"
+		UA="$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')"
+		[ -z "${UA}" ] && { echo "(ERROR) UA does not exist!"; exit 1; }
+		# Has ffmpeg process, but m3u8 link is unavailable --> err
+		FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null)
+		M3U8_RESPONSE=$(curl "${STREAM_LINK}" -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')
+		[ -n "${FFMPEG_PROCESS}" ] && [ -z "${M3U8_RESPONSE}" ] && { echo "(ERROR) FFMPEG process did not exit correctly!"; exit 1; }
+	}
+
+	echo "Everything is OK!"
+
+	exit 0
+EOF
 
 HEALTHCHECK \
 	--interval=300s \
@@ -51,9 +107,11 @@ HEALTHCHECK \
 	--start-period=300s \
 	--start-interval=300s \
 	--retries=3 \
-	CMD ["ctbcap-healthcheck"]
+	CMD ["healthcheck"]
 
 ENTRYPOINT ["tini", "-g", "--", "ctbcap"]
+
+ARG BUILD_TARGET
 
 
 # Fatty product using pre-built FFmpeg.
@@ -69,7 +127,6 @@ RUN <<EOT
 	apk add --no-cache ffmpeg
 EOT
 
-COPY ./ctbcap-healthcheck /usr/bin/
 COPY ./ctbcap /usr/bin/
 
 
@@ -180,5 +237,4 @@ FROM heir AS minimal
 USER ${CUID}:${CGID}
 
 COPY --from=builder /tmp/ffmpeg_bin/ffmpeg /usr/bin/
-COPY ./ctbcap-healthcheck /usr/bin/
 COPY ./ctbcap /usr/bin/
