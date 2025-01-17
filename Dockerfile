@@ -116,8 +116,6 @@ ARG BUILD_TARGET
 # Fatty product using pre-built FFmpeg.
 FROM heir AS fat
 
-USER ${CUID}:${CGID}
-
 RUN <<EOT
 	[ ${BUILD_TARGET} = "fat" ] || {
 		echo "Skipping fat build"
@@ -127,6 +125,8 @@ RUN <<EOT
 EOT
 
 COPY ./ctbcap /usr/bin/
+
+USER ${CUID}:${CGID}
 
 
 # FFmpeg Build Machine.
@@ -233,7 +233,7 @@ EOT
 # Minimal product using live-built FFmpeg.
 FROM heir AS minimal
 
-USER ${CUID}:${CGID}
-
 COPY --from=builder /tmp/ffmpeg_bin/ffmpeg /usr/bin/
 COPY ./ctbcap /usr/bin/
+
+USER ${CUID}:${CGID}
