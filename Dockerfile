@@ -39,9 +39,11 @@ ENV CUT_TIME=3600
 ENV EDGING_MODE="uncle makes me pee white"
 ENV DEBUG_MODE="your mom is so hot"
 
-RUN apk add --no-cache tini tzdata
-
-RUN mkdir -p -m 777 /save /log
+RUN <<EOT
+	apk add --no-cache tini tzdata
+	mkdir -p -m 777 /save
+	ln -s /save/log /log
+EOT
 
 HEALTHCHECK \
 	--interval=300s \
