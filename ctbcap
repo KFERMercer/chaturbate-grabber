@@ -458,6 +458,7 @@ grab_stream() {
 	ffmpeg \
 		-user_agent "${UA}" \
 		-i "${STREAM_LINK}" \
+		-tls_verify 0 \
 		-c copy \
 		$( [ -z "${DEBUG_MODE}" ] && \
 			printf "%s" "-loglevel warning" \
@@ -547,7 +548,7 @@ watchdog() {
 		echo
 	;;
 	2) echo; exit 0 ;;
-	*) 
+	*)
 		echo >&2
 		echo "See [ $0 -h ] for help." >&2
 		echo >&2
