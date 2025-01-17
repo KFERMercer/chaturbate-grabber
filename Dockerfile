@@ -27,8 +27,7 @@ LABEL org.opencontainers.image.licenses="GPL-3.0-or-later"
 
 RUN <<EOT
 	apk add --no-cache tini tzdata
-	mkdir -p -m 777 /save
-	ln -s /save/log /log
+	mkdir -p -m 777 /save /log
 EOT
 
 ARG CUID=1000
