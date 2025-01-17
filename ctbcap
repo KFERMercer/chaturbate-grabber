@@ -62,10 +62,10 @@ doc() {
 		echo "<username|url>		Streamer's Username or Chat"
 		echo "			Room URL."
 		echo
-		echo "-c <int number>		Will be use as number of"
-		echo "			<seconds> to [c]ut recording"
-		echo "			file at real time. Don't cut"
-		echo "			if set to 0."
+		echo "-c <INT NUM>		Use as number of <seconds> to"
+		echo "			[c]ut the recording file at"
+		echo "			real time."
+		echo "			Don't cut if set to 0."
 		echo "			Default: 3600 (60 min)."
 		echo
 		echo "-d			[D]ebug Mode."
@@ -81,7 +81,7 @@ doc() {
 		echo "-f </path/to/recdir>	Recording [f]iles will save"
 		echo "			to this path."
 		echo "			Default: /\${PWD}/rec/"
-		echo "			NO Change if Runs in Docker."
+		echo "			Don't Use if Runs in Docker."
 		echo
 		echo "-h			Get [H]elp for Commands."
 		echo
@@ -91,7 +91,7 @@ doc() {
 		echo "-o </path/to/logdir>	L[o]gging files will save to"
 		echo "			this path."
 		echo "			Default: <recdir>/log/"
-		echo "			NO Change if Runs in Docker."
+		echo "			Don't Use if Runs in Docker."
 		echo
 		echo "-p <chaturbate|stripchat> Specify Stream [P]latform"
 		echo "			to <chaturbate> (default) or"
@@ -116,7 +116,7 @@ doc() {
 		echo
 		echo "Time-Mark: [$(date "+%Y%m%d-%H%M%S")] ($(date "+%Z"))"
 		echo
-		echo "USERINFO: [$(id)]"
+		echo "User-Info: [$(id | cut -d ' ' -f 1-2)]"
 		echo
 		echo "UA: ${UA}"
 		echo
@@ -127,7 +127,6 @@ doc() {
 		printf "FFmpeg: "
 		printf "$(command -v "ffmpeg" 1>/dev/null 2>&1 || echo "N/A")"
 		printf "$(ffmpeg -version 2>/dev/null | head -n 1 | grep -oE '[0-9][^ ]+' | head -n 1)\n"
-		echo
 		echo
 		echo "See [ $0 -h ] for Command Help."
 	;;
