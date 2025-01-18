@@ -25,6 +25,7 @@ services:
     <<: *template-config
     container_name: ctbcap-modelname_2
     # image: ctbcap:latest
+    # user: 1000:1000
     # restart: unless-stopped
     environment:
       <<: *template-environment
