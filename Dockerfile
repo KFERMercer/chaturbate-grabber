@@ -21,8 +21,8 @@ FROM mother AS heir
 LABEL org.opencontainers.image.authors="KFERMercer <https://github.com/KFERMercer>"
 LABEL org.opencontainers.image.description="A simple webcam capturer for CB & SC."
 LABEL org.opencontainers.image.title="ctbcap"
-LABEL org.opencontainers.image.url="https://github.com/KFERMercer/chaturbate-grabber"
-LABEL org.opencontainers.image.source="https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/refs/heads/master/Dockerfile"
+LABEL org.opencontainers.image.url="https://github.com/KFERMercer/chaturbate-grabber/blob/master/README.md"
+LABEL org.opencontainers.image.source="https://github.com/KFERMercer/chaturbate-grabber"
 LABEL org.opencontainers.image.licenses="GPL-3.0-or-later"
 
 RUN <<EOT
