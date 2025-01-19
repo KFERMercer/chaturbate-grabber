@@ -47,8 +47,10 @@ COPY --chmod=755 <<-'EOF' /bin/healthcheck
 
 	[ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
-	# Check for assignment of runtime variables
-	[ -z "${MODEL}" ] || [ -z "${PLATFORM}" ] || [ -z "${SAVE_PATH}" ] || [ -z "${LOG_PATH}" ] && exit 0
+	[ -z "${MODEL}" ] || [ -z "$(ps -ef | grep 'ctbcap' | grep -v grep | head -n 1)" ] && {
+		echo "No ctbcap process. Exit."
+		exit 0
+	}
 
 	# Process ${MODEL}
 	# TODO: Model may change their name, consider using realtime name.
@@ -65,7 +67,7 @@ COPY --chmod=755 <<-'EOF' /bin/healthcheck
 	[ -z "${_MODEL}" ] && { echo "(ERROR) Invalid Username or Link!"; exit 1; }
 	[ -n "${_MODEL}" ] && MODEL="${_MODEL}"
 
-	# Process $PLATFORM
+	# Process ${PLATFORM}
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
 	chaturbate|ctb|cb)
@@ -84,19 +86,19 @@ COPY --chmod=755 <<-'EOF' /bin/healthcheck
 	[ ! -w "${SAVE_PATH}" ] && { echo "(ERROR) SAVE_PATH is unwritable!"; exit 1; }
 	[ ! -w "${LOG_PATH}" ] && { echo "(ERROR) LOG_PATH is unwritable!"; exit 1; }
 
-	# If Model currently online, set HTTP Status Code of m3u8 link as flag
-	[ -f "${LOG_PATH}/${MODEL}-${PLATFORM}.online" ] && {
-		STREAM_LINK="$(cat "${LOG_PATH}/${MODEL}-${PLATFORM}.online")"
+	FFMPEG_PROCESS="$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null)"
+	# If has FFmpeg process...
+	[ -n "${FFMPEG_PROCESS}" ] && {
+		STREAM_LINK="$(echo "${FFMPEG_PROCESS}" | grep -oE 'http[s]?://[^ ]+\.m3u8')"
 		UA="$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')"
 		[ -z "${UA}" ] && { echo "(ERROR) UA does not exist!"; exit 1; }
-		# Has ffmpeg process, but m3u8 link is unavailable --> err
-		FFMPEG_PROCESS=$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null)
-		M3U8_RESPONSE=$(curl "${STREAM_LINK}" -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')
-		[ -n "${FFMPEG_PROCESS}" ] && [ -z "${M3U8_RESPONSE}" ] && { echo "(ERROR) FFMPEG process did not exit correctly!"; exit 1; }
+
+		# Has FFmpeg process, but m3u8 link is unavailable --> err
+		M3U8_RESPONSE="$(curl "${STREAM_LINK}" -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')"
+		[ -z "${M3U8_RESPONSE}" ] && { echo "(ERROR) FFMPEG process did not exit correctly!"; exit 1; }
 	}
 
 	echo "Everything is OK!"
-
 	exit 0
 EOF
 
