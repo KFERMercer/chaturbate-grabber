@@ -252,8 +252,15 @@ genesis_juicer() {
 
 	SAVE_PATH="$(realpath -m "${SAVE_PATH}" 2>/dev/null)"
 	[ "${LOG_PATH}" = 0 ] \
-		&& LOG_PATH="" \
-		|| LOG_PATH="$(realpath -m "${LOG_PATH}" 2>/dev/null)"
+		&& {
+			LOG_PATH=""
+			WATCHDOG_LOGFILE="/dev/null"
+			FFMPEG_LOGFILE="/dev/null"
+		} || {
+			LOG_PATH="$(realpath -m "${LOG_PATH}" 2>/dev/null)"
+			WATCHDOG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.log"
+			FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
+		}
 
 	return 0
 }
@@ -307,42 +314,86 @@ utils() {
 		}
 		return 0
 	;;
+	# Trimming the file content before line num.
+	# Usage: `utils trimming_files "<file1>:<max line>" "<file2>:<max line>" ...`
+	trimming_files)
+		shift 1
+		printf '%s\n' "$@" | while IFS='' read -r DATA ; do
+			local FILE="$(echo "${DATA}" | sed 's|:[^:]*$||')"
+			local LINE="$(echo "${DATA}" | sed 's|.*:||')"
+			local FILE="$(realpath -m "${FILE}" 2>/dev/null)"
+			[ ! -e "${FILE}" ] && return 0
+			[ ! -r "${FILE}" ] && {
+				echo "(WARNING) Abort trimming [${FILE}] due to unreadability."
+				return 1
+			}
+			[ -z "${LINE}" ] && { echo > "${FILE}"; } >/dev/null 2>&1
+			[ "$(wc -l 2>/dev/null < "${FILE}" || echo 0)" -gt "${LINE}" ] && {
+				local BUFFER_FILE="/dev/shm/_$(basename "${FILE}")_$(date +%s)"
+				tail -n "${LINE}" "${FILE}" > "${BUFFER_FILE}"
+				cat "${BUFFER_FILE}" > "${FILE}"
+				rm -f /dev/shm/_"$(basename "${FILE}")"
+			} >/dev/null 2>&1
+			true
+		done
+		return 0
+	;;
 	esac
 
 }
 
-# Usage: `init_dir "<DIR1>:<MiB NEED>" "<DIR2>:<MiB NEED>" ...`
-init_dir() {
-	printf '%s\n' "$@" | while IFS='' read -r DATA ; do
-		local DIR="$(echo "${DATA}" | sed 's|:[^:]*$||')"
-		local SPACE="$(echo "${DATA}" | sed 's|.*:||')"
-		[ -z "${DIR}" ] && return 0 # Skip empty path
-		[ -z "${SPACE}" ] && local SPACE=0 # No space require
+init_path() {
+	case $1 in
+	# Init dirs.
+	# Usage: `init_path -d "<dir path1>:<MiB>" "<dir path2>:<MiB>" ...`
+	-d)
+		shift 1
+		printf '%s\n' "$@" | while IFS='' read -r DATA ; do
+			local DIR="$(echo "${DATA}" | sed 's|:[^:]*$||')"
+			local SPACE="$(echo "${DATA}" | sed 's|.*:||')"
+			[ -z "${DIR}" ] && return 0 # Skip empty path
+			[ -z "${SPACE}" ] && local SPACE=0 # No space require
 
-		[ -z "${DIR%"/"}" ] && { echo "(ERROR) Root directory are not allowed!" >&2; return 1; }
+			[ -z "${DIR%"/"}" ] && { echo "(ERROR) Root directory are not allowed!" >&2; return 1; }
 
-		local _DIR="${DIR}"; while [ ! -d "${_DIR}" ]; do # ${DIR} may not created yet
-			local _DIR="$(dirname "${_DIR}")"
-		done
-		local FREESPACE="$(df --block-size=1MiB "${_DIR}" | awk 'NR==2 {print $4}')"
-		[ "${FREESPACE}" -lt "${SPACE}" ] && {
-			echo "(ERROR) Space on [${_DIR}/] is too low! (${FREESPACE}MiB left, need ${SPACE}MiB at least.)" >&2
-			return 1
-		}
-
-		mkdir -p "${DIR}" 1>/dev/null 2>&1
-		[ ! -e "${DIR}" ] && { echo "(ERROR) Unable to create directory [${DIR}] !" >&2; return 1; }
-		[ ! -d "${DIR}" ] && { echo "(ERROR) [${DIR}] is not a directory!" >&2; return 1; }
-		[ ! -w "${DIR}" ] && { echo "(ERROR) Cannot Write To [${DIR}/] !" >&2; return 1; }
-
-		[ "${SPACE}" = 0 ] || {
-			[ "${FREESPACE}" -lt 1024 ] && {
-				echo "(WARNING) Space on [${DIR}/] is lower than 1GiB! [${FREESPACE}MiB]"
-				echo
+			local _DIR="${DIR}"; while [ ! -d "${_DIR}" ]; do # ${DIR} may not created yet
+				local _DIR="$(dirname "${_DIR}")"
+			done
+			local FREESPACE="$(df --block-size=1MiB "${_DIR}" | awk 'NR==2 {print $4}')"
+			[ "${FREESPACE}" -lt "${SPACE}" ] && {
+				echo "(ERROR) Space on [${_DIR}/] is too low! (${FREESPACE}MiB left, need ${SPACE}MiB at least.)" >&2
+				return 1
 			}
-		}
-		true
-	done
+
+			mkdir -p "${DIR}" 1>/dev/null 2>&1
+			[ ! -e "${DIR}" ] && { echo "(ERROR) Unable to create directory [${DIR}] !" >&2; return 1; }
+			[ ! -d "${DIR}" ] && { echo "(ERROR) [${DIR}] is not a directory!" >&2; return 1; }
+			[ ! -w "${DIR}" ] && { echo "(ERROR) Cannot write to [${DIR}/] !" >&2; return 1; }
+
+			[ "${SPACE}" = 0 ] || {
+				[ "${FREESPACE}" -lt 1024 ] && {
+					echo "(WARNING) Space on [${DIR}/] is lower than 1GiB! [${FREESPACE}MiB]"
+					echo
+				}
+			}
+			true
+		done
+	;;
+	# Init files.
+	# Usage: `init_path -f "<file path1>" "<file path2>" ...`
+	-f)
+		shift 1
+		printf '%s\n' "$@" | while IFS='' read -r FILE ; do
+			local FILE="$(realpath -m "${FILE}" 2>/dev/null)"
+			[ -z "${FILE}" ] && return 0 # Skip empty path
+			[ "${FILE}" = "/dev/null" ] && return 0 # Skip black hole
+			[ ! -e "${FILE}" ] && return 0 # Skip not exist
+			[ ! -f "${FILE}" ] && { echo "(ERROR) [${FILE}] is not a file!" >&2; return 1; }
+			[ ! -w "${FILE}" ] && { echo "(ERROR) Cannot write to [${FILE}] !" >&2; return 1; }
+			true
+		done
+	;;
+	esac
 }
 
 # Sleep time (s) before initial request to server. Range better EQ to watchdog().while.case.1).echo .
@@ -469,15 +520,13 @@ fetch_m3u() {
 }
 
 grab_stream() {
-
-	[ -n "${FFMPEG_LOGFILE}" ] || local FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
 	local CAPTURE_TIME=$(date "+%Y%m%d-%H%M%S")
 
 	{
 		echo
 		echo "========== [${CAPTURE_TIME}] =========="
 		echo
-	} >> ${FFMPEG_LOGFILE}
+	} >> "${FFMPEG_LOGFILE}"
 
 	# Core FFmpeg method.
 	# After making any changes, must confirm the compatibility of tailored FFmpeg in Dockerfile.
@@ -499,12 +548,14 @@ grab_stream() {
 				-reset_timestamps 1 \
 				${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%03d.mkv" \
 		) \
-	>> ${FFMPEG_LOGFILE} 2>&1
+	>> "${FFMPEG_LOGFILE}" 2>&1
 }
 
 watchdog() {
 	check_dir() {
-		local CHECK_MESSAGE="$({ init_dir "${SAVE_PATH}:512" "${LOG_PATH}:16"; } 2>&1 1>/dev/null)"
+		local CHECK_MESSAGE="$({ init_path -d "${SAVE_PATH}:512" "${LOG_PATH}:16"; } 2>&1 1>/dev/null)"
+		[ -z "${CHECK_MESSAGE}" ] \
+			&& local CHECK_MESSAGE="$({ init_path -f "${WATCHDOG_LOGFILE}" "${FFMPEG_LOGFILE}"; } 2>&1 1>/dev/null)"
 		[ -n "${CHECK_MESSAGE}" ] && {
 			echo "[$(date "+%Y%m%d-%H%M%S")] ${CHECK_MESSAGE}" >&2
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
@@ -515,6 +566,15 @@ watchdog() {
 	}
 
 	while true; do
+		# Trimming log files
+		[ -n "${LOG_PATH}" ] && {
+			local TRIMMING_MESSAGE="$(utils trimming_files "${WATCHDOG_LOGFILE}:5000" "${FFMPEG_LOGFILE}:10000")"
+			[ -n "${TRIMMING_MESSAGE}" ] && {
+				echo "[$(date "+%Y%m%d-%H%M%S")] ${TRIMMING_MESSAGE}"
+			}
+		}
+
+
 		fetch_m3u
 		# See the notes above fetch_m3u() .
 		case $? in
@@ -606,16 +666,11 @@ watchdog() {
 
 	utils check_depend ffmpeg || { echo >&2; exit 1; }
 
-	init_dir "${SAVE_PATH}:512" "${LOG_PATH}:16" || { echo >&2; exit 1; }
+	init_path -d "${SAVE_PATH}:512" "${LOG_PATH}:16" || { echo >&2; exit 1; }
+	init_path -f "${WATCHDOG_LOGFILE}" "${FFMPEG_LOGFILE}" || { echo >&2; exit 1; }
 
 	[ "${EDGING_MODE}" = "1" ] && { edging; echo; }
 
-	[ -n "${LOG_PATH}" ] \
-		&& WATCHDOG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.log" \
-		|| {
-			WATCHDOG_LOGFILE="/dev/null"
-			FFMPEG_LOGFILE="/dev/null"
-		}
 	watchdog 2>&1 | tee -a "${WATCHDOG_LOGFILE}" 2>/dev/null
 }
 
