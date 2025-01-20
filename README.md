@@ -16,7 +16,7 @@
 
 <div align="center"><h2>Usage | Deploy:</h2></div>
 
-### Launch with One-Command:
+### **Launch with One-Command:**
 
 > Yeah, 1 Line, Just Crazy.
 
@@ -36,13 +36,13 @@
 
 ##
 
-### Docker Container (Recommend) :
+### **Docker Container (Recommend) :**
 
 > If you're using such platforms that have good support for Docker or similar, I highly recommend to use this method: More serious; High-Availability; Everything runs in containers; Easily configures lot of chatrooms at the same time.
 
 > See [Container Arguments](#container-arguments).
 
-#### Officel CtbCap Container Registry:
+#### **Officel CtbCap Container Registry:**
 
   - [Docker Hub](https://hub.docker.com/r/kfermercer/ctbcap)\
     `docker pull kfermercer/ctbcap:latest`
@@ -50,7 +50,20 @@
   - [GitHub Package](https://github.com/KFERMercer/chaturbate-grabber/pkgs/container/ctbcap)\
     `docker pull ghcr.io/kfermercer/ctbcap:latest`
 
-#### Run As Compose Daemon (Recommend) :
+  - | Platform | Available |
+    | :-: | :-: |
+    | x86 | ✅ |
+    | x86_64 | ✅ |
+    | armhf | ✅ |
+    | armv7 | ✅ |
+    | aarch64 | ✅ |
+    | loongarch64 | ✅ |
+    | ppc64le | ✅ |
+    | riscv64 | ✅ |
+    | s390x | ✅ |
+    - **CtbCap will always deliver on the [Compatibility Promise](https://news.berkeley.edu/wp-content/uploads/2017/10/SaguaroCardon750.jpg).**
+
+#### **Run As Compose Daemon (Recommend)** :
 
   1. Custom your own compose file:
 
@@ -72,7 +85,7 @@
      docker compose -f ./ctbcap-compose.yml down --remove-orphans
      ```
 
-#### Run with Docker CLI:
+#### **Run with Docker CLI:**
 
 ```shell
 docker run -t --rm \
@@ -80,6 +93,8 @@ docker run -t --rm \
 -v </path/to/recdir>:/save \
 -v </path/to/logdir>:/log \
 -e TZ=Asia/Shanghai \
+-e <ARG>=<value> \
+... \
 kfermercer/ctbcap -h
 ```
 
@@ -88,11 +103,11 @@ kfermercer/ctbcap -h
 
 > For more container arguments, see: [Container Arguments](#container-arguments)
 
-#### Update the Container Image:
+#### **Update the Container Image:**
 
 > See [Officel CtbCap Container Registry](#officel-ctbcap-container-registry).
 
-### Container Arguments:
+### **Container Arguments:**
 
 | Arguments | Value Type | Value Examples | Default | Necessary to Change |
 | :-: | :-: | :- | :- | :-: |
