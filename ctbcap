@@ -323,25 +323,26 @@ utils() {
 		printf '%s\n' "$@" | while IFS='' read -r DATA ; do
 			local FILE="$(echo "${DATA}" | sed 's|:[^:]*$||')"
 			local LINE="$(echo "${DATA}" | sed 's|.*:||')"
+			local LINE=$(( LINE - 1000 ))
 			local FILE="$(realpath -m "${FILE}" 2>/dev/null)"
 			[ ! -e "${FILE}" ] && return 0
 			[ ! -r "${FILE}" ] && {
-				echo "(WARNING) Abort trimming [${FILE}] due to unreadability."
+				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) Abort trimming [${FILE}] due to unreadability."
 				return 1
 			}
 			[ -z "${LINE}" ] && { echo > "${FILE}"; } >/dev/null 2>&1
 			[ "$(wc -l 2>/dev/null < "${FILE}" || echo 0)" -gt "${LINE}" ] && {
+				echo "[$(date "+%Y%m%d-%H%M%S")] Trim [${FILE}] to the last ${LINE} lines..."
 				local BUFFER_FILE="/dev/shm/_$(basename "${FILE}")_$(date +%s)"
 				tail -n "${LINE}" "${FILE}" > "${BUFFER_FILE}"
 				cat "${BUFFER_FILE}" > "${FILE}"
 				rm -f "${BUFFER_FILE}"
-			} >/dev/null 2>&1
+			}
 			true
 		done
 		return 0
 	;;
 	esac
-
 }
 
 init_path() {
@@ -381,8 +382,8 @@ init_path() {
 		printf '%s\n' "$@" | while IFS='' read -r FILE ; do
 			local FILE="$(realpath -m "${FILE}" 2>/dev/null)"
 			[ -z "${FILE}" ] && return 0 # Skip empty path
-			[ "${FILE}" = "/dev/null" ] && return 0 # Skip black hole
 			[ ! -e "${FILE}" ] && return 0 # Skip not exist
+			[ "${FILE}" = "/dev/null" ] && return 0 # Skip black hole
 			[ ! -f "${FILE}" ] && { echo "(ERROR) [${FILE}] is not a file!" >&2; return 1; }
 			[ ! -w "${FILE}" ] && { echo "(ERROR) Cannot write to [${FILE}] !" >&2; return 1; }
 			true
@@ -562,14 +563,9 @@ watchdog() {
 	}
 
 	while true; do
-		# Trimming log files
-		[ -n "${LOG_PATH}" ] && {
-			local TRIMMING_MESSAGE="$(utils trimming_files "${WATCHDOG_LOGFILE}:5000" "${FFMPEG_LOGFILE}:10000")"
-			[ -n "${TRIMMING_MESSAGE}" ] && {
-				echo "[$(date "+%Y%m%d-%H%M%S")] ${TRIMMING_MESSAGE}"
-			}
-		}
-
+		# Trimming log files.
+		[ -n "${LOG_PATH}" ] \
+			&& utils trimming_files "${WATCHDOG_LOGFILE}:6000" "${FFMPEG_LOGFILE}:11000"
 
 		fetch_m3u
 		# See the notes above fetch_m3u() .
