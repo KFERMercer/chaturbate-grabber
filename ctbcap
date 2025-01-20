@@ -361,7 +361,7 @@ init_path() {
 			local _DIR="${DIR}"; while [ ! -d "${_DIR}" ]; do # ${DIR} may not created yet
 				local _DIR="$(dirname "${_DIR}")"
 			done
-			local FREESPACE="$(df --block-size=1MiB "${_DIR}" | awk 'NR==2 {print $4}')"
+			local FREESPACE="$(df -m "${_DIR}" | awk 'NR==2 {print $4}')"
 			[ "${FREESPACE}" -lt "${SPACE}" ] && {
 				echo "(ERROR) Space on [${_DIR}/] is too low! (${FREESPACE}MiB left, need ${SPACE}MiB at least.)" >&2
 				return 1
