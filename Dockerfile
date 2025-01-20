@@ -5,8 +5,11 @@
 # By doing so, it will significantly reduce the size of final image. ( 140MB -> 18MB )
 # Requires 1GB of free space on file system to build.
 #
+# Make a normal build:
+# `docker build --tag ctbcap ./`
+#
 # If you don't want to compile FFmpeg:
-# `docker build --build-arg BUILD_TARGET=fat --target fat -t <name:tag> ./`
+# `docker build --build-arg BUILD_TARGET=fat --target fat --tag ctbcap ./`
 #
 
 # Universal base for ctbcap and FFmpeg building.
@@ -137,7 +140,7 @@ FROM mother AS builder
 RUN apk add --no-cache build-base gnupg openssl-dev nasm zlib-dev
 
 RUN <<EOT
-	cat <<-EOK | gpg --import
+	cat <<-EOK | gpg --import # FFmpeg public PGP key
 		-----BEGIN PGP PUBLIC KEY BLOCK-----
 
 		mQENBE22rV0BCAC3DzRmA2XlhrqYv9HKoEvNHHf+PzosmCTHmYhWHDqvBxPkSvCl
