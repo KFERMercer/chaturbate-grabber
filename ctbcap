@@ -70,7 +70,8 @@ doc() {
 		echo "			Default: 3600 (60 min)."
 		echo
 		echo "-d			[D]ebug Mode."
-		echo "			Show the raw crawler data."
+		echo "			Show the raw crawler & runtime"
+		echo "			data."
 		echo
 		echo "-e			[E]dging Mode."
 		echo "			Delay initial requests to"
@@ -137,7 +138,6 @@ doc() {
 
 # Produce Runtime Variables.
 genesis_juicer() {
-
 	[ -z "$1" ] && [ -z "${MODEL}" ] && {
 		echo "(NOTICE) No Option Specified! Show Help Message..."
 		echo
@@ -276,7 +276,7 @@ utils() {
 			--compressed \
 			--connect-timeout 5 --retry 5 --retry-delay 2 \
 			2>/dev/null | head -n 1 | grep -oE '[0-9]{3}' \
-		|| echo 000
+			|| echo 000
 	;;
 	# Usage: `utils connect_dump "<URL>"`
 	connect_dump)
@@ -294,7 +294,7 @@ utils() {
 			| head -n 1 \
 			| cut -c -15 \
 			| grep -oE '[0-9]{3}' \
-		|| echo 000
+			|| echo 000
 	;;
 	# Re-implement random num tool on POSIX Shell (B/E).
 	# Usage: `utils random_num <SNUM> <BNUM>`
@@ -316,7 +316,7 @@ utils() {
 		}
 		return 0
 	;;
-	# Trimming the file content before line num.
+	# Trim the file to the configured number of lines.
 	# Usage: `utils trimming_files "<file1>:<max line>" "<file2>:<max line>" ...`
 	trimming_files)
 		shift 1
