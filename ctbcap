@@ -334,7 +334,7 @@ utils() {
 				local BUFFER_FILE="/dev/shm/_$(basename "${FILE}")_$(date +%s)"
 				tail -n "${LINE}" "${FILE}" > "${BUFFER_FILE}"
 				cat "${BUFFER_FILE}" > "${FILE}"
-				rm -f /dev/shm/_"$(basename "${FILE}")"
+				rm -f "${BUFFER_FILE}"
 			} >/dev/null 2>&1
 			true
 		done
