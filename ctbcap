@@ -311,14 +311,36 @@ utils() {
 
 }
 
+# Usage: `init_dir "<DIR1>:<MiB NEED>" "<DIR2>:<MiB NEED>" ...`
 init_dir() {
-	printf '%s\n' "$@" | while IFS='' read -r DIR ; do
-		[ -z "${DIR}" ] && return 0
+	printf '%s\n' "$@" | while IFS='' read -r DATA ; do
+		local DIR="$(echo "${DATA}" | sed 's|:[^:]*$||')"
+		local SPACE="$(echo "${DATA}" | sed 's|.*:||')"
+		[ -z "${DIR}" ] && return 0 # Skip empty path
+		[ -z "${SPACE}" ] && local SPACE=0 # No space require
+
 		[ -z "${DIR%"/"}" ] && { echo "(ERROR) Root directory are not allowed!" >&2; return 1; }
+
+		local _DIR="${DIR}"; while [ ! -d "${_DIR}" ]; do # ${DIR} may not created yet
+			local _DIR="$(dirname "${_DIR}")"
+		done
+		local FREESPACE="$(df --block-size=1MiB "${_DIR}" | awk 'NR==2 {print $4}')"
+		[ "${FREESPACE}" -lt "${SPACE}" ] && {
+			echo "(ERROR) Space on [${_DIR}/] is too low! (${FREESPACE}MiB left, need ${SPACE}MiB at least.)" >&2
+			return 1
+		}
+
 		mkdir -p "${DIR}" 1>/dev/null 2>&1
 		[ ! -e "${DIR}" ] && { echo "(ERROR) Unable to create directory [${DIR}] !" >&2; return 1; }
 		[ ! -d "${DIR}" ] && { echo "(ERROR) [${DIR}] is not a directory!" >&2; return 1; }
 		[ ! -w "${DIR}" ] && { echo "(ERROR) Cannot Write To [${DIR}/] !" >&2; return 1; }
+
+		[ "${SPACE}" = 0 ] || {
+			[ "${FREESPACE}" -lt 1024 ] && {
+				echo "(WARNING) Space on [${DIR}/] is lower than 1GiB! [${FREESPACE}MiB]"
+				echo
+			}
+		}
 		true
 	done
 }
@@ -481,16 +503,29 @@ grab_stream() {
 }
 
 watchdog() {
+	check_dir() {
+		local CHECK_MESSAGE="$({ init_dir "${SAVE_PATH}:512" "${LOG_PATH}:16"; } 2>&1 1>/dev/null)"
+		[ -n "${CHECK_MESSAGE}" ] && {
+			echo "[$(date "+%Y%m%d-%H%M%S")] ${CHECK_MESSAGE}" >&2
+			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
+			sleep $(utils random_num 480 720)
+			return 1
+		}
+		return 0
+	}
+
 	while true; do
 		fetch_m3u
 		# See the notes above fetch_m3u() .
 		case $? in
 		0)
+			check_dir || continue
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
 			grab_stream
 			# If recording interrupt by first time
 			while true; do
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
+				check_dir || break
 				local STREAM_TEMP_STATUS="$(utils connect_status "${STREAM_LINK}")"
 				case ${STREAM_TEMP_STATUS} in
 				2*|3*)
@@ -500,14 +535,13 @@ watchdog() {
 				;;
 				*)
 					echo "[$(date "+%Y%m%d-%H%M%S")] Stream Link closed... [${STREAM_TEMP_STATUS}]"
+					# Too short time may cause the platform to enable CAPTCHA to you.
+					echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
+					sleep $(utils random_num 240 360) # Random num B/E 240 - 360
 					break
 				;;
 				esac
 			done
-
-			# Too short time may cause the platform to enable CAPTCHA to you.
-			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
-			sleep $(utils random_num 240 360) # Random num B/E 240 - 360
 		;;
 		1)
 			# Too short time may cause the platform to enable CAPTCHA to you.
@@ -572,7 +606,7 @@ watchdog() {
 
 	utils check_depend ffmpeg || { echo >&2; exit 1; }
 
-	init_dir "${SAVE_PATH}" "${LOG_PATH}" || { echo >&2; exit 1; }
+	init_dir "${SAVE_PATH}:512" "${LOG_PATH}:16" || { echo >&2; exit 1; }
 
 	[ "${EDGING_MODE}" = "1" ] && { edging; echo; }
 
