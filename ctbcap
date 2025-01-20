@@ -15,6 +15,7 @@ defaulting_args() {
 	[ -n "${SAVE_PATH}" ] || SAVE_PATH="${PWD}/rec"
 
 	# Log files saving path
+	# Disable logging if set to 0.
 	[ -n "${LOG_PATH}" ] || LOG_PATH="${SAVE_PATH}/log"
 
 	# Streamer's Username or Room URL.
@@ -90,6 +91,7 @@ doc() {
 		echo
 		echo "-o </path/to/logdir>	L[o]gging files will save to"
 		echo "			this path."
+		echo "			Disable logging if set to 0."
 		echo "			Default: <recdir>/log/"
 		echo "			Don't Use if Runs in Docker."
 		echo
@@ -249,7 +251,9 @@ genesis_juicer() {
 	}
 
 	SAVE_PATH="$(realpath -m "${SAVE_PATH}" 2>/dev/null)"
-	LOG_PATH="$(realpath -m "${LOG_PATH}" 2>/dev/null)"
+	[ "${LOG_PATH}" = 0 ] \
+		&& LOG_PATH="" \
+		|| LOG_PATH="$(realpath -m "${LOG_PATH}" 2>/dev/null)"
 
 	return 0
 }
@@ -309,6 +313,7 @@ utils() {
 
 init_dir() {
 	printf '%s\n' "$@" | while IFS='' read -r DIR ; do
+		[ -z "${DIR}" ] && return 0
 		[ -z "${DIR%"/"}" ] && { echo "(ERROR) Root directory are not allowed!" >&2; return 1; }
 		mkdir -p "${DIR}" 1>/dev/null 2>&1
 		[ ! -e "${DIR}" ] && { echo "(ERROR) Unable to create directory [${DIR}] !" >&2; return 1; }
@@ -443,7 +448,7 @@ fetch_m3u() {
 
 grab_stream() {
 
-	local FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
+	[ -n "${FFMPEG_LOGFILE}" ] || local FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
 	local CAPTURE_TIME=$(date "+%Y%m%d-%H%M%S")
 
 	{
@@ -571,7 +576,13 @@ watchdog() {
 
 	[ "${EDGING_MODE}" = "1" ] && { edging; echo; }
 
-	watchdog 2>&1 | tee -a "${LOG_PATH}/${MODEL}-${PLATFORM}.log" 2>/dev/null
+	[ -n "${LOG_PATH}" ] \
+		&& WATCHDOG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.log" \
+		|| {
+			WATCHDOG_LOGFILE="/dev/null"
+			FFMPEG_LOGFILE="/dev/null"
+		}
+	watchdog 2>&1 | tee -a "${WATCHDOG_LOGFILE}" 2>/dev/null
 }
 
 exit 0

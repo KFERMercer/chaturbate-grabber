@@ -87,7 +87,9 @@ COPY --chmod=755 <<-'EOF' /bin/healthcheck
 
 	# Is directories writable?
 	[ ! -w "${SAVE_PATH}" ] && { echo "(ERROR) SAVE_PATH is unwritable!"; exit 1; }
-	[ ! -w "${LOG_PATH}" ] && { echo "(ERROR) LOG_PATH is unwritable!"; exit 1; }
+	[ "${LOG_PATH}" = 0 ] || {
+		[ ! -w "${LOG_PATH}" ] && { echo "(ERROR) LOG_PATH is unwritable!"; exit 1; }
+	}
 
 	FFMPEG_PROCESS="$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null)"
 	# If has FFmpeg process...
