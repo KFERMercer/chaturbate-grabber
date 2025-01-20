@@ -267,8 +267,8 @@ genesis_juicer() {
 
 # Power Tools
 utils() {
-
 	case $1 in
+	# Usage: `utils connect_status "<URL>"`
 	connect_status)
 		curl "$2" \
 			-4 -L -s -I \
@@ -278,6 +278,7 @@ utils() {
 			2>/dev/null | head -n 1 | grep -oE '[0-9]{3}' \
 		|| echo 000
 	;;
+	# Usage: `utils connect_dump "<URL>"`
 	connect_dump)
 		curl "$2" \
 			-4 -L -s -i\
@@ -287,6 +288,7 @@ utils() {
 			2>/dev/null | tr -d '\r'
 	;;
 	# Reuse results of connect_dump to get HTTP status code at the time.
+	# Usage: `utils dump2status "<URL dump>"`
 	dump2status)
 		echo "$2" \
 			| head -n 1 \
@@ -294,9 +296,9 @@ utils() {
 			| grep -oE '[0-9]{3}' \
 		|| echo 000
 	;;
-	# RE-Implement RANDOM NUM Tool on POSIX Shell (B/E).
+	# Re-implement random num tool on POSIX Shell (B/E).
+	# Usage: `utils random_num <SNUM> <BNUM>`
 	random_num)
-		# Usage: `utils random_num <SNUM> <BNUM>`
 		local SNUM=$2 # INT. Must >= 0. Small-end of Random Num you want.
 		local BNUM=$3 # INT. Must < (2^32)/2. Big-end of Random Num you want.
 		local BNUM=$(( BNUM + 1 )) # Add ${BNUM} to the pool, make method become B/E Random.
@@ -369,13 +371,6 @@ init_path() {
 			[ ! -e "${DIR}" ] && { echo "(ERROR) Unable to create directory [${DIR}] !" >&2; return 1; }
 			[ ! -d "${DIR}" ] && { echo "(ERROR) [${DIR}] is not a directory!" >&2; return 1; }
 			[ ! -w "${DIR}" ] && { echo "(ERROR) Cannot write to [${DIR}/] !" >&2; return 1; }
-
-			[ "${SPACE}" = 0 ] || {
-				[ "${FREESPACE}" -lt 1024 ] && {
-					echo "(WARNING) Space on [${DIR}/] is lower than 1GiB! [${FREESPACE}MiB]"
-					echo
-				}
-			}
 			true
 		done
 	;;
@@ -396,13 +391,13 @@ init_path() {
 	esac
 }
 
-# Sleep time (s) before initial request to server. Range better EQ to watchdog().while.case.1).echo .
+# Sleep time (sec) before initial request to server. Range better EQ to watchdog().while.case.1).echo.
 edging() {
 	local EDGING_TIME=$(utils random_num 0 600)
 
 	echo "Edging Mode is On."
 	echo
-	echo "Delay [${EDGING_TIME}]s before Simping [${MODEL}]".
+	echo "Delay [${EDGING_TIME}]s before Simping [${MODEL}]."
 	echo
 	echo "Considering we won't send any requests to [${PLATFORM}]"
 	echo "server until Edging is over, So please make sure that"
@@ -516,7 +511,7 @@ fetch_m3u() {
 		return 1
 	fi
 
-	return 0
+	return 110 # Tin Foil Hat
 }
 
 grab_stream() {
@@ -525,6 +520,7 @@ grab_stream() {
 	{
 		echo
 		echo "========== [${CAPTURE_TIME}] =========="
+		echo "${STREAM_LINK}"
 		echo
 	} >> "${FFMPEG_LOGFILE}"
 
@@ -535,8 +531,8 @@ grab_stream() {
 		-i "${STREAM_LINK}" \
 		-tls_verify 0 \
 		-c copy \
-		$( [ -z "${DEBUG_MODE}" ] && \
-			printf "%s" "-loglevel warning" \
+		$( [ -z "${DEBUG_MODE}" ] \
+			&& printf "%s" "-loglevel warning" \
 		) \
 		$( [ "${CUT_TIME}" = 0 ] \
 			&& printf "%s" "
@@ -595,27 +591,25 @@ watchdog() {
 				;;
 				*)
 					echo "[$(date "+%Y%m%d-%H%M%S")] Stream Link closed... [${STREAM_TEMP_STATUS}]"
-					# Too short time may cause the platform to enable CAPTCHA to you.
 					echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
-					sleep $(utils random_num 240 360) # Random num B/E 240 - 360
+					sleep $(utils random_num 240 360)
 					break
 				;;
 				esac
 			done
 		;;
 		1)
-			# Too short time may cause the platform to enable CAPTCHA to you.
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
 			sleep $(utils random_num 480 720)
 		;;
 		2) sleep $(utils random_num 4 6) ;;
 		3)
-			# Too short time may cause the platform to enable CAPTCHA to you.
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 1 hr..."
 			sleep $(utils random_num 3300 3900)
 		;;
 		*)
-			echo "Logic is dead. It's tinfoil hat time."
+			echo "[$(date "+%Y%m%d-%H%M%S")] Logic is dead. Time to Tin Foil Hat."
+			sleep $(utils random_num 32400 39600)
 		;;
 		esac
 	done
@@ -624,7 +618,7 @@ watchdog() {
 { # Execution Entry
 	trap '{
 		echo
-		echo "[$(date "+%Y%m%d-%H%M%S")] BYE (. Y .) BYE"
+		echo "BYE (. Y .) BYE"
 		echo
 		exit 0
 	}' HUP INT QUIT TERM
