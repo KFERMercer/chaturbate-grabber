@@ -549,7 +549,7 @@ grab_stream() {
 }
 
 watchdog() {
-	check_dir() {
+	check_path() {
 		local CHECK_MESSAGE="$({ init_path -d "${SAVE_PATH}:512" "${LOG_PATH}:16"; } 2>&1 1>/dev/null)"
 		[ -z "${CHECK_MESSAGE}" ] \
 			&& local CHECK_MESSAGE="$({ init_path -f "${WATCHDOG_LOGFILE}" "${FFMPEG_LOGFILE}"; } 2>&1 1>/dev/null)"
@@ -571,13 +571,13 @@ watchdog() {
 		# See the notes above fetch_m3u() .
 		case $? in
 		0)
-			check_dir || continue
+			check_path || continue
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
 			grab_stream
 			# If recording interrupt by first time
 			while true; do
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
-				check_dir || break
+				check_path || break
 				local STREAM_TEMP_STATUS="$(utils connect_status "${STREAM_LINK}")"
 				case ${STREAM_TEMP_STATUS} in
 				2*|3*)
