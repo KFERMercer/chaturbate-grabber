@@ -45,7 +45,7 @@ ENV CUT_TIME=3600
 ENV EDGING_MODE="uncle makes me pee white"
 ENV DEBUG_MODE="your mom is so hot"
 
-COPY --chmod=755 <<-'EOF' /bin/healthcheck
+COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 	#!/usr/bin/env sh
 
 	[ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
@@ -113,7 +113,7 @@ HEALTHCHECK \
 	--start-period=300s \
 	--start-interval=300s \
 	--retries=3 \
-	CMD ["healthcheck"]
+	CMD ["ctbcap-healthcheck"]
 
 ENTRYPOINT ["tini", "-g", "--", "ctbcap"]
 
