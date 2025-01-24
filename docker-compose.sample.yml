@@ -1,11 +1,10 @@
 services:
 
-  modelname_1: &template-config # Change modelname to yours.
+  modelname_1: &ctbcap-cfg # Change modelname to yours.
     image: kfermercer/ctbcap:latest # Mirror: ghcr.io/kfermercer/ctbcap:latest
-    container_name: ctbcap-modelname_1 # Change modelname to yours.
     user: 1000:1000 # <UID>:<GID>. Specify the user (UID) and group (GID) that the ctbcap will run as.
     restart: unless-stopped
-    environment: &template-environment
+    environment: &ctbcap-env
       MODEL: modelname_1 # Change modelname to yours.
       PLATFORM: chaturbate # What platform are model streaming at. choose "chaturbate" or "stripchat".
       TZ: Asia/Shanghai # Naming saved files & logs by using this timezone. See <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List>.
@@ -22,12 +21,11 @@ services:
 
   # Only need modifying values that different from template.
   modelname_2:
-    <<: *template-config
-    container_name: ctbcap-modelname_2
+    <<: *ctbcap-cfg
     # user: 1000:1000
     # restart: unless-stopped
     environment:
-      <<: *template-environment
+      <<: *ctbcap-env
       MODEL: modelname_2
       # PLATFORM: chaturbate
       # TZ: Asia/Shanghai
@@ -39,8 +37,7 @@ services:
     #   - /path/to/logdir:/log
 
   modelname_3:
-    <<: *template-config
-    container_name: ctbcap-modelname_3
+    <<: *ctbcap-cfg
     environment:
-      <<: *template-environment
+      <<: *ctbcap-env
       MODEL: modelname_3

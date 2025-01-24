@@ -60,7 +60,7 @@ doc() {
 		echo "              Simping Stream from CB & SC"
 	;;
 	help)
-		echo "Usage: ctbcap [options...] <username|url>"
+		echo "Usage: ctbcap [options...] <Username|URL>"
 		echo
 		echo "<username|url>		Streamer's Username or Chat"
 		echo "			Room URL."
@@ -84,7 +84,7 @@ doc() {
 		echo
 		echo "-f </path/to/recdir>	Recording [f]iles will save"
 		echo "			to this path."
-		echo "			Default: /\${PWD}/rec/"
+		echo "			Default: \${PWD}/rec/"
 		echo "			Don't Use if Runs in Docker."
 		echo
 		echo "-h			Get [H]elp for Commands."
@@ -283,7 +283,7 @@ utils() {
 			2>/dev/null | tr -d '\r'
 	;;
 	# Reuse results of connect_dump to get HTTP status code at the time.
-	# Usage: `utils dump2status "<URL dump>"`
+	# Usage: `utils dump2status "<URL DUMP>"`
 	dump2status)
 		echo "$2" \
 			| head -n 1 \
@@ -304,6 +304,7 @@ utils() {
 		done
 		echo $(( RSEED % ( BNUM - SNUM ) + SNUM )) # Format Same as $((RANDOM)) in Bash.
 	;;
+	# Usage: `utils check_depend "<COMMAND>"`
 	check_depend)
 		command -v "$2" 1>/dev/null 2>&1 || {
 			echo "(ERROR) Command [$2] not found! Check \$PATH or install it." >&2

@@ -4,7 +4,7 @@
 
 <div align="center"><p><strong><a href="#officel-ctbcap-container-registry">Officel Container Registry</a></strong></p></div>
 
-<div align="center"><h2>Key Advantages:</h2></div>
+<div align="center"><h2>Key Advantages</h2></div>
 
 - **Lightweight** - Written by most basic Shell Scripts with full POSIX compatibility. [Pythonless](https://m.media-amazon.com/images/I/71CmeuB3XXL._AC_UF1000,1000_QL80_.jpg), but far superior performance and energy efficiency.
 
@@ -14,7 +14,7 @@
 
 - **Multifunction** - Auto Recording; Auto Monitoring; Auto Stopping; Large-Scale Deploy... Just find by yourself.
 
-<div align="center"><h2>Usage | Deploy:</h2></div>
+<div align="center"><h2>Usage | Deploy</h2></div>
 
 ### **Launch with One-Command:**
 
@@ -40,8 +40,6 @@
 
 > If you're using such platforms that have good support for Docker or similar, I highly recommend to use this method: More serious; High-Availability; Everything runs in containers; Easily configures lot of chatrooms at the same time.
 
-> See [Container Arguments](#container-arguments).
-
 #### **Officel CtbCap Container Registry:**
 
   - [Docker Hub](https://hub.docker.com/r/kfermercer/ctbcap)\
@@ -50,18 +48,18 @@
   - [GitHub Package](https://github.com/KFERMercer/chaturbate-grabber/pkgs/container/ctbcap)\
     `docker pull ghcr.io/kfermercer/ctbcap:latest`
 
-  - | Platform | Available |
-    | :-: | :-: |
-    | x86 | ✅ |
-    | x86_64 | ✅ |
-    | armhf | ✅ |
-    | armv7 | ✅ |
-    | aarch64 | ✅ |
-    | loongarch64 | ✅ |
-    | ppc64le | ✅ |
-    | riscv64 | ✅ |
-    | s390x | ✅ |
-    - **CtbCap will always deliver on the [Compatibility Promise](https://news.berkeley.edu/wp-content/uploads/2017/10/SaguaroCardon750.jpg).**
+| Platform | Available |
+| :-: | :-: |
+| x86 | ✅ |
+| x86_64 | ✅ |
+| armhf | ✅ |
+| armv7 | ✅ |
+| aarch64 | ✅ |
+| loongarch64 | ✅ |
+| ppc64le | ✅ |
+| riscv64 | ✅ |
+| s390x | ✅ |
+> **CtbCap will always deliver on the [Compatibility Promise](https://news.berkeley.edu/wp-content/uploads/2017/10/SaguaroCardon750.jpg).**
 
 #### **Run As Compose Daemon (Recommend)** :
 
