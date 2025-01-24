@@ -311,6 +311,23 @@ utils() {
 		}
 		return 0
 	;;
+	# Usage: `utils check_ffmpeg_ver`
+	check_ffmpeg_ver)
+		local REQ_VER=5.0 # Required minimum version of FFmpeg.
+		local REC_VER=6.0 # Recommended minimum version of FFmpeg.
+		local COR_VER="$(ffmpeg -version 2>/dev/null | head -n 1 | grep -oE '[0-9][^ ]+' | head -n 1)"
+		[ "{COR_VER}" = "${REC_VER}" ] && return 0
+		[ "{COR_VER}" = "${REQ_VER}" ] && return 0
+		[ "$(printf "${REQ_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
+			echo "(ERROR) Current version of FFmpeg [${COR_VER}] is too low! (${REQ_VER} at least, >= ${REC_VER} is recommended.)" >&2
+			return 1
+		}
+		[ "$(printf "${REC_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
+			echo "(WARNING) Current version of FFmpeg [${COR_VER}] is not enough for full functionality. (>= ${REC_VER} is recommended.)" >&2
+			return 2
+		}
+		return 0
+	;;
 	# Execute the command and prefix the output with a Time-Mark.
 	# Only for short execution command.
 	# Commands run within cannot assign global variable.
@@ -521,16 +538,17 @@ fetch_m3u() {
 grab_stream() {
 	local CAPTURE_TIME=$(date "+%Y%m%d-%H%M%S")
 
-		echo "========== [${CAPTURE_TIME}] =========="
+	echo "========== [${CAPTURE_TIME}] =========="
 	echo "${STREAM_LINK}"
 	echo
-	
+
 	# Core FFmpeg method.
 	# After making any changes, must confirm the compatibility of tailored FFmpeg in Dockerfile.
 	ffmpeg \
 		-user_agent "${UA}" \
 		$([ "${DEBUG_MODE}" = "1" ] || printf "%s" "-loglevel warning") \
 		-tls_verify 0 \
+		$([ -z "${FFMPEG_OUTDATE}" ] && printf "%s" "-seg_max_retry 5") \
 		-i "${STREAM_LINK}" \
 		-c copy \
 		$( [ "${CUT_TIME}" = 0 ] \
@@ -555,6 +573,8 @@ watchdog() {
 		case $? in
 		0)
 			utils timemark_exec "init_path -d ${SAVE_PATH}:${SAVE_PATH_SPACE} ${LOG_PATH}:${LOG_PATH_SPACE}" || continue
+			utils timemark_exec "utils check_ffmpeg_ver" && unset FFMPEG_OUTDATE
+			case $? in 1) continue ;; 2) local FFMPEG_OUTDATE=1 ;; esac
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
 			while true; do
 				[ "${DEBUG_MODE}" = "1" ] \
@@ -644,6 +664,11 @@ watchdog() {
 	}
 
 	utils check_depend ffmpeg || { echo >&2; exit 1; }
+	utils check_ffmpeg_ver
+	case $? in
+	1) echo >&2; exit 1 ;;
+	2) echo ;;
+	esac
 
 	init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" || { echo >&2; exit 1; }
 	init_path -f "${WATCHDOG_LOGFILE}:" "${FFMPEG_LOGFILE}:" || { echo >&2; exit 1; }
