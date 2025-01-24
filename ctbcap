@@ -13,10 +13,12 @@ defaulting_args() {
 
 	# Recorded files saving path
 	[ -n "${SAVE_PATH}" ] || SAVE_PATH="${PWD}/rec"
+	[ -n "${SAVE_PATH_SPACE}" ] || SAVE_PATH_SPACE=512 # Required disk space by MiB.
 
 	# Log files saving path
 	# Disable logging if set to 0.
 	[ -n "${LOG_PATH}" ] || LOG_PATH="${SAVE_PATH}/log"
+	[ -n "${LOG_PATH_SPACE}" ] || LOG_PATH_SPACE=16 # Required disk space by MiB.
 
 	# Streamer's Username or Room URL.
 	[ -n "${MODEL}" ] || MODEL=
@@ -309,47 +311,34 @@ utils() {
 		}
 		return 0
 	;;
-	# Trim the file to the configured number of lines.
-	# Usage: `utils trimming_files "<file1>:<max line>" "<file2>:<max line>" ...`
-	trimming_files)
-		shift 1
-		printf '%s\n' "$@" | while IFS='' read -r DATA ; do
-			local FILE="$(echo "${DATA}" | sed 's|:[^:]*$||')"
-			local LINE="$(echo "${DATA}" | sed 's|.*:||')"
-			local LINE=$(( LINE - 1000 ))
-			local FILE="$(realpath -m "${FILE}" 2>/dev/null)"
-			[ ! -e "${FILE}" ] && return 0
-			[ ! -r "${FILE}" ] && {
-				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) Abort trimming [${FILE}] due to unreadability."
-				return 1
-			}
-			[ -z "${LINE}" ] && { echo > "${FILE}"; } >/dev/null 2>&1
-			[ "$(wc -l 2>/dev/null < "${FILE}" || echo 0)" -gt "${LINE}" ] && {
-				echo "[$(date "+%Y%m%d-%H%M%S")] Trim [${FILE}] to the last ${LINE} lines..."
-				local BUFFER_FILE="/dev/shm/_$(basename "${FILE}")_$(date +%s)"
-				tail -n "${LINE}" "${FILE}" > "${BUFFER_FILE}"
-				cat "${BUFFER_FILE}" > "${FILE}"
-				rm -f "${BUFFER_FILE}"
-			}
-			true
-		done
-		return 0
+	# Execute the command and prefix the output with a Time-Mark.
+	# Only for short execution command.
+	# Commands run within cannot assign global variable.
+	# Usage: `utils timemark_exec "<COMMAND LINE>"`
+	timemark_exec)
+		local TIME_MARK="[$(date "+%Y%m%d-%H%M%S")] "
+		local ROW="$($2 2>&1; printf "\n$?")"
+		local OUTPUT="$(echo "$(echo "${ROW}" | head -n -1)")"
+		[ -z "${OUTPUT}" ] && return 0
+		local EXEC_STAT="$(echo "${ROW}" | tail -n 1)"
+		echo "${OUTPUT}" | sed "s|^|${TIME_MARK}|"
+		return ${EXEC_STAT}
 	;;
 	esac
 }
 
+# Usage:
+# Init dirs: `init_path -d "<DIR1>:<MiB>" "<DIR2>:<MiB>" ...`
+# Init files: `init_path -f "<FILE1>:<MAX LINE>" "<FILE2>:<MAX LINE>" ...`
 init_path() {
 	case $1 in
-	# Init dirs.
-	# Usage: `init_path -d "<dir path1>:<MiB>" "<dir path2>:<MiB>" ...`
 	-d)
 		shift 1
 		printf '%s\n' "$@" | while IFS='' read -r DATA ; do
 			local DIR="$(echo "${DATA}" | sed 's|:[^:]*$||')"
+			[ -z "${DIR}" ] && continue # Skip empty path
 			local SPACE="$(echo "${DATA}" | sed 's|.*:||')"
-			[ -z "${DIR}" ] && return 0 # Skip empty path
 			[ -z "${SPACE}" ] && local SPACE=0 # No space require
-
 			[ -z "${DIR%"/"}" ] && { echo "(ERROR) Root directory are not allowed!" >&2; return 1; }
 
 			local _DIR="${DIR}"; while [ ! -d "${_DIR}" ]; do # ${DIR} may not created yet
@@ -364,22 +353,36 @@ init_path() {
 			mkdir -p "${DIR}" 1>/dev/null 2>&1
 			[ ! -e "${DIR}" ] && { echo "(ERROR) Unable to create directory [${DIR}] !" >&2; return 1; }
 			[ ! -d "${DIR}" ] && { echo "(ERROR) [${DIR}] is not a directory!" >&2; return 1; }
-			[ ! -w "${DIR}" ] && { echo "(ERROR) Cannot write to [${DIR}/] !" >&2; return 1; }
+			[ ! -w "${DIR}" ] && { echo "(ERROR) Unable to write to directory [${DIR}/] !" >&2; return 1; }
 			true
 		done
 	;;
-	# Init files.
-	# Usage: `init_path -f "<file path1>" "<file path2>" ...`
 	-f)
 		shift 1
-		printf '%s\n' "$@" | while IFS='' read -r FILE ; do
-			local FILE="$(realpath -m "${FILE}" 2>/dev/null)"
-			[ -z "${FILE}" ] && return 0 # Skip empty path
-			[ ! -e "${FILE}" ] && return 0 # Skip not exist
-			[ "${FILE}" = "/dev/null" ] && return 0 # Skip black hole
+		printf '%s\n' "$@" | while IFS='' read -r DATA ; do
+			local FILE="$(echo "${DATA}" | sed 's|:[^:]*$||')"
+			[ -z "${FILE}" ] && continue # Skip empty path
+			[ ! -e "${FILE}" ] && continue # Skip not exist
+			[ "${FILE}" = "/dev/null" ] && continue # Skip black hole
 			[ ! -f "${FILE}" ] && { echo "(ERROR) [${FILE}] is not a file!" >&2; return 1; }
-			[ ! -w "${FILE}" ] && { echo "(ERROR) Cannot write to [${FILE}] !" >&2; return 1; }
-			true
+			[ ! -w "${FILE}" ] && { echo "(ERROR) Unable to write to file [${FILE}] !" >&2; return 1; }
+
+			local LINE="$(echo "${DATA}" | sed 's|.*:||')"
+			[ -z "${LINE}" ] && continue # Skip trimming file
+			[ ! -r "${FILE}" ] && {
+				echo "(WARNING) Unable to read file [${FILE}] !" >&2
+				echo "(WARNING) Skip trimming [${FILE}] due to unreadability." >&2
+				continue
+			}
+			local LINE=$(( LINE - 1000 ))
+			[ "${LINE}" -le 0 ] && { cat /dev/null > "${FILE}"; } >/dev/null 2>&1
+			[ "$(wc -l 2>/dev/null < "${FILE}" || echo 0)" -gt "${LINE}" ] && {
+				echo "Trim [${FILE}] to the last ${LINE} lines..."
+				local BUFFER_FILE="/dev/shm/_$(basename "${FILE}")_$(date +%s)"
+				tail -n "${LINE}" "${FILE}" > "${BUFFER_FILE}"
+				cat "${BUFFER_FILE}" > "${FILE}"
+				rm -f "${BUFFER_FILE}"
+			}
 		done
 	;;
 	esac
@@ -518,23 +521,18 @@ fetch_m3u() {
 grab_stream() {
 	local CAPTURE_TIME=$(date "+%Y%m%d-%H%M%S")
 
-	{
-		echo
 		echo "========== [${CAPTURE_TIME}] =========="
-		echo "${STREAM_LINK}"
-		echo
-	} >> "${FFMPEG_LOGFILE}"
-
+	echo "${STREAM_LINK}"
+	echo
+	
 	# Core FFmpeg method.
 	# After making any changes, must confirm the compatibility of tailored FFmpeg in Dockerfile.
 	ffmpeg \
 		-user_agent "${UA}" \
-		-i "${STREAM_LINK}" \
+		$([ "${DEBUG_MODE}" = "1" ] || printf "%s" "-loglevel warning") \
 		-tls_verify 0 \
+		-i "${STREAM_LINK}" \
 		-c copy \
-		$( [ -z "${DEBUG_MODE}" ] \
-			&& printf "%s" "-loglevel warning" \
-		) \
 		$( [ "${CUT_TIME}" = 0 ] \
 			&& printf "%s" "
 				${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}.mkv" \
@@ -544,70 +542,61 @@ grab_stream() {
 				-segment_start_number 1 \
 				-reset_timestamps 1 \
 				${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%03d.mkv" \
-		) \
-	>> "${FFMPEG_LOGFILE}" 2>&1
+		)
+
+	echo
 }
 
 watchdog() {
-	check_path() {
-		local CHECK_MESSAGE="$({ init_path -d "${SAVE_PATH}:512" "${LOG_PATH}:16"; } 2>&1 1>/dev/null)"
-		[ -z "${CHECK_MESSAGE}" ] \
-			&& local CHECK_MESSAGE="$({ init_path -f "${WATCHDOG_LOGFILE}" "${FFMPEG_LOGFILE}"; } 2>&1 1>/dev/null)"
-		[ -n "${CHECK_MESSAGE}" ] && {
-			echo "[$(date "+%Y%m%d-%H%M%S")] ${CHECK_MESSAGE}" >&2
-			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
-			sleep $(utils random_num 480 720)
-			return 1
-		}
-		return 0
-	}
-
 	while true; do
-		# Trimming log files.
-		[ -n "${LOG_PATH}" ] \
-			&& utils trimming_files "${WATCHDOG_LOGFILE}:6000" "${FFMPEG_LOGFILE}:11000"
-
+		utils timemark_exec "init_path -f ${WATCHDOG_LOGFILE}:6000 ${FFMPEG_LOGFILE}:11000"
 		fetch_m3u
 		# See the notes above fetch_m3u() .
 		case $? in
 		0)
-			check_path || continue
+			utils timemark_exec "init_path -d ${SAVE_PATH}:${SAVE_PATH_SPACE} ${LOG_PATH}:${LOG_PATH_SPACE}" || continue
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
-			grab_stream
-			# If recording interrupt by first time
 			while true; do
+				[ "${DEBUG_MODE}" = "1" ] \
+					&& { grab_stream 2>&1 | tee -a "${FFMPEG_LOGFILE}" 2>/dev/null; true; } \
+					|| { grab_stream 2>&1 | tee -a "${FFMPEG_LOGFILE}" >/dev/null 2>&1; }
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
-				check_path || break
-				local STREAM_TEMP_STATUS="$(utils connect_status "${STREAM_LINK}")"
-				case ${STREAM_TEMP_STATUS} in
+				utils timemark_exec "init_path -d ${SAVE_PATH}:${SAVE_PATH_SPACE} ${LOG_PATH}:${LOG_PATH_SPACE}" || break
+				local STREAM_STATUS="$(utils connect_status "${STREAM_LINK}")"
+				case ${STREAM_STATUS} in
 				2*|3*)
 					# Reconnect.
-					echo "[$(date "+%Y%m%d-%H%M%S")] Restart recording... [${STREAM_TEMP_STATUS}]"
-					grab_stream
+					echo "[$(date "+%Y%m%d-%H%M%S")] Restart recording... [${STREAM_STATUS}]"
+					continue
 				;;
 				*)
-					echo "[$(date "+%Y%m%d-%H%M%S")] Stream Link closed... [${STREAM_TEMP_STATUS}]"
+					echo "[$(date "+%Y%m%d-%H%M%S")] Stream Link closed... [${STREAM_STATUS}]"
 					echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
 					sleep $(utils random_num 240 360)
 					break
 				;;
 				esac
 			done
+			continue
 		;;
-		1)
-			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
-			sleep $(utils random_num 480 720)
+		1) ;;
+		2)
+			sleep $(utils random_num 4 6)
+			continue
 		;;
-		2) sleep $(utils random_num 4 6) ;;
 		3)
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 1 hr..."
 			sleep $(utils random_num 3300 3900)
+			continue
 		;;
 		*)
 			echo "[$(date "+%Y%m%d-%H%M%S")] Logic is dead. Time to Tin Foil Hat."
 			sleep $(utils random_num 32400 39600)
+			continue
 		;;
 		esac
+		echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
+		sleep $(utils random_num 480 720)
 	done
 }
 
@@ -656,8 +645,8 @@ watchdog() {
 
 	utils check_depend ffmpeg || { echo >&2; exit 1; }
 
-	init_path -d "${SAVE_PATH}:512" "${LOG_PATH}:16" || { echo >&2; exit 1; }
-	init_path -f "${WATCHDOG_LOGFILE}" "${FFMPEG_LOGFILE}" || { echo >&2; exit 1; }
+	init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" || { echo >&2; exit 1; }
+	init_path -f "${WATCHDOG_LOGFILE}:" "${FFMPEG_LOGFILE}:" || { echo >&2; exit 1; }
 
 	[ "${EDGING_MODE}" = "1" ] && { edging; echo; }
 
