@@ -230,14 +230,8 @@ genesis_juicer() {
 
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
-	chaturbate|ctb|cb)
-		PLATFORM=chaturbate
-		LINK="https://chaturbate.com/api/chatvideocontext/${MODEL}/" # Must keep " / " at the end
-	;;
-	stripchat|stc|sc|st)
-		PLATFORM=stripchat
-		LINK="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
-	;;
+	chaturbate|ctb|cb) PLATFORM=chaturbate ;;
+	stripchat|stc|sc|st) PLATFORM=stripchat ;;
 	*)
 		echo "(ERROR) Unknown Platform: [${PLATFORM}] !" >&2
 		return 1
@@ -251,8 +245,7 @@ genesis_juicer() {
 	}
 
 	SAVE_PATH="$(realpath -m "${SAVE_PATH}" 2>/dev/null)"
-	[ "${LOG_PATH}" = 0 ] \
-		&& {
+	[ "${LOG_PATH}" = 0 ] && {
 			LOG_PATH=""
 			WATCHDOG_LOGFILE="/dev/null"
 			FFMPEG_LOGFILE="/dev/null"
@@ -419,20 +412,78 @@ edging() {
 # If can't find chatroom at all, return 3.
 fetch_m3u() {
 	unset STREAM_LINK_GENERIC STREAM_LINK
+	[ -n "${MODEL_NEW_NAME}" ] && {
+		echo "[$(date "+%Y%m%d-%H%M%S")] (NOTICE) Due to name change, [${MODEL_NEW_NAME}] will now be used for actual requests."
+		local MODEL="${MODEL_NEW_NAME}"
+	}
 
-	[ -n "${LINK_NEW_NAME}" ] && local CONNECT_DUMP="$(utils connect_dump "${LINK_NEW_NAME}")"
-	[ -z "${LINK_NEW_NAME}" ] && local CONNECT_DUMP="$(utils connect_dump "${LINK}")"
-	local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
-	case ${CONNECT_STATUS} in
-	2*|3*)
-		# Do nothing. leave to platform method to deal with.
+	# Core methods by each Platform.
+	case ${PLATFORM} in
+	chaturbate)
+		local API_LINK="https://chaturbate.com/api/chatvideocontext/${MODEL}/" # Must keep " / " at the end
+		local CONNECT_DUMP="$(utils connect_dump "${API_LINK}")"
+		local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
+		case ${CONNECT_STATUS} in
+		# Check if online:
+		2*|3*)
+			local ROOM_STATUS="$(echo "${CONNECT_DUMP}" | grep -oE '"room_status":[ ]?"[^"]+"' | cut -d '"' -f4)"
+			if [ -n "$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8')" ]; then
+				STREAM_LINK_GENERIC=$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
+				STREAM_LINK="$(utils connect_dump "${STREAM_LINK_GENERIC}" | tail -n 1)"
+				[ -n "${STREAM_LINK}" ] && STREAM_LINK=$(echo "${STREAM_LINK_GENERIC}" | sed 's|playlist.m3u8.*||')${STREAM_LINK}
+			else
+				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is ${ROOM_STATUS} now. [${CONNECT_STATUS}]"
+				return 1
+			fi
+		unset CONNECT_STATUS
+		;;
+		# Check if Model change to new name
+		404)
+			local CONNECT_DUMP="$(utils connect_dump "https://chaturbate.com/${MODEL}/")"
+			local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
+			MODEL_NEW_NAME=$(echo "${CONNECT_DUMP}" | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
+			[ -n "${MODEL_NEW_NAME}" ] && {
+					echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2
+					return 2
+				} || {
+					echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2
+					return 3
+				}
+		unset CONNECT_STATUS
+		;;
+		esac
 	;;
+	stripchat)
+		local API_LINK="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
+		local CONNECT_DUMP="$(utils connect_dump "${API_LINK}")"
+		local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
+		case ${CONNECT_STATUS} in
+		# Check if online:
+		2*|3*)
+			if [ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true')" ]; then
+				local STREAMNAME="$(echo "${CONNECT_DUMP}" | grep '"streamName":' | head -n 1 | sed 's|.*"streamName":"||'| sed 's|".*||')"
+				STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
+				STREAM_LINK="$(utils connect_dump "${STREAM_LINK_GENERIC}" | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)"
+			else
+				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
+				return 1
+			fi
+		unset CONNECT_STATUS
+		;;
+		# TODO: Name changing detection for Stripchat method.
+		esac
+	;;
+	esac
+
+	case ${CONNECT_STATUS} in
+	"") ;;
 	401)
 		echo "[$(date "+%Y%m%d-%H%M%S")] Room [${MODEL}] might require password. [${CONNECT_STATUS}]" >&2
 		return 1
 	;;
 	404)
-		# Do nothing. leave to platform method to deal with.
+		echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2
+		return 3
 	;;
 	4*)
 		echo "[$(date "+%Y%m%d-%H%M%S")] You might gotten blocked by CAPTCHA. [${CONNECT_STATUS}]" >&2
@@ -445,57 +496,6 @@ fetch_m3u() {
 	1*|5*|*)
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now. [${CONNECT_STATUS}]" >&2
 		return 1
-	;;
-	esac
-
-	# Core methods by each Platform:
-	case ${PLATFORM} in
-	chaturbate)
-		# Check if Model change to new name
-		[ "${CONNECT_STATUS}" = 404 ] && {
-			local CONNECT_DUMP="$(utils connect_dump "https://chaturbate.com/${MODEL}/")"
-			local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
-			MODEL_NEW_NAME=$(echo "${CONNECT_DUMP}" | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
-			[ -n "${MODEL_NEW_NAME}" ] && {
-				LINK_NEW_NAME=$(echo "${LINK}" | sed "s|${MODEL}|${MODEL_NEW_NAME}|g")
-				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2
-				return 2
-			}
-			[ -z "${MODEL_NEW_NAME}" ] && {
-				echo "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2
-				return 3
-			}
-		}
-
-		[ -n "${MODEL_NEW_NAME}" ] \
-			&& echo "[$(date "+%Y%m%d-%H%M%S")] (NOTICE) Due to name change, [${MODEL_NEW_NAME}] will now be used for actual requests." >&2
-
-		# Check if online:
-		local ROOM_STATUS="$(echo "${CONNECT_DUMP}" | grep -oE '"room_status":[ ]?"[^"]+"' | cut -d '"' -f4)"
-		if [ -n "$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8')" ]; then
-			STREAM_LINK_GENERIC=$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
-			STREAM_LINK="$(utils connect_dump "${STREAM_LINK_GENERIC}" | tail -n 1)"
-			[ -n "${STREAM_LINK}" ] && STREAM_LINK=$(echo "${STREAM_LINK_GENERIC}" | sed 's|playlist.m3u8.*||')${STREAM_LINK}
-		else
-			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is ${ROOM_STATUS} now. [${CONNECT_STATUS}]"
-			return 1
-		fi
-	;;
-	stripchat)
-		[ "${CONNECT_STATUS}" = 404 ] && {
-			# TODO: Name changing detection for Stripchat method.
-			echo "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2
-			return 3
-		}
-
-		if [ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true')" ]; then
-			local STREAMNAME="$(echo "${CONNECT_DUMP}" | grep '"streamName":' | head -n 1 | sed 's|.*"streamName":"||'| sed 's|".*||')"
-			STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
-			STREAM_LINK="$(utils connect_dump "${STREAM_LINK_GENERIC}" | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)"
-		else
-			echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
-			return 1
-		fi
 	;;
 	esac
 
