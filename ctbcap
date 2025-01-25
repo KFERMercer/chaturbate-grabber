@@ -432,7 +432,7 @@ edging() {
 # If chatroom is changed to new name, return 2.
 # If can't find chatroom at all, return 3.
 fetch_m3u() {
-	unset STREAM_LINK_GENERIC STREAM_LINK
+	unset STREAM_LINK_GENERIC STREAM_LINK EXT_FFMPEG_OPTS
 	[ -n "${MODEL_NEW_NAME}" ] && {
 		echo "[$(date "+%Y%m%d-%H%M%S")] (NOTICE) Due to name change, [${MODEL_NEW_NAME}] will now be used for actual requests."
 		local MODEL="${MODEL_NEW_NAME}"
@@ -537,33 +537,27 @@ fetch_m3u() {
 }
 
 grab_stream() {
+	[ -z "${DEBUG_MODE}" ] && local EXT_FFMPEG_OPTS="${EXT_FFMPEG_OPTS} -loglevel warning"
+	[ -z "${FFMPEG_OUTDATE}" ] && local EXT_FFMPEG_OPTS="${EXT_FFMPEG_OPTS} -reconnect_max_retries 3 -seg_max_retry 5"
+
 	local CAPTURE_TIME=$(date "+%Y%m%d-%H%M%S")
 
+	[ "${CUT_TIME}" = 0 ] \
+		&& local FFMPEG_OUT="${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}.mkv" \
+		|| local FFMPEG_OUT="-f segment -segment_time ${CUT_TIME} -segment_start_number 1 -reset_timestamps 1 ${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%03d.mkv"
+
+	echo
 	echo "========== [${CAPTURE_TIME}] =========="
 	echo "${STREAM_LINK}"
 	echo
 
-	# Core FFmpeg method.
-	# After making any changes, must confirm the compatibility of tailored FFmpeg in Dockerfile.
 	ffmpeg \
-		-user_agent "${UA}" \
-		$([ "${DEBUG_MODE}" = "1" ] || printf "%s" "-loglevel warning") \
-		-tls_verify 0 \
-		$([ -z "${FFMPEG_OUTDATE}" ] && printf "%s" "-seg_max_retry 5") \
+		-nostdin -user_agent "${UA}" -tls_verify 0 -copy_unknown \
+		-reconnect 1 -reconnect_on_network_error 1 -reconnect_on_http_error 1 \
+		-reconnect_streamed 1 -reconnect_delay_max 5 \
+		${EXT_FFMPEG_OPTS} \
 		-i "${STREAM_LINK}" \
-		-c copy \
-		$( [ "${CUT_TIME}" = 0 ] \
-			&& printf "%s" "
-				${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}.mkv" \
-			|| printf "%s" "
-				-f segment \
-				-segment_time ${CUT_TIME} \
-				-segment_start_number 1 \
-				-reset_timestamps 1 \
-				${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%03d.mkv" \
-		)
-
-	echo
+		-c copy ${FFMPEG_OUT}
 }
 
 watchdog() {
@@ -624,7 +618,7 @@ watchdog() {
 { # Execution Entry
 	trap '{
 		echo
-		echo "BYE (. Y .) BYE"
+		echo "BYE (. )( .) BYE"
 		echo
 		exit 0
 	}' HUP INT QUIT TERM

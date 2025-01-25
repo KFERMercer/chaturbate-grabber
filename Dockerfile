@@ -218,14 +218,13 @@ RUN <<EOT
 		--disable-doc \
 		--disable-programs --enable-ffmpeg \
 		--disable-shared --enable-static \
-		--enable-zlib \
-		--enable-openssl \
+		--enable-zlib --enable-openssl \
 		--enable-decoder=h264,hevc,av1,aac \
 		--enable-parser=h264,hevc,av1,aac \
-		--enable-demuxer=hls,h264,hevc,av1,mp4,m4v,mpegts \
-		--enable-muxer=h264,hevc,av1,segment,matroska \
-		--enable-bsf=extract_extradata \
-		--enable-protocol=hls,http,https,file
+		--enable-demuxer=hls,mp4,m4v,mpegts \
+		--enable-muxer=segment,matroska \
+		--enable-protocol=hls,http,https,file \
+		--enable-bsf=extract_extradata
 EOT
 
 RUN <<EOT
