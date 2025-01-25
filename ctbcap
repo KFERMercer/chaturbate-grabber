@@ -392,10 +392,10 @@ init_path() {
 				echo "(WARNING) Skip trimming [${FILE}] due to unreadability." >&2
 				continue
 			}
-			local LINE=$(( LINE - 1000 ))
 			[ "${LINE}" -le 0 ] && { cat /dev/null > "${FILE}"; } >/dev/null 2>&1
 			[ "$(wc -l 2>/dev/null < "${FILE}" || echo 0)" -gt "${LINE}" ] && {
-				echo "Trim [${FILE}] to the last ${LINE} lines..."
+				local LINE=$(( LINE - 1000 ))
+				echo "Trim [${FILE}] to ${LINE} lines..."
 				local BUFFER_FILE="/dev/shm/_$(basename "${FILE}")_$(date +%s)"
 				tail -n "${LINE}" "${FILE}" > "${BUFFER_FILE}"
 				cat "${BUFFER_FILE}" > "${FILE}"
