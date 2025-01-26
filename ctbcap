@@ -41,7 +41,7 @@ defaulting_args() {
 	# Debug Mode. Inactive if not 1.
 	[ "${DEBUG_MODE}" = "1" ] || DEBUG_MODE=
 
-	# Link Mode. Only grab stream link. Inactive if not 1.
+	# Link Mode. Only grab stream URL. Inactive if not 1.
 	[ "${LINK_MODE}" = "1" ] || LINK_MODE=
 
 }
@@ -88,9 +88,8 @@ doc() {
 		echo "			Don't Use if Runs in Docker."
 		echo
 		echo "-h			Get [H]elp for Commands."
-		echo
-		echo "-l			[L]ink Mode. Capture Stream"
-		echo "			Link but don't recording it."
+		echo "-l			[L]ink Mode. Grab Stream URL"
+		echo "			but don't recording it."
 		echo
 		echo "-o </path/to/logdir>	L[o]gging files will save to"
 		echo "			this path."
@@ -443,8 +442,8 @@ fetch_m3u() {
 	case ${PLATFORM} in
 	chaturbate)
 		EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-multiple_requests 1'
-		local API_LINK="https://chaturbate.com/api/chatvideocontext/${MODEL}/" # Must keep " / " at the end
-		local CONNECT_DUMP="$(utils connect_dump "${API_LINK}")"
+		local API_URL="https://chaturbate.com/api/chatvideocontext/${MODEL}/" # Must keep " / " at the end
+		local CONNECT_DUMP="$(utils connect_dump "${API_URL}")"
 		local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
 		case ${CONNECT_STATUS} in
 		# Check if online:
@@ -478,8 +477,8 @@ fetch_m3u() {
 		esac
 	;;
 	stripchat)
-		local API_LINK="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
-		local CONNECT_DUMP="$(utils connect_dump "${API_LINK}")"
+		local API_URL="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
+		local CONNECT_DUMP="$(utils connect_dump "${API_URL}")"
 		local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
 		case ${CONNECT_STATUS} in
 		# Check if online:
@@ -527,13 +526,13 @@ fetch_m3u() {
 	# If successfully grabed ${STREAM_URL_GENERIC} ${STREAM_URL}, show them.
 	[ -n "${STREAM_URL}" ] && {
 		echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is online now! [$([ -n "${ROOM_STATUS}" ] && echo "${ROOM_STATUS}" || echo online)]"
-		echo "[$(date "+%Y%m%d-%H%M%S")] Successfully Captured Stream Link:"
+		echo "[$(date "+%Y%m%d-%H%M%S")] Successfully Captured Stream URL:"
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_URL_GENERIC}"
-		echo "[$(date "+%Y%m%d-%H%M%S")] Highest Definition Stream Link:"
+		echo "[$(date "+%Y%m%d-%H%M%S")] Highest Resolution Stream URL:"
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_URL}"
 		return 0
 	} || {
-		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch stream link! [$(utils connect_status "${STREAM_URL_GENERIC}")]"
+		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch Stream URL! [$(utils connect_status "${STREAM_URL_GENERIC}")]"
 		return 1
 	}
 
@@ -541,10 +540,10 @@ fetch_m3u() {
 }
 
 grab_stream() {
-	[ -z "${DEBUG_MODE}" ] \
-		&& local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-loglevel warning'
-	[ -z "${FFMPEG_LEGACY_MODE}" ] \
-		&& local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-reconnect_max_retries 5 -seg_max_retry 5'
+	[ -n "${DEBUG_MODE}" ] \
+		|| local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-loglevel warning'
+	[ -n "${FFMPEG_LEGACY_MODE}" ] \
+		|| local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-reconnect_max_retries 5 -seg_max_retry 5'
 
 	local FFMPEG_OPT="$(
 		cat <<-'EOT'
@@ -593,15 +592,15 @@ grab_stream() {
 
 watchdog() {
 	while true; do
+		unset STREAM_URL_GENERIC STREAM_URL EXT_FFMPEG_OPT FFMPEG_LEGACY_MODE
 		utils timemark_exec "init_path -f ${WATCHDOG_LOGFILE}:6000 ${FFMPEG_LOGFILE}:11000"
-		unset STREAM_URL_GENERIC STREAM_URL EXT_FFMPEG_OPT
 		fetch_m3u
 		# See the notes above fetch_m3u() .
 		case $? in
 		0)
 			utils timemark_exec "init_path -d ${SAVE_PATH}:${SAVE_PATH_SPACE} ${LOG_PATH}:${LOG_PATH_SPACE}" || continue
 			utils timemark_exec "utils check_ffmpeg_ver"
-			case $? in 0) unset FFMPEG_LEGACY_MODE ;; 1) continue ;; 2) local FFMPEG_LEGACY_MODE=1 ;; esac
+			case $? in 1) continue ;; 2) local FFMPEG_LEGACY_MODE=1 ;; esac
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
 			while true; do
 				[ "${DEBUG_MODE}" = "1" ] \
@@ -616,7 +615,7 @@ watchdog() {
 					continue
 				;;
 				*)
-					echo "[$(date "+%Y%m%d-%H%M%S")] Stream Link closed... [${STREAM_STATUS}]"
+					echo "[$(date "+%Y%m%d-%H%M%S")] Stream closed... [${STREAM_STATUS}]"
 					echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
 					sleep "$(utils random_num 240 360)"
 					break

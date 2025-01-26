@@ -57,7 +57,7 @@ COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 
 	# Process ${MODEL}
 	# TODO: Model may change their name, consider using realtime name.
-	# Assume ${MODEL} contain some link form, process & cut invalid chars.
+	# Assume ${MODEL} contain some URL form, process & cut invalid chars.
 	_MODEL="$(echo "${MODEL}" \
 		| tr '[:upper:]' '[:lower:]' \
 		| grep -oE 'http[s]?://[a-z0-9-]?+[.]?[a-z0-9-]+[.][a-z]+[/][^ /]+' \
@@ -67,7 +67,7 @@ COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 	[ -n "${_MODEL}" ] && MODEL="${_MODEL}"
 	# If ${MODEL} not URL form, cut invalid chars.
 	[ -z "${_MODEL}" ] && _MODEL="$(echo "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)"
-	[ -z "${_MODEL}" ] && { echo "(ERROR) Invalid Username or Link!"; exit 1; }
+	[ -z "${_MODEL}" ] && { echo "(ERROR) Invalid Username or URL!"; exit 1; }
 	[ -n "${_MODEL}" ] && MODEL="${_MODEL}"
 
 	# Process ${PLATFORM}
@@ -94,12 +94,12 @@ COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 	FFMPEG_PROCESS="$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null | head -n 1)"
 	# If has FFmpeg process...
 	[ -n "${FFMPEG_PROCESS}" ] && {
-		STREAM_LINK="$(echo "${FFMPEG_PROCESS}" | grep -oE 'http[s]?://[^ ]+\.m3u8')"
+		STREAM_URL="$(echo "${FFMPEG_PROCESS}" | grep -oE 'http[s]?://[^ ]+\.m3u8')"
 		UA="$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')"
 		[ -z "${UA}" ] && { echo "(ERROR) UA does not exist!"; exit 1; }
 
-		# Has FFmpeg process, but m3u8 link is unavailable --> err
-		M3U8_RESPONSE="$(curl "${STREAM_LINK}" -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')"
+		# Has FFmpeg process, but m3u8 URL is unavailable --> err
+		M3U8_RESPONSE="$(curl "${STREAM_URL}" -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')"
 		[ -z "${M3U8_RESPONSE}" ] && { echo "(ERROR) FFMPEG process did not exit correctly!"; exit 1; }
 	}
 
