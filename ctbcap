@@ -240,10 +240,12 @@ genesis_juicer() {
 	;;
 	esac
 
-	CUT_TIME=$(echo "${CUT_TIME}" | cut -c -9) #Cut to INT range
-	[ -z "$(echo "${CUT_TIME}" | grep -oE '^[0-9]+$')" ] && {
-		echo "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]" >&2
-		return 1
+	[ "${CUT_TIME}" = 0 ] && CUT_TIME="" || {
+		CUT_TIME=$(echo "${CUT_TIME}" | cut -c -9) #Cut to INT range
+		[ -z "$(echo "${CUT_TIME}" | grep -oE '^[0-9]+$')" ] && {
+			echo "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]" >&2
+			return 1
+		}
 	}
 
 	SAVE_PATH="$(realpath -m "${SAVE_PATH}" 2>/dev/null)"
@@ -432,7 +434,6 @@ edging() {
 # If chatroom is changed to new name, return 2.
 # If can't find chatroom at all, return 3.
 fetch_m3u() {
-	unset STREAM_LINK_GENERIC STREAM_LINK EXT_FFMPEG_OPTS
 	[ -n "${MODEL_NEW_NAME}" ] && {
 		echo "[$(date "+%Y%m%d-%H%M%S")] (NOTICE) Due to name change, [${MODEL_NEW_NAME}] will now be used for actual requests."
 		local MODEL="${MODEL_NEW_NAME}"
@@ -441,6 +442,7 @@ fetch_m3u() {
 	# Core methods by each Platform.
 	case ${PLATFORM} in
 	chaturbate)
+		EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-multiple_requests 1'
 		local API_LINK="https://chaturbate.com/api/chatvideocontext/${MODEL}/" # Must keep " / " at the end
 		local CONNECT_DUMP="$(utils connect_dump "${API_LINK}")"
 		local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
@@ -537,39 +539,67 @@ fetch_m3u() {
 }
 
 grab_stream() {
-	[ -z "${DEBUG_MODE}" ] && local EXT_FFMPEG_OPTS="${EXT_FFMPEG_OPTS} -loglevel warning"
-	[ -z "${FFMPEG_OUTDATE}" ] && local EXT_FFMPEG_OPTS="${EXT_FFMPEG_OPTS} -reconnect_max_retries 3 -seg_max_retry 5"
+	[ -z "${DEBUG_MODE}" ] \
+		&& local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-loglevel warning'
+	[ -z "${FFMPEG_LEGACY_MODE}" ] \
+		&& local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-reconnect_max_retries 5 -seg_max_retry 5'
+
+	local FFMPEG_OPT="$(
+		cat <<-'EOT'
+			-nostdin -y -user_agent "${UA}" -tls_verify 0
+			-copy_unknown -fflags +nobuffer -avioflags direct
+			-reconnect 1
+				-reconnect_on_network_error 1
+				-reconnect_on_http_error 1
+				-reconnect_streamed 1
+				-reconnect_delay_max 5
+		EOT
+	)${EXT_FFMPEG_OPT}"
+
+	local FFMPEG_IN='-i "${STREAM_LINK}"'
+
+	[ -n "${FFMPEG_CODEC}" ] || local FFMPEG_CODEC='-codec copy'
 
 	local CAPTURE_TIME=$(date "+%Y%m%d-%H%M%S")
 
-	[ "${CUT_TIME}" = 0 ] \
-		&& local FFMPEG_OUT="${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}.mkv" \
-		|| local FFMPEG_OUT="-f segment -segment_time ${CUT_TIME} -segment_start_number 1 -reset_timestamps 1 ${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%03d.mkv"
+	local FFMPEG_OUT='"${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}.mkv"'
+	[ -n "${CUT_TIME}" ] && local FFMPEG_OUT="$(
+		cat <<-'EOT'
+			-f segment
+				-segment_time "${CUT_TIME}"
+				-segment_start_number 1
+				-reset_timestamps 1
+				"${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}_%03d.mkv"
+		EOT
+	)"
+
+	local FFMPEG_EXEC_RAW="$(
+		echo "ffmpeg ${FFMPEG_OPT} ${FFMPEG_IN} ${FFMPEG_CODEC} ${FFMPEG_OUT}" | tr '[:space:]' ' '
+	)"
+
+	# Cooking ${FFMPEG_EXEC_RAW} to directly executable format:
+	local FFMPEG_EXEC="$(eval echo "$(echo "${FFMPEG_EXEC_RAW}" | sed 's|"|\\"|g')")"
 
 	echo
-	echo "========== [${CAPTURE_TIME}] =========="
-	echo "${STREAM_LINK}"
+	echo "8================= [${CAPTURE_TIME}] =================D"
+	echo
+	echo "${FFMPEG_EXEC}"
 	echo
 
-	ffmpeg \
-		-nostdin -user_agent "${UA}" -tls_verify 0 -copy_unknown \
-		-reconnect 1 -reconnect_on_network_error 1 -reconnect_on_http_error 1 \
-		-reconnect_streamed 1 -reconnect_delay_max 5 \
-		${EXT_FFMPEG_OPTS} \
-		-i "${STREAM_LINK}" \
-		-c copy ${FFMPEG_OUT}
+	sh -c "${FFMPEG_EXEC}" #Launch FFmpeg
 }
 
 watchdog() {
 	while true; do
 		utils timemark_exec "init_path -f ${WATCHDOG_LOGFILE}:6000 ${FFMPEG_LOGFILE}:11000"
+		unset STREAM_LINK_GENERIC STREAM_LINK EXT_FFMPEG_OPT
 		fetch_m3u
 		# See the notes above fetch_m3u() .
 		case $? in
 		0)
 			utils timemark_exec "init_path -d ${SAVE_PATH}:${SAVE_PATH_SPACE} ${LOG_PATH}:${LOG_PATH_SPACE}" || continue
-			utils timemark_exec "utils check_ffmpeg_ver" && unset FFMPEG_OUTDATE
-			case $? in 1) continue ;; 2) local FFMPEG_OUTDATE=1 ;; esac
+			utils timemark_exec "utils check_ffmpeg_ver"
+			case $? in 0) unset FFMPEG_LEGACY_MODE ;; 1) continue ;; 2) local FFMPEG_LEGACY_MODE=1 ;; esac
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
 			while true; do
 				[ "${DEBUG_MODE}" = "1" ] \

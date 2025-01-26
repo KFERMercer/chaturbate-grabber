@@ -91,7 +91,7 @@ COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 		[ ! -w "${LOG_PATH}" ] && { echo "(ERROR) LOG_PATH is unwritable!"; exit 1; }
 	}
 
-	FFMPEG_PROCESS="$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null)"
+	FFMPEG_PROCESS="$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null | head -n 1)"
 	# If has FFmpeg process...
 	[ -n "${FFMPEG_PROCESS}" ] && {
 		STREAM_LINK="$(echo "${FFMPEG_PROCESS}" | grep -oE 'http[s]?://[^ ]+\.m3u8')"
