@@ -603,7 +603,7 @@ watchdog() {
 			case $? in 1) continue ;; 2) local FFMPEG_LEGACY_MODE=1 ;; esac
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
 			while true; do
-				[ "${DEBUG_MODE}" = "1" ] \
+				[ -n "${DEBUG_MODE}" ] \
 					&& { grab_stream 2>&1 | tee -a "${FFMPEG_LOGFILE}" 2>/dev/null; true; } \
 					|| { grab_stream 2>&1 | tee -a "${FFMPEG_LOGFILE}" >/dev/null 2>&1; }
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
@@ -667,11 +667,11 @@ watchdog() {
 	;;
 	esac
 
-	[ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
+	[ -n "${DEBUG_MODE}" ] && set -x # Debug Mode
 
 	utils check_depend curl || { echo >&2; exit 1; }
 
-	[ "${LINK_MODE}" = "1" ] && {
+	[ -n "${LINK_MODE}" ] && {
 		fetch_m3u
 		case $? in
 		2)
@@ -687,7 +687,7 @@ watchdog() {
 	init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" || { echo >&2; exit 1; }
 	init_path -f "${WATCHDOG_LOGFILE}:" "${FFMPEG_LOGFILE}:" || { echo >&2; exit 1; }
 
-	[ "${EDGING_MODE}" = "1" ] && { edging; echo; }
+	[ -n "${EDGING_MODE}" ] && { edging; echo; }
 
 	watchdog 2>&1 | tee -a "${WATCHDOG_LOGFILE}" 2>/dev/null
 }
