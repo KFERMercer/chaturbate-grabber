@@ -242,7 +242,7 @@ genesis_juicer() {
 
 	[ "${CUT_TIME}" = 0 ] && CUT_TIME="" || {
 		CUT_TIME=$(echo "${CUT_TIME}" | cut -c -9) #Cut to INT range
-		[ -z "$(echo "${CUT_TIME}" | grep -oE '^[0-9]+$')" ] && {
+		[ -z "$(echo "${CUT_TIME}" | grep -oE '^[0-9]+$' | head -n 1)" ] && {
 			echo "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]" >&2
 			return 1
 		}
@@ -250,14 +250,14 @@ genesis_juicer() {
 
 	SAVE_PATH="$(realpath -m "${SAVE_PATH}" 2>/dev/null)"
 	[ "${LOG_PATH}" = 0 ] && {
-			LOG_PATH=""
-			WATCHDOG_LOGFILE="/dev/null"
-			FFMPEG_LOGFILE="/dev/null"
-		} || {
-			LOG_PATH="$(realpath -m "${LOG_PATH}" 2>/dev/null)"
-			WATCHDOG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.log"
-			FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
-		}
+		LOG_PATH=""
+		WATCHDOG_LOGFILE="/dev/null"
+		FFMPEG_LOGFILE="/dev/null"
+	} || {
+		LOG_PATH="$(realpath -m "${LOG_PATH}" 2>/dev/null)"
+		WATCHDOG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.log"
+		FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
+	}
 
 	return 0
 }
@@ -272,7 +272,7 @@ utils() {
 			-A "${UA}" \
 			--compressed \
 			--connect-timeout 5 --retry 5 --retry-delay 2 \
-			2>/dev/null | head -n 1 | grep -oE '[0-9]{3}' \
+			2>/dev/null | tr -d '\r' | head -n 1 | grep -oE '[0-9]{3}' \
 			|| echo 000
 	;;
 	# Usage: `utils connect_dump "<URL>"`
@@ -296,13 +296,13 @@ utils() {
 	# Re-implement random num tool on POSIX Shell (B/E).
 	# Usage: `utils random_num <SNUM> <BNUM>`
 	random_num)
-		local SNUM=$2 # INT. Must >= 0. Small-end of Random Num you want.
-		local BNUM=$3 # INT. Must < (2^32)/2. Big-end of Random Num you want.
+		local SNUM="$2" # INT. Must >= 0. Small-end of Random Num you want.
+		local BNUM="$3" # INT. Must < (2^32)/2. Big-end of Random Num you want.
 		local BNUM=$(( BNUM + 1 )) # Add ${BNUM} to the pool, make method become B/E Random.
-		local RSEED=$(od -An -N4 -tu4 /dev/urandom) # Gen random num B/E 0 - (2^32-1) as Seed.
+		local RSEED="$(od -An -N4 -tu4 /dev/urandom)" # Gen random num B/E 0 - (2^32-1) as Seed.
 		local SEEDMIN=$(( 4294967295 % ( BNUM - SNUM ) )) # ${SEED} <= ${SEEDMIN} will cause redundant modulus.
 		while [ "${RSEED}" -le "${SEEDMIN}" ]; do
-			local RSEED=$(od -An -N4 -tu4 /dev/urandom) # If ${SEED} <= ${SEEDMIN}, Reshake ${RSEED} till isn't.
+			local RSEED="$(od -An -N4 -tu4 /dev/urandom)" # If ${SEED} <= ${SEEDMIN}, Reshake ${RSEED} till isn't.
 		done
 		echo $(( RSEED % ( BNUM - SNUM ) + SNUM )) # Format Same as $((RANDOM)) in Bash.
 	;;
@@ -317,16 +317,16 @@ utils() {
 	# Usage: `utils check_ffmpeg_ver`
 	check_ffmpeg_ver)
 		local REQ_VER=5.0 # Required minimum version of FFmpeg.
-		local REC_VER=6.0 # Recommended minimum version of FFmpeg.
+		local REC_VER=7.1 # Recommended minimum version of FFmpeg.
 		local COR_VER="$(ffmpeg -version 2>/dev/null | head -n 1 | grep -oE '[0-9][^ ]+' | head -n 1)"
-		[ "{COR_VER}" = "${REC_VER}" ] && return 0
-		[ "{COR_VER}" = "${REQ_VER}" ] && return 0
+		[ "${COR_VER}" = "${REC_VER}" ] && return 0
+		[ "${COR_VER}" = "${REQ_VER}" ] && return 0
 		[ "$(printf "${REQ_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
-			echo "(ERROR) Current version of FFmpeg [${COR_VER}] is too low! (${REQ_VER} at least, >= ${REC_VER} is recommended.)" >&2
+			echo "(ERROR) Version of FFmpeg [${COR_VER}] must be higher than ${REQ_VER}! (Recommended ${REC_VER}+)" >&2
 			return 1
 		}
 		[ "$(printf "${REC_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
-			echo "(WARNING) Current version of FFmpeg [${COR_VER}] is not enough for full functionality. (>= ${REC_VER} is recommended.)" >&2
+			echo "(WARNING) Using legacy version of FFmpeg [${COR_VER}]. (Recommended ${REC_VER}+)" >&2
 			return 2
 		}
 		return 0
@@ -337,12 +337,12 @@ utils() {
 	# Usage: `utils timemark_exec "<COMMAND LINE>"`
 	timemark_exec)
 		local TIME_MARK="[$(date "+%Y%m%d-%H%M%S")] "
-		local ROW="$($2 2>&1; printf "\n$?")"
-		local OUTPUT="$(echo "$(echo "${ROW}" | head -n -1)")"
+		local RAW="$($2 2>&1; printf "\n$?")"
+		local OUTPUT="$(echo "$(echo "${RAW}" | head -n -1)")"
 		[ -z "${OUTPUT}" ] && return 0
-		local EXEC_STAT="$(echo "${ROW}" | tail -n 1)"
+		local EXEC_STAT="$(echo "${RAW}" | tail -n 1)"
 		echo "${OUTPUT}" | sed "s|^|${TIME_MARK}|"
-		return ${EXEC_STAT}
+		return "${EXEC_STAT}"
 	;;
 	esac
 }
@@ -410,7 +410,7 @@ init_path() {
 
 # Sleep time (sec) before initial request to server. Range better EQ to watchdog().while.case.1).echo.
 edging() {
-	local EDGING_TIME=$(utils random_num 0 600)
+	local EDGING_TIME="$(utils random_num 0 600)"
 
 	echo "Edging Mode is On."
 	echo
@@ -423,14 +423,14 @@ edging() {
 	echo "Edging..."
 	echo
 
-	sleep ${EDGING_TIME}
+	sleep "${EDGING_TIME}"
 
 	echo "Edging Enough...Cum..."
 }
 
 # Core platform methods.
-# Fetch ${STREAM_LINK_GENERIC} & ${STREAM_LINK}, show them & return 0.
-# If no ${STREAM_LINK}, return 1.
+# Fetch ${STREAM_URL_GENERIC} & ${STREAM_URL}, show them & return 0.
+# If no ${STREAM_URL}, return 1.
 # If chatroom is changed to new name, return 2.
 # If can't find chatroom at all, return 3.
 fetch_m3u() {
@@ -449,15 +449,16 @@ fetch_m3u() {
 		case ${CONNECT_STATUS} in
 		# Check if online:
 		2*|3*)
-			local ROOM_STATUS="$(echo "${CONNECT_DUMP}" | grep -oE '"room_status":[ ]?"[^"]+"' | cut -d '"' -f4)"
-			if [ -n "$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8')" ]; then
-				STREAM_LINK_GENERIC=$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
-				STREAM_LINK="$(utils connect_dump "${STREAM_LINK_GENERIC}" | tail -n 1)"
-				[ -n "${STREAM_LINK}" ] && STREAM_LINK=$(echo "${STREAM_LINK_GENERIC}" | sed 's|playlist.m3u8.*||')${STREAM_LINK}
-			else
+			local ROOM_STATUS="$(echo "${CONNECT_DUMP}" | grep -oE '"room_status":[ ]?"[^"]+"' | head -n 1 | cut -d '"' -f4)"
+			[ -n "$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8'| head -n 1)" ] && {
+				STREAM_URL_GENERIC=$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
+				STREAM_URL="$(utils connect_dump "${STREAM_URL_GENERIC}" | tail -n 1)"
+				[ -n "${STREAM_URL}" ] && STREAM_URL=$(echo "${STREAM_URL_GENERIC}" | sed 's|playlist.m3u8.*||')${STREAM_URL}
+				true
+			} || {
 				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is ${ROOM_STATUS} now. [${CONNECT_STATUS}]"
 				return 1
-			fi
+			}
 		unset CONNECT_STATUS
 		;;
 		# Check if Model change to new name
@@ -466,12 +467,12 @@ fetch_m3u() {
 			local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
 			MODEL_NEW_NAME=$(echo "${CONNECT_DUMP}" | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
 			[ -n "${MODEL_NEW_NAME}" ] && {
-					echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2
-					return 2
-				} || {
-					echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2
-					return 3
-				}
+				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2
+				return 2
+			} || {
+				echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2
+				return 3
+			}
 		unset CONNECT_STATUS
 		;;
 		esac
@@ -483,14 +484,15 @@ fetch_m3u() {
 		case ${CONNECT_STATUS} in
 		# Check if online:
 		2*|3*)
-			if [ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true')" ]; then
+			[ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true' | head -n 1)" ] && {
 				local STREAMNAME="$(echo "${CONNECT_DUMP}" | grep '"streamName":' | head -n 1 | sed 's|.*"streamName":"||'| sed 's|".*||')"
-				STREAM_LINK_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
-				STREAM_LINK="$(utils connect_dump "${STREAM_LINK_GENERIC}" | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)"
-			else
+				STREAM_URL_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
+				STREAM_URL="$(utils connect_dump "${STREAM_URL_GENERIC}" | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)"
+				true
+			} || {
 				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
 				return 1
-			fi
+			}
 		unset CONNECT_STATUS
 		;;
 		# TODO: Name changing detection for Stripchat method.
@@ -522,18 +524,18 @@ fetch_m3u() {
 	;;
 	esac
 
-	# If successfully grabed ${STREAM_LINK_GENERIC} ${STREAM_LINK}, show them.
-	if [ -n "${STREAM_LINK}" ]; then
+	# If successfully grabed ${STREAM_URL_GENERIC} ${STREAM_URL}, show them.
+	[ -n "${STREAM_URL}" ] && {
 		echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is online now! [$([ -n "${ROOM_STATUS}" ] && echo "${ROOM_STATUS}" || echo online)]"
 		echo "[$(date "+%Y%m%d-%H%M%S")] Successfully Captured Stream Link:"
-		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_LINK_GENERIC}"
+		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_URL_GENERIC}"
 		echo "[$(date "+%Y%m%d-%H%M%S")] Highest Definition Stream Link:"
-		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_LINK}"
+		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_URL}"
 		return 0
-	else
-		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch stream link! [$(utils connect_status "${STREAM_LINK_GENERIC}")]"
+	} || {
+		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch stream link! [$(utils connect_status "${STREAM_URL_GENERIC}")]"
 		return 1
-	fi
+	}
 
 	return 110 # Tin Foil Hat
 }
@@ -556,11 +558,11 @@ grab_stream() {
 		EOT
 	)${EXT_FFMPEG_OPT}"
 
-	local FFMPEG_IN='-i "${STREAM_LINK}"'
+	local FFMPEG_IN='-i "${STREAM_URL}"'
 
 	[ -n "${FFMPEG_CODEC}" ] || local FFMPEG_CODEC='-codec copy'
 
-	local CAPTURE_TIME=$(date "+%Y%m%d-%H%M%S")
+	local CAPTURE_TIME="$(date "+%Y%m%d-%H%M%S")"
 
 	local FFMPEG_OUT='"${SAVE_PATH}/${MODEL}-${CAPTURE_TIME}.mkv"'
 	[ -n "${CUT_TIME}" ] && local FFMPEG_OUT="$(
@@ -592,7 +594,7 @@ grab_stream() {
 watchdog() {
 	while true; do
 		utils timemark_exec "init_path -f ${WATCHDOG_LOGFILE}:6000 ${FFMPEG_LOGFILE}:11000"
-		unset STREAM_LINK_GENERIC STREAM_LINK EXT_FFMPEG_OPT
+		unset STREAM_URL_GENERIC STREAM_URL EXT_FFMPEG_OPT
 		fetch_m3u
 		# See the notes above fetch_m3u() .
 		case $? in
@@ -607,17 +609,16 @@ watchdog() {
 					|| { grab_stream 2>&1 | tee -a "${FFMPEG_LOGFILE}" >/dev/null 2>&1; }
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
 				utils timemark_exec "init_path -d ${SAVE_PATH}:${SAVE_PATH_SPACE} ${LOG_PATH}:${LOG_PATH_SPACE}" || break
-				local STREAM_STATUS="$(utils connect_status "${STREAM_LINK}")"
-				case ${STREAM_STATUS} in
+				local STREAM_STATUS="$(utils connect_status "${STREAM_URL}")"
+				case ${STREAM_STATUS} in # First recording interruption...
 				2*|3*)
-					# Reconnect.
 					echo "[$(date "+%Y%m%d-%H%M%S")] Restart recording... [${STREAM_STATUS}]"
 					continue
 				;;
 				*)
 					echo "[$(date "+%Y%m%d-%H%M%S")] Stream Link closed... [${STREAM_STATUS}]"
 					echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
-					sleep $(utils random_num 240 360)
+					sleep "$(utils random_num 240 360)"
 					break
 				;;
 				esac
@@ -625,23 +626,20 @@ watchdog() {
 			continue
 		;;
 		1) ;;
-		2)
-			sleep $(utils random_num 4 6)
-			continue
-		;;
+		2) sleep "$(utils random_num 4 6)"; continue ;;
 		3)
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 1 hr..."
-			sleep $(utils random_num 3300 3900)
+			sleep "$(utils random_num 3300 3900)"
 			continue
 		;;
 		*)
 			echo "[$(date "+%Y%m%d-%H%M%S")] Logic is dead. Time to Tin Foil Hat."
-			sleep $(utils random_num 32400 39600)
+			sleep "$(utils random_num 32400 39600)"
 			continue
 		;;
 		esac
 		echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
-		sleep $(utils random_num 480 720)
+		sleep "$(utils random_num 480 720)"
 	done
 }
 
@@ -653,9 +651,7 @@ watchdog() {
 		exit 0
 	}' HUP INT QUIT TERM
 
-	echo
-	doc neon
-	echo
+	{ echo; doc neon; echo; }
 
 	genesis_juicer "$@"
 	case $? in
@@ -680,20 +676,14 @@ watchdog() {
 		fetch_m3u
 		case $? in
 		2)
-			sleep $(utils random_num 4 6)
+			sleep "$(utils random_num 4 6)"
 			fetch_m3u && { echo; exit 0; } || { echo >&2; exit 1; }
-		;;
-		0) echo; exit 0 ;;
-		*) echo >&2; exit 1 ;;
-		esac
+		;; 0) echo; exit 0 ;; *) echo >&2; exit 1 ;; esac
 	}
 
 	utils check_depend ffmpeg || { echo >&2; exit 1; }
 	utils check_ffmpeg_ver
-	case $? in
-	1) echo >&2; exit 1 ;;
-	2) echo ;;
-	esac
+	case $? in 1) echo >&2; exit 1 ;; 2) echo ;; esac
 
 	init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" || { echo >&2; exit 1; }
 	init_path -f "${WATCHDOG_LOGFILE}:" "${FFMPEG_LOGFILE}:" || { echo >&2; exit 1; }

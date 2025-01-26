@@ -25,7 +25,7 @@
   - Open your whatever terminal & drop this:
 
     ```shell
-    sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
+    sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
     ```
     > Put the options after `@` . e.g:\
     > `sh -c <...curl...stuff...> @ -ef ~/rec your_mom`
@@ -125,7 +125,7 @@ kfermercer/ctbcap -h
 ./ctbcap -h
 
 # One-Command Run:
-sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
 
 # Docker CLI:
 docker run -t --rm kfermercer/ctbcap -h
@@ -138,7 +138,7 @@ docker run -t --rm kfermercer/ctbcap -h
 ./ctbcap -v
 
 # One-Command Run:
-sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -v
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -v
 
 # Docker CLI:
 docker run -t --rm -u <UID>:<GID> kfermercer/ctbcap -v
@@ -151,7 +151,7 @@ docker run -t --rm -u <UID>:<GID> kfermercer/ctbcap -v
 ./ctbcap -f </path/to/recdir> your_girl
 
 # One-Command Run:
-sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> your_girl
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> your_girl
 
 # Docker CLI:
 docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save kfermercer/ctbcap your_girl
@@ -164,7 +164,7 @@ docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save kfermercer/ctbcap y
 ./ctbcap -f </path/to/recdir> -c 0 your_girl
 
 # One-Command Run:
-sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> -c 0 your_girl
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> -c 0 your_girl
 
 # Docker CLI:
 docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save kfermercer/ctbcap -c 0 your_girl
@@ -177,7 +177,7 @@ docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save kfermercer/ctbcap -
 ./ctbcap -f </path/to/recdir> -c 1800 your_girl
 
 # One-Command Run:
-sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> -c 1800 your_girl
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> -c 1800 your_girl
 
 # Docker CLI:
 docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save kfermercer/ctbcap -c 1800 your_girl
@@ -190,7 +190,7 @@ docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save kfermercer/ctbcap -
 ./ctbcap -l your_girl
 
 # One-Command Run:
-sh -c "$(curl -s -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -l your_girl
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -l your_girl
 
 # Docker CLI:
 docker run -t --rm kfermercer/ctbcap -l your_girl
