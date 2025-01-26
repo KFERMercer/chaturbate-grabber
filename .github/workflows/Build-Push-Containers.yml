@@ -114,8 +114,8 @@ jobs:
         uses: Noelware/docker-manifest-action@master
         with:
           inputs: |
-            kfermercer/${{ env.IMAGE_NAME }}:snapshot,
-            kfermercer/${{ env.IMAGE_NAME }}:latest
+            kfermercer/${{ env.IMAGE_NAME }}:latest,
+            kfermercer/${{ env.IMAGE_NAME }}:snapshot
           images: |
             kfermercer/${{ env.IMAGE_NAME }}:latest-x86,
             kfermercer/${{ env.IMAGE_NAME }}:latest-x86_64,
@@ -133,8 +133,8 @@ jobs:
         uses: Noelware/docker-manifest-action@master
         with:
           inputs: |
-            ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:snapshot,
-            ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest
+            ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest,
+            ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:snapshot
           images: |
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest-x86,
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest-x86_64,
@@ -156,9 +156,9 @@ jobs:
         uses: Noelware/docker-manifest-action@master
         with:
           inputs: |
-            kfermercer/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }},
+            kfermercer/${{ env.IMAGE_NAME }}:latest,
             kfermercer/${{ env.IMAGE_NAME }}:latest-release,
-            kfermercer/${{ env.IMAGE_NAME }}:latest
+            kfermercer/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
           images: |
             kfermercer/${{ env.IMAGE_NAME }}:latest-x86,
             kfermercer/${{ env.IMAGE_NAME }}:latest-x86_64,
@@ -176,9 +176,9 @@ jobs:
         uses: Noelware/docker-manifest-action@master
         with:
           inputs: |
-            ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }},
+            ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest,
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest-release,
-            ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest
+            ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
           images: |
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest-x86,
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest-x86_64,
