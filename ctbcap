@@ -329,7 +329,7 @@ utils() {
 	timemark_exec)
 		local TIME_MARK="[$(date "+%Y%m%d-%H%M%S")] "
 		local RAW="$($2 2>&1; printf "\n$?")"
-		local OUTPUT="$(echo "$(echo "${RAW}" | head -n -1)")"
+		local OUTPUT="$(echo "${RAW}" | head -n -1)"
 		[ -z "${OUTPUT}" ] && return 0
 		local EXEC_STAT="$(echo "${RAW}" | tail -n 1)"
 		echo "${OUTPUT}" | sed "s|^|${TIME_MARK}|"
