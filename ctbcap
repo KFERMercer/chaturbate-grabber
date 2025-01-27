@@ -209,25 +209,9 @@ genesis_juicer() {
 
 	defaulting_args
 
-	[ -z "${MODEL}" ] && {
-		echo "(ERROR) No Username or URL Specified!" >&2
-		return 1
-	}
-	# Assume ${MODEL} contain some URL form, process & cut invalid chars.
-	local _MODEL="$(echo "${MODEL}" \
-		| tr '[:upper:]' '[:lower:]' \
-		| grep -oE 'http[s]?://[a-z0-9-]?+[.]?[a-z0-9-]+[.][a-z]+[/][^ /]+' \
-		| cut -d '/' -f4 \
-		| grep -oE '[a-z0-9_-]+' \
-		| head -n 1)"
-	[ -n "${_MODEL}" ] && MODEL=${_MODEL}
-	# If ${MODEL} not URL form, cut invalid chars.
-	[ -z "${_MODEL}" ] && local _MODEL="$(echo "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)"
-	[ -z "${_MODEL}" ] && {
-		echo "(ERROR) Invalid Username or URL! [${MODEL}]" >&2
-		return 1
-	}
-	[ -n "${_MODEL}" ] && MODEL=${_MODEL}
+	[ -z "${MODEL}" ] && { echo "(ERROR) No Username or URL Specified!" >&2; return 1; }
+	MODEL="$(basename "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)"
+	[ -z "${MODEL}" ] && { echo "(ERROR) Invalid Username or URL! [${MODEL}]" >&2; return 1; }
 
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
@@ -584,8 +568,9 @@ grab_stream() {
 		echo "ffmpeg ${FFMPEG_OPT} ${FFMPEG_IN} ${FFMPEG_CODEC} ${FFMPEG_OUT}" | tr '[:space:]' ' '
 	)"
 
-	# Cooking ${FFMPEG_EXEC_RAW} to directly executable format:
-	local FFMPEG_EXEC="$(eval echo "$(echo "${FFMPEG_EXEC_RAW}" | sed 's|"|\\"|g')")"
+	# Cooking ${FFMPEG_EXEC_RAW} to directly executable format.
+	# shellcheck disable=SC1003
+	local FFMPEG_EXEC="$(eval echo "$(echo "${FFMPEG_EXEC_RAW}" | sed 's|"|\\'\''|g')")"
 
 	echo
 	echo "8================= [${CAPTURE_TIME}] =================D"

@@ -57,18 +57,8 @@ COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 
 	# Process ${MODEL}
 	# TODO: Model may change their name, consider using realtime name.
-	# Assume ${MODEL} contain some URL form, process & cut invalid chars.
-	_MODEL="$(echo "${MODEL}" \
-		| tr '[:upper:]' '[:lower:]' \
-		| grep -oE 'http[s]?://[a-z0-9-]?+[.]?[a-z0-9-]+[.][a-z]+[/][^ /]+' \
-		| cut -d '/' -f4 \
-		| grep -oE '[a-z0-9_-]+' \
-		| head -n 1)"
-	[ -n "${_MODEL}" ] && MODEL="${_MODEL}"
-	# If ${MODEL} not URL form, cut invalid chars.
-	[ -z "${_MODEL}" ] && _MODEL="$(echo "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)"
-	[ -z "${_MODEL}" ] && { echo "(ERROR) Invalid Username or URL!"; exit 1; }
-	[ -n "${_MODEL}" ] && MODEL="${_MODEL}"
+	MODEL="$(basename "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)"
+	[ -z "${MODEL}" ] && { echo "(ERROR) Invalid Username or URL!"; exit 1; }
 
 	# Process ${PLATFORM}
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
