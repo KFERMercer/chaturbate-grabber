@@ -401,9 +401,8 @@ init_path() {
 				echo "(WARNING) Skip trimming [${FILE}] due to unreadability." >&2
 				continue
 			}
-			[ "${LINE}" -le 0 ] && { cat /dev/null > "${FILE}"; } >/dev/null 2>&1
-			[ "$(wc -l 2>/dev/null < "${FILE}" || echo 0)" -gt "${LINE}" ] && {
-				local LINE=$(( LINE - 1000 ))
+			[ "${LINE}" -le 0 ] && { true > "${FILE}"; } >/dev/null 2>&1
+			[ "$(wc -l 2>/dev/null < "${FILE}" || echo 0)" -ge "$(( LINE + 2000 ))" ] && { # 2000 as buffer size
 				echo "Trim [${FILE}] to ${LINE} lines..."
 				local BUFFER_FILE="/dev/shm/_$(basename "${FILE}")_$(date +%s)"
 				tail -n "${LINE}" "${FILE}" > "${BUFFER_FILE}"
@@ -600,7 +599,7 @@ grab_stream() {
 watchdog() {
 	while true; do
 		unset STREAM_URL_GENERIC STREAM_URL EXT_FFMPEG_OPT
-		utils timemark_exec "init_path -f ${WATCHDOG_LOGFILE}:6000 ${FFMPEG_LOGFILE}:11000"
+		utils timemark_exec "init_path -f ${WATCHDOG_LOGFILE}:10000 ${FFMPEG_LOGFILE}:20000"
 		fetch_m3u
 		# See the notes above fetch_m3u() .
 		case $? in
