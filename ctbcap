@@ -313,20 +313,28 @@ utils() {
 		}
 		return 0
 	;;
-	# Usage: `utils check_ffmpeg_ver`
+	# Usage:
+	# Human-friendly message and return value: `utils check_ffmpeg_ver`
+	# Check if version is met and return value: `utils check_ffmpeg_ver "[VERSION CODE]"`
 	check_ffmpeg_ver)
+		local COR_VER="$(ffmpeg -version 2>/dev/null | head -n 1 | grep -oE '[0-9][^ ]+' | head -n 1)"
+		[ -n "$2" ] && {
+			local TAR_VER="$2"
+			[ "${COR_VER}" = "${TAR_VER}" ] && return 0
+			[ "$(printf "${TAR_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${TAR_VER}" ] && return 1
+			return 0
+		}
 		local REQ_VER=5.0 # Required minimum version of FFmpeg.
 		local REC_VER=7.1 # Recommended minimum version of FFmpeg.
-		local COR_VER="$(ffmpeg -version 2>/dev/null | head -n 1 | grep -oE '[0-9][^ ]+' | head -n 1)"
 		[ "${COR_VER}" = "${REC_VER}" ] && return 0
-		[ "${COR_VER}" = "${REQ_VER}" ] && return 0
-		[ "$(printf "${REQ_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
-			echo "(ERROR) Version of FFmpeg [${COR_VER}] must be higher than ${REQ_VER}! (Recommended ${REC_VER}+)" >&2
-			return 1
-		}
 		[ "$(printf "${REC_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
 			echo "(WARNING) Using legacy version of FFmpeg [${COR_VER}]. (Recommended ${REC_VER}+)" >&2
 			return 2
+		}
+		[ "${COR_VER}" = "${REQ_VER}" ] && return 2
+		[ "$(printf "${REQ_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
+			echo "(ERROR) Version of FFmpeg [${COR_VER}] must be higher than ${REQ_VER}! (Recommended ${REC_VER}+)" >&2
+			return 1
 		}
 		return 0
 	;;
@@ -540,15 +548,14 @@ fetch_m3u() {
 }
 
 grab_stream() {
-	[ -n "${DEBUG_MODE}" ] \
-		|| local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-loglevel warning'
-	[ -n "${FFMPEG_LEGACY_MODE}" ] \
-		|| local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-reconnect_max_retries 5 -seg_max_retry 5'
+	utils check_ffmpeg_ver "6.0" && local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-seg_max_retry 5'
+	utils check_ffmpeg_ver "7.1" && local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-reconnect_max_retries 3'
 
 	local FFMPEG_OPT="$(
 		cat <<-'EOT'
-			-nostdin -y -user_agent "${UA}" -tls_verify 0
-			-copy_unknown -fflags +nobuffer -avioflags direct
+			-nostdin -y -loglevel warning -user_agent "${UA}"
+			-tls_verify 0 -copy_unknown -fflags +nobuffer
+			-avioflags +direct
 			-reconnect 1
 				-reconnect_on_network_error 1
 				-reconnect_on_http_error 1
@@ -592,7 +599,7 @@ grab_stream() {
 
 watchdog() {
 	while true; do
-		unset STREAM_URL_GENERIC STREAM_URL EXT_FFMPEG_OPT FFMPEG_LEGACY_MODE
+		unset STREAM_URL_GENERIC STREAM_URL EXT_FFMPEG_OPT
 		utils timemark_exec "init_path -f ${WATCHDOG_LOGFILE}:6000 ${FFMPEG_LOGFILE}:11000"
 		fetch_m3u
 		# See the notes above fetch_m3u() .
@@ -600,7 +607,6 @@ watchdog() {
 		0)
 			utils timemark_exec "init_path -d ${SAVE_PATH}:${SAVE_PATH_SPACE} ${LOG_PATH}:${LOG_PATH_SPACE}" || continue
 			utils timemark_exec "utils check_ffmpeg_ver"
-			case $? in 1) continue ;; 2) local FFMPEG_LEGACY_MODE=1 ;; esac
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
 			while true; do
 				[ -n "${DEBUG_MODE}" ] \
