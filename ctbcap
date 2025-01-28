@@ -211,7 +211,7 @@ genesis_juicer() {
 	defaulting_args
 
 	[ -z "${MODEL}" ] && { echo "(ERROR) No Username or URL Specified!" >&2; return 1; }
-	MODEL="$(basename "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)"
+	MODEL=$(basename "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)
 	[ -z "${MODEL}" ] && { echo "(ERROR) Invalid Username or URL! [${MODEL}]" >&2; return 1; }
 
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
@@ -234,13 +234,13 @@ genesis_juicer() {
 
 	SAVE_PATH="$(echo "${SAVE_PATH}" | sed "s|^~/|${HOME}/|")"
 	LOG_PATH="$(echo "${LOG_PATH}" | sed "s|^~/|${HOME}/|")"
-	SAVE_PATH="$(realpath -m "${SAVE_PATH}" 2>/dev/null)"
+	SAVE_PATH=$(realpath -m "${SAVE_PATH}" 2>/dev/null)
 	[ "${LOG_PATH}" = 0 ] && {
 		LOG_PATH=""
 		WATCHDOG_LOGFILE="/dev/null"
 		FFMPEG_LOGFILE="/dev/null"
 	} || {
-		LOG_PATH="$(realpath -m "${LOG_PATH}" 2>/dev/null)"
+		LOG_PATH=$(realpath -m "${LOG_PATH}" 2>/dev/null)
 		WATCHDOG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.log"
 		FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
 	}
@@ -445,7 +445,7 @@ fetch_m3u() {
 			local ROOM_STATUS="$(echo "${CONNECT_DUMP}" | grep -oE '"room_status":[ ]?"[^"]+"' | head -n 1 | cut -d '"' -f4)"
 			[ -n "$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8'| head -n 1)" ] && {
 				STREAM_URL_GENERIC=$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
-				STREAM_URL="$(utils connect_dump "${STREAM_URL_GENERIC}" | tail -n 1)"
+				STREAM_URL=$(utils connect_dump "${STREAM_URL_GENERIC}" | tail -n 1)
 				[ -n "${STREAM_URL}" ] && STREAM_URL=$(echo "${STREAM_URL_GENERIC}" | sed 's|playlist.m3u8.*||')${STREAM_URL}
 				true
 			} || {
@@ -480,7 +480,7 @@ fetch_m3u() {
 			[ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true' | head -n 1)" ] && {
 				local STREAMNAME="$(echo "${CONNECT_DUMP}" | grep '"streamName":' | head -n 1 | sed 's|.*"streamName":"||'| sed 's|".*||')"
 				STREAM_URL_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
-				STREAM_URL="$(utils connect_dump "${STREAM_URL_GENERIC}" | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)"
+				STREAM_URL=$(utils connect_dump "${STREAM_URL_GENERIC}" | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)
 				true
 			} || {
 				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
@@ -557,7 +557,11 @@ grab_stream() {
 	)"
 
 	# Cooking ${FFMPEG_EXEC_RAW} to directly executable format.
-	local FFMPEG_EXEC="$(eval echo "$(echo "${FFMPEG_EXEC_RAW}" | sed "s|\"|\\\'|g")")"
+	local FFMPEG_EXEC="$(
+		eval echo "$(echo "${FFMPEG_EXEC_RAW}" | sed 's|"|\\"|g')" \
+			| sed "s|'|'\\\''|g" \
+			| sed 's|"|'\''|g'
+	)" # Magic.
 
 	echo
 	echo "8================= [${CAPTURE_TIME}] =================D"
