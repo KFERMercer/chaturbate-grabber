@@ -232,6 +232,8 @@ genesis_juicer() {
 		}
 	}
 
+	SAVE_PATH="$(echo "${SAVE_PATH}" | sed "s|^~/|${HOME}/|")"
+	LOG_PATH="$(echo "${LOG_PATH}" | sed "s|^~/|${HOME}/|")"
 	SAVE_PATH="$(realpath -m "${SAVE_PATH}" 2>/dev/null)"
 	[ "${LOG_PATH}" = 0 ] && {
 		LOG_PATH=""
