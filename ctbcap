@@ -580,7 +580,11 @@ watchdog() {
 		# See the notes above fetch_m3u() .
 		case $? in
 		0)
-			utils timemark_exec 'init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}"' || continue
+			utils timemark_exec 'init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}"' || {
+				echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
+				sleep "$(utils random_num 480 720)"
+				continue
+			}
 			utils timemark_exec 'utils check_ffmpeg_ver'
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
 			while true; do
