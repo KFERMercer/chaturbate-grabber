@@ -570,8 +570,7 @@ grab_stream() {
 	)"
 
 	# Cooking ${FFMPEG_EXEC_RAW} to directly executable format.
-	# shellcheck disable=SC1003
-	local FFMPEG_EXEC="$(eval echo "$(echo "${FFMPEG_EXEC_RAW}" | sed 's|"|\\'\''|g')")"
+	local FFMPEG_EXEC="$(eval echo "$(echo "${FFMPEG_EXEC_RAW}" | sed "s|\"|\\\'|g")")"
 
 	echo
 	echo "8================= [${CAPTURE_TIME}] =================D"
