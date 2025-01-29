@@ -211,8 +211,9 @@ genesis_juicer() {
 	defaulting_args
 
 	[ -z "${MODEL}" ] && { echo "(ERROR) No Username or URL Specified!" >&2; return 1; }
-	MODEL=$(basename "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)
-	[ -z "${MODEL}" ] && { echo "(ERROR) Invalid Username or URL! [${MODEL}]" >&2; return 1; }
+	local _MODEL="$(basename "${MODEL}" | head -n 1 | tr '[:upper:]' '[:lower:]' | grep -oE '^[a-z0-9_-]+$')"
+	[ -z "${_MODEL}" ] && { echo "(ERROR) Invalid Username or URL! [${MODEL}]" >&2; return 1; }
+	MODEL=${_MODEL}
 
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
@@ -225,11 +226,13 @@ genesis_juicer() {
 	esac
 
 	[ "${CUT_TIME}" = 0 ] && CUT_TIME="" || {
-		CUT_TIME=$(echo "${CUT_TIME}" | cut -c -9) #Cut to INT range
-		[ -z "$(echo "${CUT_TIME}" | grep -oE '^[0-9]+$' | head -n 1)" ] && {
+		local _CUT_TIME="$(echo "${CUT_TIME}" | head -n 1 | grep -oE '^[0-9]+$')"
+		local _CUT_TIME="$(printf %d "${_CUT_TIME}" 2>/dev/null)"
+		[ "${_CUT_TIME}" = 0 ] && {
 			echo "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]" >&2
 			return 1
 		}
+		CUT_TIME=${_CUT_TIME}
 	}
 
 	SAVE_PATH="$(echo "${SAVE_PATH}" | sed "s|^~/|${HOME}/|")"
