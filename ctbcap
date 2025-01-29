@@ -149,38 +149,27 @@ genesis_juicer() {
 	while getopts ':c:def:hlo:p:v' OPT; do
 		case ${OPT} in
 		c)
-			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} || {
-				echo "(ERROR) -c: No Cut Time Specified!" >&2; return 1
-			}
+			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} \
+				|| echo "(ERROR) -c: No Cut Time Specified!" >&2; return 1
 		;;
 		d) DEBUG_MODE=1 ;;
 		e) EDGING_MODE=1 ;;
 		f)
-			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} || {
-				echo "(ERROR) -f: No Recording Saving Path Specified!" >&2; return 1
-			}
+			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} \
+				|| echo "(ERROR) -f: No Recording Saving Path Specified!" >&2; return 1
 		;;
 		h) doc help; return 2 ;;
 		l) LINK_MODE=1 ;;
 		o)
-			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} || {
-				echo "(ERROR) -o: No Log Saving Path Specified!" >&2; return 1
-			}
+			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} \
+				|| echo "(ERROR) -o: No Log Saving Path Specified!" >&2; return 1
 		;;
 		p)
-			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} || {
-				echo "(ERROR) -p: No Platform Specified!" >&2; return 1
-			}
+			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} \
+				|| echo "(ERROR) -p: No Platform Specified!" >&2; return 1
 		;;
-		v)
-			defaulting_args
-			doc ver
-			return 2
-		;;
-		\?)
-			echo "(ERROR) Invalid Option: [${OPTARG}] !" >&2
-			return 1
-		;;
+		v) defaulting_args; doc ver; return 2 ;;
+		\?) echo "(ERROR) Invalid Option: [${OPTARG}] !" >&2; return 1 ;;
 		:)
 			case ${OPTARG} in
 			c) echo "(ERROR) -c: No Cut Time Specified!" >&2 ;;
@@ -193,11 +182,7 @@ genesis_juicer() {
 		esac
 	done
 	shift $((OPTIND - 1))
-	[ -n "$2" ] && {
-		shift 1
-		echo "(ERROR) Invalid Inputs: [$*] !" >&2
-		return 1
-	}
+	[ -n "$2" ] && { shift 1; echo "(ERROR) Invalid Inputs: [$*] !" >&2; return 1; }
 	[ -n "$1" ] && MODEL=$1
 
 	defaulting_args
@@ -211,10 +196,7 @@ genesis_juicer() {
 	case ${PLATFORM} in
 	chaturbate|ctb|cb) PLATFORM=chaturbate ;;
 	stripchat|stc|sc|st) PLATFORM=stripchat ;;
-	*)
-		echo "(ERROR) Unknown Platform: [${PLATFORM}] !" >&2
-		return 1
-	;;
+	*) echo "(ERROR) Unknown Platform: [${PLATFORM}] !" >&2; return 1 ;;
 	esac
 
 	[ "${CUT_TIME}" = 0 ] && CUT_TIME="" || {
@@ -519,9 +501,8 @@ grab_stream() {
 
 	local FFMPEG_OPT="$(
 		cat <<-'EOT'
-			-nostdin -y -loglevel warning -user_agent "${UA}"
-			-tls_verify 0 -copy_unknown -fflags +nobuffer
-			-avioflags +direct
+			-nostdin -y -loglevel warning -user_agent "${UA}" -tls_verify 0
+			-copy_unknown -fflags +nobuffer -avioflags +direct
 			-reconnect 1
 				-reconnect_on_network_error 1
 				-reconnect_on_http_error 1
@@ -553,9 +534,7 @@ grab_stream() {
 
 	# Cooking ${FFMPEG_EXEC_RAW} to directly executable format.
 	local FFMPEG_EXEC="$(
-		eval echo "$(echo "${FFMPEG_EXEC_RAW}" | sed 's|"|\\"|g')" \
-			| sed "s|'|'\\\''|g" \
-			| sed 's|"|'\''|g'
+		eval echo "$(echo "${FFMPEG_EXEC_RAW}" | sed 's|"|\\"|g')" | sed "s|'|'\\\''|g" | sed 's|"|'\''|g'
 	)" # Magic.
 
 	[ -n "${LINK_MODE}" ] && {
@@ -629,12 +608,7 @@ watchdog() {
 }
 
 { # Execution Entry
-	trap '{
-		echo
-		echo "BYE (. )( .) BYE"
-		echo
-		exit 0
-	}' HUP INT QUIT TERM
+	trap '{ echo; echo "BYE (. )( .) BYE"; echo; exit 0; }' HUP INT QUIT TERM
 
 	{ echo; doc neon; echo; }
 
@@ -645,17 +619,9 @@ watchdog() {
 
 	genesis_juicer "$@"
 	case $? in
-	0)
-		echo "Simping Streamer: [${MODEL}] (${PLATFORM})"
-		echo
-	;;
+	0) echo "Simping Streamer: [${MODEL}] (${PLATFORM})"; echo ;;
 	2) echo; exit 0 ;;
-	*)
-		echo >&2
-		echo "See [ $0 -h ] for help." >&2
-		echo >&2
-		exit 1
-	;;
+	*) echo >&2; echo "See [ $0 -h ] for help." >&2; echo >&2; exit 1 ;;
 	esac
 
 	[ -n "${DEBUG_MODE}" ] && set -x # Debug Mode
