@@ -401,7 +401,7 @@ init_path() {
 	esac
 }
 
-# Sleep time (sec) before initial request to server. Range better EQ to watchdog().while.case.1).echo.
+# Sleep time (sec) before initial request to server. Range better EQ to watchdog().while.echo .
 edging() {
 	local EDGING_TIME="$(utils random_num 0 600)"
 
