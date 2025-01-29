@@ -638,6 +638,11 @@ watchdog() {
 
 	{ echo; doc neon; echo; }
 
+	[ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "linux" ] && {
+		echo "(NOTICE) Non-GNU/Linux detected! Make sure you have coreutils installed! Or You Will Get Error!"
+		echo
+	}
+
 	genesis_juicer "$@"
 	case $? in
 	0)
