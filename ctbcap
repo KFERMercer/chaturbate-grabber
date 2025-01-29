@@ -149,36 +149,28 @@ genesis_juicer() {
 	while getopts ':c:def:hlo:p:v' OPT; do
 		case ${OPT} in
 		c)
-			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
-				echo "(ERROR) -c: No Cut Time Specified!" >&2
-				return 1
+			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} || {
+				echo "(ERROR) -c: No Cut Time Specified!" >&2; return 1
 			}
-			CUT_TIME=${OPTARG}
 		;;
 		d) DEBUG_MODE=1 ;;
 		e) EDGING_MODE=1 ;;
 		f)
-			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
-				echo "(ERROR) -f: No Recording Saving Path Specified!" >&2
-				return 1
+			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} || {
+				echo "(ERROR) -f: No Recording Saving Path Specified!" >&2; return 1
 			}
-			SAVE_PATH=${OPTARG}
 		;;
 		h) doc help; return 2 ;;
 		l) LINK_MODE=1 ;;
 		o)
-			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
-				echo "(ERROR) -o: No Log Saving Path Specified!" >&2
-				return 1
+			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} || {
+				echo "(ERROR) -o: No Log Saving Path Specified!" >&2; return 1
 			}
-			LOG_PATH=${OPTARG}
 		;;
 		p)
-			[ "$(echo "${OPTARG}" | cut -c1)" = "-" ] && {
-				echo "(ERROR) -p: No Platform Specified!" >&2
-				return 1
+			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} || {
+				echo "(ERROR) -p: No Platform Specified!" >&2; return 1
 			}
-			PLATFORM=${OPTARG}
 		;;
 		v)
 			defaulting_args
@@ -318,12 +310,12 @@ utils() {
 		local REC_VER=7.1 # Recommended minimum version of FFmpeg.
 		[ "${COR_VER}" = "${REC_VER}" ] && return 0
 		[ "$(printf "${REC_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
-			echo "(WARNING) Using legacy version of FFmpeg [${COR_VER}]. (Recommended ${REC_VER}+)" >&2
+			echo "(WARNING) Using legacy version of FFmpeg. [${COR_VER}] (Recommended ${REC_VER}+)" >&2
 			return 2
 		}
 		[ "${COR_VER}" = "${REQ_VER}" ] && return 2
 		[ "$(printf "${REQ_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
-			echo "(ERROR) Version of FFmpeg [${COR_VER}] must be higher than ${REQ_VER}! (Recommended ${REC_VER}+)" >&2
+			echo "(ERROR) Version of FFmpeg must be higher than ${REQ_VER}! [${COR_VER}] (Recommended ${REC_VER}+)" >&2
 			return 1
 		}
 		return 0
@@ -361,9 +353,9 @@ init_path() {
 			local _DIR="${DIR}"; while [ ! -d "${_DIR}" ]; do # ${DIR} may not created yet
 				local _DIR="$(dirname "${_DIR}")"
 			done
-			local FREESPACE="$(df -m "${_DIR}" | awk 'NR==2 {print $4}')"
+			local FREESPACE="$(( $(df -k "${_DIR}" | awk 'NR==2 {print $4}') / 1024 ))"
 			[ "${FREESPACE}" -lt "${SPACE}" ] && {
-				echo "(ERROR) Space on [${_DIR}/] is too low! (${FREESPACE}MiB left, need ${SPACE}MiB at least.)" >&2
+				echo "(ERROR) Space on [${_DIR}/] must be bigger than ${SPACE}MiB! [${FREESPACE}MiB]" >&2
 				return 1
 			}
 
@@ -556,7 +548,7 @@ grab_stream() {
 	)"
 
 	local FFMPEG_EXEC_RAW="$(
-		echo "ffmpeg ${FFMPEG_OPT} ${FFMPEG_IN} ${FFMPEG_CODEC} ${FFMPEG_OUT}" | tr '[:space:]' ' '
+		echo "ffmpeg ${FFMPEG_OPT} ${FFMPEG_IN} ${FFMPEG_CODEC} ${FFMPEG_OUT}" | tr -s '[:space:]' ' '
 	)"
 
 	# Cooking ${FFMPEG_EXEC_RAW} to directly executable format.
