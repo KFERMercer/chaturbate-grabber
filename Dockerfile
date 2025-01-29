@@ -57,18 +57,14 @@ COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 
 	# Process ${MODEL}
 	# TODO: Model may change their name, consider using realtime name.
-	MODEL="$(basename "${MODEL}" | tr '[:upper:]' '[:lower:]'| grep -oE '[a-z0-9_-]+' | head -n 1)"
+	MODEL="$(basename "${MODEL}" | head -n 1 | tr '[:upper:]' '[:lower:]' | grep -oE '^[a-z0-9_-]+$')"
 	[ -z "${MODEL}" ] && { echo "(ERROR) Invalid Username or URL!"; exit 1; }
 
 	# Process ${PLATFORM}
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
-	chaturbate|ctb|cb)
-		PLATFORM=chaturbate
-	;;
-	stripchat|stc|sc|st)
-		PLATFORM=stripchat
-	;;
+	chaturbate|ctb|cb) PLATFORM=chaturbate ;;
+	stripchat|stc|sc|st) PLATFORM=stripchat ;;
 	*)
 		echo "(ERROR) Invalid Platform!"
 		exit 1
