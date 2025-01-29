@@ -42,11 +42,9 @@
 
 #### **Officel CtbCap Container Registry:**
 
-  - [Docker Hub](https://hub.docker.com/r/kfermercer/ctbcap)\
-    `docker pull kfermercer/ctbcap:latest`
+  - [Docker Hub](https://hub.docker.com/r/kfermercer/ctbcap): `docker pull kfermercer/ctbcap:latest`
 
-  - [GitHub Package](https://github.com/KFERMercer/chaturbate-grabber/pkgs/container/ctbcap)\
-    `docker pull ghcr.io/kfermercer/ctbcap:latest`
+  - [GitHub Package](https://github.com/KFERMercer/chaturbate-grabber/pkgs/container/ctbcap): ` docker pull ghcr.io/kfermercer/ctbcap:latest `
 
 | Platform | Available |
 | :-: | :-: |
