@@ -499,7 +499,7 @@ fetch_m3u() {
 
 	# If successfully grabed ${STREAM_URL_GENERIC} ${STREAM_URL}, show them.
 	[ -n "${STREAM_URL}" ] && {
-		echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is online now! [$([ -n "${ROOM_STATUS}" ] && echo "${ROOM_STATUS}" || echo online)]"
+		echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is Online Now! [$([ -n "${ROOM_STATUS}" ] && echo "${ROOM_STATUS}" || echo online)]"
 		echo "[$(date "+%Y%m%d-%H%M%S")] Successfully Captured Stream URL:"
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_URL_GENERIC}"
 		echo "[$(date "+%Y%m%d-%H%M%S")] Highest Resolution Stream URL:"
@@ -557,6 +557,12 @@ grab_stream() {
 			| sed "s|'|'\\\''|g" \
 			| sed 's|"|'\''|g'
 	)" # Magic.
+
+	[ -n "${LINK_MODE}" ] && {
+		echo "[$(date "+%Y%m%d-%H%M%S")] Directly Executable FFmpeg (5.0+) Command:"
+		echo "[$(date "+%Y%m%d-%H%M%S")] ${FFMPEG_EXEC}"
+		return 0
+	}
 
 	echo
 	echo "8================= [${CAPTURE_TIME}] =================D"
@@ -656,8 +662,9 @@ watchdog() {
 		case $? in
 		2)
 			sleep "$(utils random_num 4 6)"
-			fetch_m3u && { echo; exit 0; } || { echo >&2; exit 1; }
-		;; 0) echo; exit 0 ;; *) echo >&2; exit 1 ;; esac
+			fetch_m3u || { echo >&2; exit 1; }
+		;; 0) ;; *) echo >&2; exit 1 ;; esac
+		grab_stream && { echo; exit 0; }
 	}
 
 	utils check_depend ffmpeg || { echo >&2; exit 1; }
