@@ -150,23 +150,23 @@ genesis_juicer() {
 		case ${OPT} in
 		c)
 			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} \
-				|| echo "(ERROR) -c: No Cut Time Specified!" >&2; return 1
+				|| { echo "(ERROR) -c: No Cut Time Specified!" >&2; return 1; }
 		;;
 		d) DEBUG_MODE=1 ;;
 		e) EDGING_MODE=1 ;;
 		f)
 			[ -n "${OPTARG##"-"*}" ] && SAVE_PATH=${OPTARG} \
-				|| echo "(ERROR) -f: No Recording Saving Path Specified!" >&2; return 1
+				|| { echo "(ERROR) -f: No Recording Saving Path Specified!" >&2; return 1; }
 		;;
 		h) doc help; return 2 ;;
 		l) LINK_MODE=1 ;;
 		o)
 			[ -n "${OPTARG##"-"*}" ] && LOG_PATH=${OPTARG} \
-				|| echo "(ERROR) -o: No Log Saving Path Specified!" >&2; return 1
+				|| { echo "(ERROR) -o: No Log Saving Path Specified!" >&2; return 1; }
 		;;
 		p)
 			[ -n "${OPTARG##"-"*}" ] && PLATFORM=${OPTARG} \
-				|| echo "(ERROR) -p: No Platform Specified!" >&2; return 1
+				|| { echo "(ERROR) -p: No Platform Specified!" >&2; return 1; }
 		;;
 		v) defaulting_args; doc ver; return 2 ;;
 		\?) echo "(ERROR) Invalid Option: [${OPTARG}] !" >&2; return 1 ;;
