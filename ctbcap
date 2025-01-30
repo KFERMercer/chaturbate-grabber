@@ -155,17 +155,17 @@ genesis_juicer() {
 		d) DEBUG_MODE=1 ;;
 		e) EDGING_MODE=1 ;;
 		f)
-			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} \
+			[ -n "${OPTARG##"-"*}" ] && SAVE_PATH=${OPTARG} \
 				|| echo "(ERROR) -f: No Recording Saving Path Specified!" >&2; return 1
 		;;
 		h) doc help; return 2 ;;
 		l) LINK_MODE=1 ;;
 		o)
-			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} \
+			[ -n "${OPTARG##"-"*}" ] && LOG_PATH=${OPTARG} \
 				|| echo "(ERROR) -o: No Log Saving Path Specified!" >&2; return 1
 		;;
 		p)
-			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} \
+			[ -n "${OPTARG##"-"*}" ] && PLATFORM=${OPTARG} \
 				|| echo "(ERROR) -p: No Platform Specified!" >&2; return 1
 		;;
 		v) defaulting_args; doc ver; return 2 ;;
