@@ -127,11 +127,11 @@ doc() {
 		echo
 		printf "cURL: "
 		printf "$(command -v "curl" 1>/dev/null 2>&1 || echo "N/A")"
-		printf "$(curl -V 2>/dev/null | head -n 1 | grep -oE '[0-9][^ ]+' | head -n 1)\n"
+		printf "$(curl -V 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f2)\n"
 		echo
 		printf "FFmpeg: "
 		printf "$(command -v "ffmpeg" 1>/dev/null 2>&1 || echo "N/A")"
-		printf "$(ffmpeg -version 2>/dev/null | head -n 1 | grep -oE '[0-9][^ ]+' | head -n 1)\n"
+		printf "$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)\n"
 		echo
 		echo "See [ $0 -h ] for Command Help."
 	;;
@@ -281,7 +281,7 @@ utils() {
 	# Human-friendly message and return value: `utils check_ffmpeg_ver`
 	# Check if version is met and return value: `utils check_ffmpeg_ver "[VERSION CODE]"`
 	check_ffmpeg_ver)
-		local COR_VER="$(ffmpeg -version 2>/dev/null | head -n 1 | grep -oE '[0-9][^ ]+' | head -n 1)"
+		local COR_VER="$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)"
 		[ -n "$2" ] && {
 			local TAR_VER="$2"
 			[ "${COR_VER}" = "${TAR_VER}" ] && return 0
