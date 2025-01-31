@@ -2,7 +2,7 @@
 
 <div align="center"><p>Chaturbate-Grabber/CtbCap is a Functional, Reliable, Easy to Use, yet Extremely Lightweight <strong>Recorder</strong>/<strong>Watchbot</strong> for Chaturbate|StripChat.</p></div>
 
-<div align="center"><p><strong><a href="#officel-ctbcap-container-registry">Officel Container Registry</a></strong></p></div>
+<div align="center"><p><strong><a href="#official-ctbcap-container-registry">Official Container Registry</a></strong></p></div>
 
 <div align="center"><h2>Key Advantages</h2></div>
 
@@ -12,7 +12,7 @@
 
     > Considering all the things mentioned and their platform versatility, this pretty much means you can run it on any device with only need internet connection: your phone, refrigerator, slipper, TV remote, [buttplug](https://news.berkeley.edu/wp-content/uploads/2017/10/SaguaroCardon750.jpg), even [your boss's wig](https://m.media-amazon.com/images/I/71+B81wFylL._SX466_.jpg).
 
-- **Multifunction** - Auto Recording; Auto Monitoring; Auto Stopping; Large-Scale Deploy... Just find by yourself.
+- **Multifunction** - Auto Recording; Auto Monitoring; Auto Stopping; Large-Scale Deployment... Just find by yourself.
 
 <div align="center"><h2>Usage | Deploy</h2></div>
 
@@ -40,7 +40,7 @@
 
 > If you're using such platforms that have good support for Docker or similar, I highly recommend to use this method: More serious; High-Availability; Everything runs in containers; Easily configures lot of chatrooms at the same time.
 
-#### **Officel CtbCap Container Registry:**
+#### **Official CtbCap Container Registry:**
 
   - [Docker Hub](https://hub.docker.com/r/kfermercer/ctbcap): `docker pull kfermercer/ctbcap:latest`
 
@@ -101,7 +101,7 @@ kfermercer/ctbcap -h
 
 #### **Update the Container Image:**
 
-> See [Officel CtbCap Container Registry](#officel-ctbcap-container-registry).
+> See [Official CtbCap Container Registry](#official-ctbcap-container-registry).
 
 ### **Container Arguments:**
 
