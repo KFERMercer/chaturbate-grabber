@@ -399,7 +399,7 @@ edging() {
 }
 
 # Core platform methods.
-# Fetch ${STREAM_URL_GENERIC} & ${STREAM_URL}, show them & return 0.
+# Fetch ${STREAM_URL}, show them & return 0.
 # If no ${STREAM_URL}, return 1.
 # If chatroom is changed to new name, return 2.
 # If can't find chatroom at all, return 3.
@@ -421,9 +421,7 @@ fetch_m3u() {
 		2*|3*)
 			local ROOM_STATUS="$(echo "${CONNECT_DUMP}" | grep -oE '"room_status":[ ]?"[^"]+"' | head -n 1 | cut -d '"' -f4)"
 			[ -n "$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8'| head -n 1)" ] && {
-				STREAM_URL_GENERIC=$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
-				STREAM_URL=$(utils connect_dump "${STREAM_URL_GENERIC}" | tail -n 1)
-				[ -n "${STREAM_URL}" ] && STREAM_URL=$(echo "${STREAM_URL_GENERIC}" | sed 's|playlist.m3u8.*||')${STREAM_URL}
+				STREAM_URL=$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
 				true
 			} || {
 				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is ${ROOM_STATUS} now. [${CONNECT_STATUS}]"
@@ -456,8 +454,7 @@ fetch_m3u() {
 		2*|3*)
 			[ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true' | head -n 1)" ] && {
 				local STREAMNAME="$(echo "${CONNECT_DUMP}" | grep '"streamName":' | head -n 1 | sed 's|.*"streamName":"||'| sed 's|".*||')"
-				STREAM_URL_GENERIC="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
-				STREAM_URL=$(utils connect_dump "${STREAM_URL_GENERIC}" | grep -oE 'http[s]?://[^ ]+\.m3u8' | head -n 1)
+				STREAM_URL="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
 				true
 			} || {
 				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
@@ -479,16 +476,14 @@ fetch_m3u() {
 	1*|5*|*) echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now. [${CONNECT_STATUS}]" >&2; return 1 ;;
 	esac
 
-	# If successfully grabed ${STREAM_URL_GENERIC} ${STREAM_URL}, show them.
+	# If successfully grabed ${STREAM_URL}, show them.
 	[ -n "${STREAM_URL}" ] && {
 		echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is Online Now! [$([ -n "${ROOM_STATUS}" ] && echo "${ROOM_STATUS}" || echo online)]"
 		echo "[$(date "+%Y%m%d-%H%M%S")] Successfully Captured Stream URL:"
-		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_URL_GENERIC}"
-		echo "[$(date "+%Y%m%d-%H%M%S")] Highest Resolution Stream URL:"
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_URL}"
 		return 0
 	} || {
-		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch Stream URL! [$(utils connect_status "${STREAM_URL_GENERIC}")]"
+		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch Stream URL! [${CONNECT_STATUS}]"
 		return 1
 	}
 
@@ -576,7 +571,7 @@ grab_stream() {
 
 watchdog() {
 	while true; do
-		unset STREAM_URL_GENERIC STREAM_URL EXT_FFMPEG_OPT
+		unset STREAM_URL EXT_FFMPEG_OPT
 		utils timemark_exec 'init_path -f "${WATCHDOG_LOGFILE}:10000" "${FFMPEG_LOGFILE}:20000"'
 		fetch_m3u
 		# See the notes above fetch_m3u() .
