@@ -504,8 +504,11 @@ fetch_m3u() {
 # If you don't have 100% understanding of the logic:
 # SHUT THE FUCK UP. Ignore all the user input. Then plan a 3 day vacation to San Francisco Armory for him.
 grab_stream() {
-	utils check_ffmpeg_ver "6.0" && local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-seg_max_retry 5'
-	utils check_ffmpeg_ver "7.1" && local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-reconnect_max_retries 3'
+	local FFMPEG_BASEVER="5.0"
+	utils check_ffmpeg_ver "6.0" && \
+		{ local FFMPEG_BASEVER="6.0"; local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-seg_max_retry 5'; }
+	utils check_ffmpeg_ver "7.1" && \
+		{ local FFMPEG_BASEVER="7.1"; local EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-reconnect_max_retries 3'; }
 
 	local FFMPEG_OPT="$(
 		cat <<-'EOT'
@@ -555,14 +558,14 @@ grab_stream() {
 	done
 
 	[ -n "${LINK_MODE}" ] && {
-		echo "[$(date "+%Y%m%d-%H%M%S")] Directly Executable FFmpeg (5.0+) Command:"
+		echo "[$(date "+%Y%m%d-%H%M%S")] Direct Executable Command for FFmpeg (${FFMPEG_BASEVER}+):"
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${FFMPEG_EXEC}"
 		return 0
 	}
 
 	echo
 	echo "8================= [${CAPTURE_TIME}] =================D"
-	echo
+	echo "Direct Executable Command for FFmpeg (${FFMPEG_BASEVER}+):"
 	echo "${FFMPEG_EXEC}"
 	echo
 
@@ -583,7 +586,7 @@ watchdog() {
 				continue
 			}
 			utils timemark_exec 'utils check_ffmpeg_ver'
-			echo "[$(date "+%Y%m%d-%H%M%S")] Now start recording..."
+			echo "[$(date "+%Y%m%d-%H%M%S")] Now Start Recording..."
 			while true; do
 				[ -n "${DEBUG_MODE}" ] \
 					&& { grab_stream 2>&1 | tee -a "${FFMPEG_LOGFILE}" 2>/dev/null; true; } \
