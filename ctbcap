@@ -82,18 +82,17 @@ doc() {
 		echo "			request waves caused by"
 		echo "			large-scale deployments."
 		echo
-		echo "-f </path/to/recdir>	Recording [f]iles will save"
-		echo "			to this path."
+		echo "-f </path/to/recdir>	Recording [f]iles saving path."
 		echo "			Default: \${PWD}/rec/"
 		echo "			Don't Use if Runs in Docker."
 		echo
 		echo "-h			Get [H]elp for Commands."
 		echo
 		echo "-l			[L]ink Mode. Grab Stream URL"
-		echo "			but don't recording it."
+		echo "			& gen Direct FFmpeg Command,"
+		echo "			but Don't start recording."
 		echo
-		echo "-o </path/to/logdir>	L[o]gging files will save to"
-		echo "			this path."
+		echo "-o </path/to/logdir>	L[o]gging saving path."
 		echo "			Disable logging if set to 0."
 		echo "			Default: <recdir>/log/"
 		echo "			Don't Use if Runs in Docker."

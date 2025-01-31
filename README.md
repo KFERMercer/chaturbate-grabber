@@ -44,7 +44,7 @@
 
   - [Docker Hub](https://hub.docker.com/r/kfermercer/ctbcap): `docker pull kfermercer/ctbcap:latest`
 
-  - [GitHub Package](https://github.com/KFERMercer/chaturbate-grabber/pkgs/container/ctbcap): ` docker pull ghcr.io/kfermercer/ctbcap:latest `
+  - [GitHub Package](https://github.com/KFERMercer/chaturbate-grabber/pkgs/container/ctbcap): `docker pull ghcr.io/kfermercer/ctbcap:latest`
 
 | Platform | Available |
 | :-: | :-: |
@@ -129,19 +129,6 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 docker run -t --rm kfermercer/ctbcap -h
 ```
 
-#### Show version & runtime info:
-
-```shell
-# Local:
-./ctbcap -v
-
-# One-Command Run:
-sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -v
-
-# Docker CLI:
-docker run -t --rm -u <UID>:<GID> kfermercer/ctbcap -v
-```
-
 #### Simping your girl with nonstop:
 
 ```shell
@@ -153,6 +140,19 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 
 # Docker CLI:
 docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save kfermercer/ctbcap your_girl
+```
+
+#### Grab stream URL and generating FFmpeg command, but don't start recording:
+
+```shell
+# Local:
+./ctbcap -l your_girl
+
+# One-Command Run:
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -l your_girl
+
+# Docker CLI:
+docker run -t --rm kfermercer/ctbcap -l your_girl
 ```
 
 #### Simping your girl's stream and don't cut the file (cut the files every 3600 seconds by default) :
@@ -181,17 +181,17 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save kfermercer/ctbcap -c 1800 your_girl
 ```
 
-#### Just wanna check if your girl is online:
+#### Show version & runtime info:
 
 ```shell
 # Local:
-./ctbcap -l your_girl
+./ctbcap -v
 
 # One-Command Run:
-sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -l your_girl
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -v
 
 # Docker CLI:
-docker run -t --rm kfermercer/ctbcap -l your_girl
+docker run -t --rm -u <UID>:<GID> kfermercer/ctbcap -v
 ```
 
 <div align="center"><h2>Branch Description</h2></div>
