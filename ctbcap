@@ -280,27 +280,27 @@ utils() {
 	# Human-friendly message and return value: `utils check_ffmpeg_ver`
 	# Check if version is met and return value: `utils check_ffmpeg_ver "[VERSION CODE]"`
 	check_ffmpeg_ver)
-		local COR_VER="$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)"
+		local CUR_VER="$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)"
 		[ -n "$2" ] && {
 			local TAR_VER="$2"
-			[ "${COR_VER}" = "${TAR_VER}" ] && return 0
-			[ "$(printf "${TAR_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${TAR_VER}" ] && return 1
+			[ "${CUR_VER}" = "${TAR_VER}" ] && return 0
+			[ "$(printf "${TAR_VER}\n${CUR_VER}" | sort -V | tail -n 1)" = "${TAR_VER}" ] && return 1
 			return 0
 		}
 		local REQ_VER=5.0 # Required minimum version of FFmpeg.
 		local REC_VER=7.1 # Recommended minimum version of FFmpeg.
-		[ -z "${COR_VER}" ] && {
+		[ -z "${CUR_VER}" ] && {
 			echo "(ERROR) NO FFmpeg found! (Recommended ${REC_VER}+)" >&2
 			return 1
 		}
-		[ "${COR_VER}" = "${REC_VER}" ] && return 0
-		[ "$(printf "${REC_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
-			echo "(WARNING) Using legacy version of FFmpeg. [${COR_VER}] (Recommended ${REC_VER}+)" >&2
+		[ "${CUR_VER}" = "${REC_VER}" ] && return 0
+		[ "$(printf "${REC_VER}\n${CUR_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
+			echo "(WARNING) Using legacy version of FFmpeg. [${CUR_VER}] (Recommended ${REC_VER}+)" >&2
 			return 2
 		}
-		[ "${COR_VER}" = "${REQ_VER}" ] && return 2
-		[ "$(printf "${REQ_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
-			echo "(ERROR) Version of FFmpeg must be higher than ${REQ_VER}! [${COR_VER}] (Recommended ${REC_VER}+)" >&2
+		[ "${CUR_VER}" = "${REQ_VER}" ] && return 2
+		[ "$(printf "${REQ_VER}\n${CUR_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
+			echo "(ERROR) Version of FFmpeg must be higher than ${REQ_VER}! [${CUR_VER}] (Recommended ${REC_VER}+)" >&2
 			return 1
 		}
 		return 0
@@ -664,7 +664,7 @@ watchdog() {
 
 	utils check_depend ffmpeg || { echo >&2; exit 1; }
 	utils check_ffmpeg_ver
-	case $? in 1) echo >&2; exit 1 ;; 2) echo ;; esac
+	case $? in 1) echo >&2; exit 1 ;; 2) echo >&2 ;; esac
 
 	init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" || { echo >&2; exit 1; }
 	init_path -f "${WATCHDOG_LOGFILE}:" "${FFMPEG_LOGFILE}:" || { echo >&2; exit 1; }
