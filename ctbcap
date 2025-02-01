@@ -289,6 +289,10 @@ utils() {
 		}
 		local REQ_VER=5.0 # Required minimum version of FFmpeg.
 		local REC_VER=7.1 # Recommended minimum version of FFmpeg.
+		[ -z "${COR_VER}" ] && {
+			echo "(ERROR) NO FFmpeg found! (Recommended ${REC_VER}+)" >&2
+			return 1
+		}
 		[ "${COR_VER}" = "${REC_VER}" ] && return 0
 		[ "$(printf "${REC_VER}\n${COR_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
 			echo "(WARNING) Using legacy version of FFmpeg. [${COR_VER}] (Recommended ${REC_VER}+)" >&2
@@ -579,12 +583,13 @@ watchdog() {
 		# See the notes above fetch_m3u() .
 		case $? in
 		0)
-			utils timemark_exec 'init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}"' || {
-				echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
-				sleep "$(utils random_num 480 720)"
-				continue
-			}
-			utils timemark_exec 'utils check_ffmpeg_ver'
+			utils timemark_exec 'init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}"' \
+				&& { utils timemark_exec 'utils check_ffmpeg_ver'; case $? in 0|2) true ;; *) false ;; esac; } \
+				|| {
+					echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
+					sleep "$(utils random_num 480 720)"
+					continue
+				}
 			echo "[$(date "+%Y%m%d-%H%M%S")] Now Start Recording..."
 			while true; do
 				[ -n "${DEBUG_MODE}" ] \
