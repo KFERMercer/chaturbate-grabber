@@ -516,7 +516,7 @@ grab_stream() {
 	local FFMPEG_OPT="$(
 		cat <<-'EOT'
 			-nostdin -y -loglevel warning -user_agent "${UA}" -tls_verify 0
-			-copy_unknown -fflags +nobuffer -avioflags +direct
+			-copy_unknown -fflags +genpts+nobuffer -avioflags +direct
 			-reconnect 1
 				-reconnect_on_network_error 1
 				-reconnect_on_http_error 1
