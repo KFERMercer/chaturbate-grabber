@@ -479,7 +479,7 @@ fetch_m3u() {
 	1*|5*|*) echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now. [${CONNECT_STATUS}]" >&2; return 1 ;;
 	esac
 
-	# If successfully grabed ${STREAM_URL}, show them.
+	# If successfully grabbed ${STREAM_URL}, show them.
 	[ -n "${STREAM_URL}" ] && {
 		echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is Online Now! [$([ -n "${ROOM_STATUS}" ] && echo "${ROOM_STATUS}" || echo online)]"
 		echo "[$(date "+%Y%m%d-%H%M%S")] Successfully Captured Stream URL:"
