@@ -280,7 +280,8 @@ utils() {
 	# Human-friendly message and return value: `utils check_ffmpeg_ver`
 	# Check if version is met and return value: `utils check_ffmpeg_ver "[VERSION CODE]"`
 	check_ffmpeg_ver)
-		local CUR_VER="$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)"
+		local CUR_VER_RAW="$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)"
+		local CUR_VER="$(case ${CUR_VER_RAW} in [!0-9][0-9]*) echo "${CUR_VER_RAW#?}" ;; *) echo "${CUR_VER_RAW}" ;; esac)"
 		[ -n "$2" ] && {
 			local TAR_VER="$2"
 			[ "${CUR_VER}" = "${TAR_VER}" ] && return 0
