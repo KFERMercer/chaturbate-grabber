@@ -44,6 +44,8 @@ defaulting_args() {
 	# Link Mode. Only grab stream URL. Inactive if not 1.
 	[ "${LINK_MODE}" = "1" ] || LINK_MODE=
 
+	# Disable banner showing.
+	[ "${NOBANNER}" = "1" ] || NOBANNER=
 }
 
 doc() {
@@ -640,7 +642,7 @@ watchdog() {
 { # Execution Entry
 	trap '{ echo; echo "BYE (. )( .) BYE"; echo; exit 0; }' HUP INT QUIT TERM
 
-	{ echo; doc neon; echo; }
+	[ -z "${NOBANNER}" ] && { echo; doc neon; echo; }
 
 	[ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "linux" ] && {
 		echo "(NOTICE) Non-GNU/Linux detected! Make sure you have coreutils installed! Or You Will Get Error!"
