@@ -2,62 +2,96 @@
 
 <div align="center"><p>Chaturbate-Grabber/CtbCap is a Functional, Reliable, Easy to Use, yet Extremely Lightweight <strong>Recorder</strong>/<strong>Watchbot</strong> for Chaturbate|StripChat.</p></div>
 
-<div align="center"><p><strong><a href="#official-ctbcap-container-registry">Official Container Registry</a></strong></p></div>
-
 <div align="center"><h2>Key Advantages</h2></div>
 
-- **Lightweight** - Written by most basic Shell Scripts with full POSIX compatibility. [Pythonless](https://m.media-amazon.com/images/I/71CmeuB3XXL._AC_UF1000,1000_QL80_.jpg), but far superior performance and energy efficiency.
+- **Lightweight** - Written in most basic Shell Scripts to strive POSIX compatibility and energy efficiency.
+  > Py is so braindead.
 
 - **All platforms available** - All functions are available with just require `curl` & `ffmpeg`.
-
-    > Considering all the things mentioned and their platform versatility, this pretty much means you can run it on any device with only need internet connection: your phone, refrigerator, slipper, TV remote, [buttplug](https://news.berkeley.edu/wp-content/uploads/2017/10/SaguaroCardon750.jpg), even [your boss's wig](https://m.media-amazon.com/images/I/71+B81wFylL._SX466_.jpg).
+  > $0.1 Temu Phone? No problem.
 
 - **Multifunction** - Auto Recording; Auto Monitoring; Auto Stopping; Large-Scale Deployment... Just find by yourself.
+  > I'm lighter, yet I'm more powerful.
 
 <div align="center"><h2>Usage | Deploy</h2></div>
 
 ### **Launch with One-Command:**
 
-> Yeah, 1 Line, Just Crazy.
+**Open your whatever terminal & drop this:**
 
+```shell
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
+```
+
+> [!NOTE]
+> Put the options after `@` . e.g:\
+> `sh -c <...curl...stuff...> @ -ef ~/rec your_mom`
+
+> [!TIP]
+> You can also choose to download/upgrade CtbCap to your local:\
+> `curl -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap -o ctbcap && chmod +x ctbcap`\
+> After its done, run `./ctbcap` to launch CtbCap.
+
+> [!TIP]
 > **Termux is Supported.**
-
-  - Open your whatever terminal & drop this:
-
-    ```shell
-    sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
-    ```
-    > Put the options after `@` . e.g:\
-    > `sh -c <...curl...stuff...> @ -ef ~/rec your_mom`
-
-    > You can also choose to download | upgrade CtbCap to your local:\
-    > `curl -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap -o ctbcap && chmod +x ctbcap`\
-    > After its done, run `./ctbcap` to launch CtbCap.
 
 ##
 
 ### **Docker Container (Recommend) :**
 
+> [!NOTE]
 > If you're using such platforms that have good support for Docker or similar, I highly recommend to use this method: More serious; High-Availability; Everything runs in containers; Easily configures lot of chatrooms at the same time.
 
 #### **Official CtbCap Container Registry:**
 
-  - [Docker Hub](https://hub.docker.com/r/kfermercer/ctbcap): `docker pull kfermercer/ctbcap:latest`
+- [Docker Hub](https://hub.docker.com/r/kfermercer/ctbcap): `docker pull kfermercer/ctbcap:latest`
 
-  - [GitHub Package](https://github.com/KFERMercer/chaturbate-grabber/pkgs/container/ctbcap): `docker pull ghcr.io/kfermercer/ctbcap:latest`
+- [GitHub Package](https://github.com/KFERMercer/chaturbate-grabber/pkgs/container/ctbcap): `docker pull ghcr.io/kfermercer/ctbcap:latest`
 
-| Platform | Available |
-| :-: | :-: |
-| x86 | ✅ |
-| x86_64 | ✅ |
-| armhf | ✅ |
-| armv7 | ✅ |
-| aarch64 | ✅ |
-| loongarch64 | ✅ |
-| ppc64le | ✅ |
-| riscv64 | ✅ |
-| s390x | ✅ |
-> **CtbCap will always deliver on the [Compatibility Promise](https://news.berkeley.edu/wp-content/uploads/2017/10/SaguaroCardon750.jpg).**
+<table>
+<tr align="center">
+<th>Platform</th>
+<th>Available</th>
+<th>Status</th>
+</tr>
+<tr align="center">
+<td>x86</td>
+<td>✅</td>
+<td rowspan="0"><a href="https://github.com/KFERMercer/chaturbate-grabber/actions/workflows/Build-Push-Containers.yml"><img src="https://img.shields.io/github/actions/workflow/status/KFERMercer/chaturbate-grabber/Build-Push-Containers.yml"></a></td>
+</tr>
+<tr align="center">
+<td>x86_64</td>
+<td>✅</td>
+</tr>
+<tr align="center">
+<td>armhf</td>
+<td>✅</td>
+</tr>
+<tr align="center">
+<td>armv7</td>
+<td>✅</td>
+</tr>
+<tr align="center">
+<td>aarch64</td>
+<td>✅</td>
+</tr>
+<tr align="center">
+<td>loongarch64</td>
+<td>✅</td>
+</tr>
+<tr align="center">
+<td>ppc64le</td>
+<td>✅</td>
+</tr>
+<tr align="center">
+<td>riscv64</td>
+<td>✅</td>
+</tr>
+<tr align="center">
+<td>s390x</td>
+<td>✅</td>
+</tr>
+</table>
 
 #### **Run As Compose Daemon (Recommend)** :
 
@@ -66,6 +100,7 @@
      ```shell
      curl -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/docker-compose.sample.yml -o ctbcap-compose.yml
      ```
+
      Then edit `./ctbcap-compose.yml` to configure.
 
   2. Deploy the compose daemon:
@@ -89,23 +124,28 @@ docker run -t --rm \
 -v </path/to/recdir>:/save \
 -v </path/to/logdir>:/log \
 -e TZ=Asia/Shanghai \
--e <ARG>=<value> \
+-e <VAR>=<value> \
 ... \
 kfermercer/ctbcap -h
 ```
 
-> Option `-u <UID>:<GID>` allows you to specify the user (UID) and group (GID) that the container will run as. For example, `-u 65534:65534` will run the container as the 'nobody'. If you don't specify `-u`, the container will running as `1000:1000`.\
-> `-u $(id -u):$(id -g)` Will use your current UID and GID.
+> [!NOTE]
+> Option `-u <UID>:<GID>` allows you to specify the user (UID) and group (GID) that the container will run as. For example, `-u 0:0` will run the container as root.
+> 
+> - If you don't specify `-u`, the container will running as `1000:1000`.
+> 
+> - Use `-u $(id -u):$(id -g)` to use your current UID and GID.
 
-> For more container arguments, see: [Container Arguments](#container-arguments)
+> [!NOTE]
+> For Container Variables, see: [Container Variables](#container-variables)
 
 #### **Update the Container Image:**
 
-> See [Official CtbCap Container Registry](#official-ctbcap-container-registry).
+See [Official CtbCap Container Registry](#official-ctbcap-container-registry).
 
-### **Container Arguments:**
+### **Container Variables:**
 
-| Arguments | Value Type | Value Examples | Default | Necessary to Change |
+| Variables | Value Type | Value Examples | Default | Necessary to Change |
 | :-: | :-: | :- | :- | :-: |
 | MODEL | Streamer's Username <br> or <br> Chatroom URL | `3rd8008` <br> `s1mp_L0r3-87` <br> `https://chaturbate.com/your_sister` <br> `https://stripchat.com/dicklessman` <br> ... | - | Yes |
 | PLATFORM | `chaturbate` <br> or <br> `stripchat` | `chaturbate` <br> `stripchat` | `chaturbate` | Yes <br> if not Chaturbate |
