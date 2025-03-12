@@ -427,7 +427,12 @@ fetch_m3u() {
 		2*|3*)
 			local ROOM_STATUS="$(echo "${CONNECT_DUMP}" | grep -oE '"room_status":[ ]?"[^"]+"' | head -n 1 | cut -d '"' -f4)"
 			[ -n "$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8'| head -n 1)" ] && {
-				STREAM_URL=$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
+				STREAM_URL=$(echo "${CONNECT_DUMP}" \
+						| grep -oE 'http[s]?://edge[^ ]+\.m3u8' \
+						| head -n 1 \
+						| sed 's|playlist.m3u8|playlist_sfm4s.m3u8|g' \
+						| sed 's|live-hls|live-c-fhls|g'
+					)
 				true
 			} || {
 				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is ${ROOM_STATUS} now. [${CONNECT_STATUS}]"
