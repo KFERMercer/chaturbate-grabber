@@ -57,7 +57,7 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 <tr align="center">
 <td>x86</td>
 <td>✅</td>
-<td rowspan="0"><a href="https://github.com/KFERMercer/chaturbate-grabber/actions/workflows/Build-Push-Containers.yml"><img src="https://img.shields.io/github/actions/workflow/status/KFERMercer/chaturbate-grabber/Build-Push-Containers.yml"></a></td>
+<td rowspan="9"><a href="https://github.com/KFERMercer/chaturbate-grabber/actions/workflows/Build-Push-Containers.yml"><img src="https://img.shields.io/github/actions/workflow/status/KFERMercer/chaturbate-grabber/Build-Push-Containers.yml"></a></td>
 </tr>
 <tr align="center">
 <td>x86_64</td>
@@ -93,7 +93,7 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 </tr>
 </table>
 
-#### **Run As Compose Daemon (Recommend)** :
+#### **Run As Compose Daemon (Recommend) :**
 
   1. Custom your own compose file:
 
@@ -143,7 +143,7 @@ kfermercer/ctbcap -h
 
 See [Official CtbCap Container Registry](#official-ctbcap-container-registry).
 
-### **Container Variables:**
+#### **Container Variables:**
 
 | Variables | Value Type | Value Examples | Default | Necessary to Change |
 | :-: | :-: | :- | :- | :-: |
