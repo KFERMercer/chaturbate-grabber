@@ -237,7 +237,7 @@ utils() {
 			--compressed \
 			--connect-timeout 5 --retry 5 --retry-delay 2 \
 			2>/dev/null | tr -d '\r' | head -n 1 | grep -oE '[0-9]{3}' \
-			|| echo 000
+			|| echo 999
 	;;
 	# Usage: `utils connect_dump "<URL>"`
 	connect_dump)
@@ -255,7 +255,7 @@ utils() {
 			| head -n 1 \
 			| cut -c -15 \
 			| grep -oE '[0-9]{3}' \
-			|| echo 000
+			|| echo 999
 	;;
 	# Re-implement random num tool on POSIX Shell (B/E).
 	# Usage: `utils random_num <SNUM> <BNUM>`
@@ -486,7 +486,7 @@ fetch_m3u() {
 	401) echo "[$(date "+%Y%m%d-%H%M%S")] Room [${MODEL}] might require password. [${CONNECT_STATUS}]" >&2 ; return 1 ;;
 	404) echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2; return 3 ;;
 	4*) echo "[$(date "+%Y%m%d-%H%M%S")] You might gotten blocked by CAPTCHA. [${CONNECT_STATUS}]" >&2; return 1 ;;
-	000) echo "[$(date "+%Y%m%d-%H%M%S")] Internet Connection Error. [${CONNECT_STATUS}]" >&2; return 1 ;;
+	999) echo "[$(date "+%Y%m%d-%H%M%S")] Internet Connection Error. [${CONNECT_STATUS}]" >&2; return 1 ;;
 	1*|5*|*) echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now. [${CONNECT_STATUS}]" >&2; return 1 ;;
 	esac
 
