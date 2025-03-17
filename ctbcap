@@ -409,6 +409,7 @@ edging() {
 # If no ${STREAM_URL}, return 1.
 # If chatroom is changed to new name, return 2.
 # If can't find chatroom at all, return 3.
+# If ${STREAM_URL} is not accessible, return 4.
 fetch_m3u() {
 	[ -n "${MODEL_NEW_NAME}" ] && {
 		echo "[$(date "+%Y%m%d-%H%M%S")] (NOTICE) Due to name change, [${MODEL_NEW_NAME}] will now be used for actual requests."
@@ -431,14 +432,13 @@ fetch_m3u() {
 				[ "$(utils connect_status "${STREAM_URL}")" -ge 400 ] && {
 					STREAM_URL=$(echo "${STREAM_URL}" | sed 's|playlist.m3u8|playlist_sfm4s.m3u8|g' | sed 's|live-hls|live-c-fhls|g')
 					[ "$(utils connect_status "${STREAM_URL}")" -ge 400 ] && {
-						unset STREAM_URL
 						echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) [${MODEL}] is Online now, but looks like the backend of [${PLATFORM}] has been changed." >&2
-						return 1
+						unset STREAM_URL && return 4
 					}
 				}
 				true
 			} || {
-				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is ${ROOM_STATUS} now. [${CONNECT_STATUS}]"
+				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is [${ROOM_STATUS}] now. [${CONNECT_STATUS}]"
 				return 1
 			}
 			unset CONNECT_STATUS
@@ -469,6 +469,11 @@ fetch_m3u() {
 			[ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true' | head -n 1)" ] && {
 				local STREAMNAME="$(echo "${CONNECT_DUMP}" | grep '"streamName":' | head -n 1 | sed 's|.*"streamName":"||'| sed 's|".*||')"
 				STREAM_URL="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
+				local STREAM_URL_STATUS="$(utils connect_status "${STREAM_URL}")"
+				[ "${STREAM_URL_STATUS}" -ge 400 ] && {
+					echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) [${MODEL}] is Online, but can't access the stream now. [${STREAM_URL_STATUS}]" >&2
+					unset STREAM_URL && return 4
+				}
 				true
 			} || {
 				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
@@ -634,6 +639,11 @@ watchdog() {
 		3)
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 1 hr..."
 			sleep "$(utils random_num 3300 3900)"
+			continue
+		;;
+		4)
+			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 3 min..."
+			sleep "$(utils random_num 150 210)"
 			continue
 		;;
 		*)
