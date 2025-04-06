@@ -6,8 +6,8 @@ on:
       - master
     tags:
       - '*'
-  # schedule:
-  #   - cron: '0 0 * * MON' # Every Monday at 00:00 (UTC) .
+  schedule:
+    - cron: '0 0 * * MON' # Every Monday at 00:00 (UTC) .
 
 env:
   IMAGE_NAME: ctbcap

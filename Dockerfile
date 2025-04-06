@@ -168,17 +168,15 @@ EOT
 WORKDIR /ffmpeg_source
 
 RUN <<EOT
-	# Get newest version of FFmpeg.
-	# FFMPEG_TARBALL="$( \
-	# 	curl -s -L -k --connect-timeout 5 --retry 3 \
-	# 		"https://ffmpeg.org/releases/" \
-	# 		| grep -oE 'ffmpeg-[0-9]+.*.tar.xz' \
-	# 		| sed 's|\.tar.xz.*||' \
-	# 		| sort -V \
-	# 		| tail -n 1 \
-	# ).tar.xz"
-
-	FFMPEG_TARBALL="ffmpeg-7.1.tar.xz"
+	# Get newest version tarball of FFmpeg.
+	FFMPEG_TARBALL="$( \
+		curl -s -L -k --connect-timeout 5 --retry 3 \
+			"https://ffmpeg.org/releases/" \
+			| grep -oE 'ffmpeg-[0-9]+.*.tar.xz' \
+			| sed 's|\.tar.xz.*||' \
+			| sort -V \
+			| tail -n 1 \
+	).tar.xz"
 
 	curl -L -k --connect-timeout 5 --retry 3 \
 		"https://ffmpeg.org/releases/${FFMPEG_TARBALL}" \
