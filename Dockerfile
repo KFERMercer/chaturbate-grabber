@@ -165,7 +165,7 @@ RUN <<EOT
 	rm -rf ~/.gnupg/public-keys.d/pubring.db.lock
 EOT
 
-WORKDIR /tmp/ffmpeg_source
+WORKDIR /ffmpeg_source
 
 RUN <<EOT
 	# Get newest version of FFmpeg.
@@ -196,10 +196,10 @@ RUN <<EOT
 	tar -xf ffmpeg.tar.xz --strip-components 1
 EOT
 
-WORKDIR /tmp/ffmpeg_bin
+WORKDIR /ffmpeg_bin
 
 RUN <<EOT
-	/tmp/ffmpeg_source/configure \
+	/ffmpeg_source/configure \
 		--disable-everything \
 		--disable-autodetect \
 		--disable-avdevice \
@@ -229,7 +229,7 @@ EOT
 # Minimal product using live-built FFmpeg.
 FROM heir AS minimal
 
-COPY --from=builder /tmp/ffmpeg_bin/ffmpeg /usr/bin/
+COPY --from=builder /ffmpeg_bin/ffmpeg /usr/bin/
 COPY ./ctbcap /usr/bin/
 
 USER ${CUID}:${CGID}
