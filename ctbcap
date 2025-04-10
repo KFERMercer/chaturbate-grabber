@@ -212,13 +212,15 @@ genesis_juicer() {
 
 	SAVE_PATH="$(echo "${SAVE_PATH}" | sed "s|^~/|${HOME}/|")"
 	LOG_PATH="$(echo "${LOG_PATH}" | sed "s|^~/|${HOME}/|")"
-	SAVE_PATH=$(realpath -m "${SAVE_PATH}" 2>/dev/null)
+	_SAVE_PATH=$(realpath -m "${SAVE_PATH}" 2>/dev/null)
+	[ -n "${_SAVE_PATH}" ] && SAVE_PATH=${_SAVE_PATH}
 	[ "${LOG_PATH}" = 0 ] && {
 		LOG_PATH=""
 		WATCHDOG_LOGFILE="/dev/null"
 		FFMPEG_LOGFILE="/dev/null"
 	} || {
-		LOG_PATH=$(realpath -m "${LOG_PATH}" 2>/dev/null)
+		_LOG_PATH=$(realpath -m "${LOG_PATH}" 2>/dev/null)
+		[ -n "${_LOG_PATH}" ] && LOG_PATH=${_LOG_PATH}
 		WATCHDOG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.log"
 		FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
 	}
@@ -283,7 +285,12 @@ utils() {
 	# Check if version is met and return value: `utils check_ffmpeg_ver "[VERSION CODE]"`
 	check_ffmpeg_ver)
 		local CUR_VER_RAW="$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)"
-		local CUR_VER="$(case ${CUR_VER_RAW} in [!0-9][0-9]*) echo "${CUR_VER_RAW#?}" ;; *) echo "${CUR_VER_RAW}" ;; esac)"
+
+		case ${CUR_VER_RAW} in
+		[!0-9][0-9]*) local CUR_VER="${CUR_VER_RAW#?}" ;;
+		*) local CUR_VER="${CUR_VER_RAW}" ;;
+		esac
+
 		[ -n "$2" ] && {
 			local TAR_VER="$2"
 			[ "${CUR_VER}" = "${TAR_VER}" ] && return 0
@@ -315,7 +322,7 @@ utils() {
 	timemark_exec)
 		local TIME_MARK="[$(date "+%Y%m%d-%H%M%S")] "
 		local RAW="$(eval "$2" 2>&1; printf "\n$?")"
-		local OUTPUT="$(echo "${RAW}" | head -n -1)"
+		local OUTPUT="$(echo "${RAW}" | sed '$d')"
 		[ -z "${OUTPUT}" ] && return 0
 		local EXEC_STAT="$(echo "${RAW}" | tail -n 1)"
 		echo "${OUTPUT}" | sed "s|^|${TIME_MARK}|"
