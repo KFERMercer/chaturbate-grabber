@@ -7,7 +7,7 @@ on:
     tags:
       - '*'
   schedule:
-    - cron: '0 0 * * MON' # Every Monday at 00:00 (UTC) .
+    - cron: '0 0 1 * *' # 00:00 (UTC) on every 1st day of month.
 
 env:
   IMAGE_NAME: ctbcap
