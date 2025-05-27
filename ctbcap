@@ -52,7 +52,7 @@ doc() {
 	case $1 in
 	neon)
 		# Multi-line message should not be larger than 55 columns per line:
-		#     ↓                     55 columns                      ↓
+		#     v                     55 columns                      v
 		echo "8=====================================================D"
 		echo " ┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐"
 		echo " │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘"
