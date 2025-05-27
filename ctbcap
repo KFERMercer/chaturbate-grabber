@@ -538,7 +538,7 @@ grab_stream() {
 
 	local FFMPEG_OPT="$(
 		cat <<-'EOT'
-			-y -loglevel error -nostdin
+			-y -loglevel warning -nostdin
 			-copyts -start_at_zero
 			-copy_unknown
 			-user_agent "${UA}"
