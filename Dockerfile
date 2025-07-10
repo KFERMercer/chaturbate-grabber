@@ -200,6 +200,7 @@ WORKDIR /ffmpeg_bin
 RUN <<EOT
 	/ffmpeg_source/configure \
 		--disable-everything \
+		--disable-debug \
 		--disable-autodetect \
 		--disable-avdevice \
 		--disable-swscale \
@@ -213,7 +214,9 @@ RUN <<EOT
 		--enable-demuxer=hls,mp4,m4v,mpegts \
 		--enable-muxer=segment,matroska \
 		--enable-protocol=hls,http,https,file \
-		--enable-bsf=extract_extradata
+		--enable-bsf=extract_extradata \
+		--enable-small \
+		--optflags=-O3 --extra-ldflags="-s"
 EOT
 
 RUN <<EOT
