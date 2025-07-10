@@ -72,15 +72,16 @@ COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 	;;
 	esac
 
-	# Is directories writable?
-	[ ! -w "${SAVE_PATH}" ] && { echo "(ERROR) SAVE_PATH is unwritable!"; exit 1; }
-	[ "${LOG_PATH}" = 0 ] || {
-		[ ! -w "${LOG_PATH}" ] && { echo "(ERROR) LOG_PATH is unwritable!"; exit 1; }
-	}
-
 	FFMPEG_PROCESS="$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null | head -n 1)"
 	# If has FFmpeg process...
 	[ -n "${FFMPEG_PROCESS}" ] && {
+
+		# Is directories writable?
+		[ ! -w "${SAVE_PATH}" ] && { echo "(ERROR) [${SAVE_PATH}] is unwritable!"; exit 1; }
+		[ "${LOG_PATH}" = 0 ] || {
+			[ ! -w "${LOG_PATH}" ] && { echo "(ERROR) [${LOG_PATH}] is unwritable!"; exit 1; }
+		}
+
 		STREAM_URL="$(echo "${FFMPEG_PROCESS}" | grep -oE 'http[s]?://[^ ]+\.m3u8')"
 		UA="$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')"
 		[ -z "${UA}" ] && { echo "(ERROR) UA does not exist!"; exit 1; }
