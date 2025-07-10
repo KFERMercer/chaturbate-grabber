@@ -108,12 +108,12 @@ jobs:
 
       - name: Create and push latest manifest image to Docker Hub
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        uses: Noelware/docker-manifest-action@master
+        uses: Noelware/docker-manifest-action@v1
         with:
-          inputs: |
+          tags: |
             kfermercer/${{ env.IMAGE_NAME }}:latest,
             kfermercer/${{ env.IMAGE_NAME }}:snapshot
-          tags: |
+          inputs: |
             kfermercer/${{ env.IMAGE_NAME }}:latest-x86,
             kfermercer/${{ env.IMAGE_NAME }}:latest-x86_64,
             kfermercer/${{ env.IMAGE_NAME }}:latest-armhf,
@@ -127,12 +127,12 @@ jobs:
 
       - name: Create and push latest manifest image to GHCR
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        uses: Noelware/docker-manifest-action@master
+        uses: Noelware/docker-manifest-action@v1
         with:
-          inputs: |
+          tags: |
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest,
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:snapshot
-          tags: |
+          inputs: |
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest-x86,
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest-x86_64,
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest-armhf,
@@ -150,13 +150,13 @@ jobs:
 
       - name: Create and push release manifest to Docker Hub
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        uses: Noelware/docker-manifest-action@master
+        uses: Noelware/docker-manifest-action@v1
         with:
-          inputs: |
+          tags: |
             kfermercer/${{ env.IMAGE_NAME }}:latest,
             kfermercer/${{ env.IMAGE_NAME }}:latest-release,
             kfermercer/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
-          tags: |
+          inputs: |
             kfermercer/${{ env.IMAGE_NAME }}:latest-x86,
             kfermercer/${{ env.IMAGE_NAME }}:latest-x86_64,
             kfermercer/${{ env.IMAGE_NAME }}:latest-armhf,
@@ -170,13 +170,13 @@ jobs:
 
       - name: Create and push release manifest to GHCR
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        uses: Noelware/docker-manifest-action@master
+        uses: Noelware/docker-manifest-action@v1
         with:
-          inputs: |
+          tags: |
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest,
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest-release,
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
-          tags: |
+          inputs: |
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest-x86,
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest-x86_64,
             ghcr.io/kfermercer/${{ env.IMAGE_NAME }}:latest-armhf,
