@@ -75,20 +75,21 @@ COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 	FFMPEG_PROCESS="$(ps -ef | grep -oE "[f]fmpeg.*-i.*.m3u8.*${MODEL}.*.mkv" 2>/dev/null | head -n 1)"
 	# If has FFmpeg process...
 	[ -n "${FFMPEG_PROCESS}" ] && {
-
-		# Is directories writable?
-		[ ! -w "${SAVE_PATH}" ] && { echo "(ERROR) [${SAVE_PATH}] is unwritable!"; exit 1; }
-		[ "${LOG_PATH}" = 0 ] || {
-			[ ! -w "${LOG_PATH}" ] && { echo "(ERROR) [${LOG_PATH}] is unwritable!"; exit 1; }
-		}
-
 		STREAM_URL="$(echo "${FFMPEG_PROCESS}" | grep -oE 'http[s]?://[^ ]+\.m3u8')"
 		UA="$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')"
-		[ -z "${UA}" ] && { echo "(ERROR) UA does not exist!"; exit 1; }
+		[ -z "${UA}" ] && { echo "(ERROR) UA is not set!"; exit 1; }
 
-		# Has FFmpeg process, but m3u8 URL is unavailable --> err
 		M3U8_RESPONSE="$(curl "${STREAM_URL}" -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')"
-		[ -z "${M3U8_RESPONSE}" ] && { echo "(ERROR) FFMPEG process did not exit correctly!"; exit 1; }
+		[ -n "${M3U8_RESPONSE}" ] && {
+			# Is directories writable?
+			[ ! -w "${SAVE_PATH}" ] && { echo "(ERROR) [${SAVE_PATH}] is unwritable!"; exit 1; }
+			[ "${LOG_PATH}" = 0 ] || { # Has FFmpeg process, but directories unwritable --> err
+				[ ! -w "${LOG_PATH}" ] && { echo "(ERROR) [${LOG_PATH}] is unwritable!"; exit 1; }
+			}
+		} || { # Has FFmpeg process, but m3u8 URL is unavailable --> err
+			echo "(ERROR) FFMPEG process did not exit correctly!"
+			exit 1
+		}
 	}
 
 	echo "Everything is OK!"
