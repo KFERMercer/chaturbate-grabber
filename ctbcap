@@ -667,7 +667,9 @@ watchdog() {
 { # Execution Entry
 	trap '{ echo; echo "BYE (. )( .) BYE"; echo; exit 0; }' HUP INT QUIT TERM
 
-	[ -z "${NOBANNER}" ] && { echo; doc neon; echo; }
+	echo
+
+	[ -z "${NOBANNER}" ] && { doc neon; echo; }
 
 	[ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "linux" ] && {
 		echo "(NOTICE) Non-GNU/Linux detected! Make sure you have coreutils installed! Or You Will Get Error!"

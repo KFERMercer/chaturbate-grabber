@@ -5,13 +5,13 @@
 <div align="center"><h2>Key Advantages</h2></div>
 
 - **Lightweight** - Written in most basic Shell Scripts to strive POSIX compatibility and energy efficiency.
-  > Py is so braindead.
+  > Py is too heavy.
 
 - **All platforms available** - All functions are available with just require `curl` & `ffmpeg`.
   > $0.1 Temu Phone? No problem.
 
 - **Multifunction** - Auto Recording; Auto Monitoring; Auto Stopping; Large-Scale Deployment... Just find by yourself.
-  > I'm lighter, yet I'm more powerful.
+  > Lighter, yet more powerful.
 
 <div align="center"><h2>Usage | Deploy</h2></div>
 
@@ -24,7 +24,7 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 ```
 
 > [!NOTE]
-> Put the options after `@` . e.g:\
+> Put the options after `@` like:\
 > `sh -c <...curl...stuff...> @ -ef ~/rec your_mom`
 
 > [!TIP]
@@ -33,7 +33,7 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 > After its done, run `./ctbcap` to launch CtbCap.
 
 > [!TIP]
-> **Termux is Supported.**
+> **Available on Termux.**
 
 ##
 
@@ -44,52 +44,43 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 
 #### **Official CtbCap Container Registry:**
 
-- [Docker Hub](https://hub.docker.com/r/kfermercer/ctbcap): `docker pull kfermercer/ctbcap:latest`
-
-- [GitHub Package](https://github.com/KFERMercer/chaturbate-grabber/pkgs/container/ctbcap): `docker pull ghcr.io/kfermercer/ctbcap:latest`
+| Registry | Docker CLI |
+| :-: | :-: |
+| [Docker Hub](https://hub.docker.com/r/kfermercer/ctbcap) | `docker pull kfermercer/ctbcap:latest` |
+| [GitHub Package](https://github.com/KFERMercer/chaturbate-grabber/pkgs/container/ctbcap) | `docker pull ghcr.io/kfermercer/ctbcap:latest` |
 
 <table>
 <tr align="center">
 <th>Platform</th>
-<th>Available</th>
-<th>Status</th>
+<th>Build Status</th>
 </tr>
 <tr align="center">
 <td>x86</td>
-<td>✅</td>
 <td rowspan="9"><a href="https://github.com/KFERMercer/chaturbate-grabber/actions/workflows/Build-Push-Containers.yml"><img src="https://img.shields.io/github/actions/workflow/status/KFERMercer/chaturbate-grabber/Build-Push-Containers.yml"></a></td>
 </tr>
 <tr align="center">
 <td>x86_64</td>
-<td>✅</td>
 </tr>
 <tr align="center">
 <td>armhf</td>
-<td>✅</td>
 </tr>
 <tr align="center">
 <td>armv7</td>
-<td>✅</td>
 </tr>
 <tr align="center">
 <td>aarch64</td>
-<td>✅</td>
 </tr>
 <tr align="center">
 <td>loongarch64</td>
-<td>✅</td>
 </tr>
 <tr align="center">
 <td>ppc64le</td>
-<td>✅</td>
 </tr>
 <tr align="center">
 <td>riscv64</td>
-<td>✅</td>
 </tr>
 <tr align="center">
 <td>s390x</td>
-<td>✅</td>
 </tr>
 </table>
 

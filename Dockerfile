@@ -1,14 +1,14 @@
 #
 # Copyright (C) 2019-2025 KFERMercer <https://github.com/KFERMercer>
 #
-# This Dockerfile will build a minimal FFmpeg tailored for ctbcap in same time.
+# By default, this Dockerfile will build a minimal FFmpeg tailored for ctbcap.
 # By doing so, it will significantly reduce the size of final image. ( 140MB -> 18MB )
-# Requires 1GB of free space on file system to build.
+# Requires 1GB of free space on file system to make default build.
 #
-# Make a normal build:
+# Make a default build:
 # `docker build --tag ctbcap ./`
 #
-# If you don't want to compile FFmpeg:
+# If you don't want build (tailored) FFmpeg:
 # `docker build --build-arg BUILD_TARGET=fat --target fat --tag ctbcap ./`
 #
 
@@ -198,6 +198,7 @@ EOT
 WORKDIR /ffmpeg_bin
 
 RUN <<EOT
+	# `--enable-openssl`: will use existing openssl library brought by curl.
 	/ffmpeg_source/configure \
 		--disable-everything \
 		--disable-debug \
