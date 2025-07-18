@@ -86,6 +86,7 @@ COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 			[ "${LOG_PATH}" = 0 ] || { # Has FFmpeg process, but directories unwritable --> err
 				[ ! -w "${LOG_PATH}" ] && { echo "(ERROR) [${LOG_PATH}] is unwritable!"; exit 1; }
 			}
+		true
 		} || { # Has FFmpeg process, but m3u8 URL is unavailable --> err
 			echo "(ERROR) FFMPEG process did not exit correctly!"
 			exit 1
