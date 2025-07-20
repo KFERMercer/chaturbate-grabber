@@ -1,8 +1,11 @@
 #!/usr/bin/env sh
 #
+# A simple webcam capturer for CB & SC.
+#
 # Copyright (C) 2019-2025 KFERMercer <https://github.com/KFERMercer>
 #
-# A simple webcam capturer for CB & SC.
+# shellcheck disable=2015,2016,2059,2155,3043
+# shellcheck source=/dev/null
 #
 
 CTBCAP_VERSION=4.0
@@ -554,7 +557,7 @@ grab_stream() {
 		EOT
 	)${EXT_FFMPEG_OPT}"
 
-	# shellcheck disable=SC2089
+	# shellcheck disable=2089
 	local FFMPEG_IN='-i "${STREAM_URL}"'
 
 	[ -n "${FFMPEG_CODEC}" ] || local FFMPEG_CODEC='-codec copy'
@@ -575,7 +578,7 @@ grab_stream() {
 	local FFMPEG_EXEC=ffmpeg
 
 	set -f
-	# shellcheck disable=SC2086,SC2090
+	# shellcheck disable=2086,2090
 	set -- ${FFMPEG_OPT} ${FFMPEG_IN} ${FFMPEG_CODEC} ${FFMPEG_OUT}
 	set +f
 
