@@ -234,8 +234,8 @@ genesis_juicer() {
 # Power Tools
 utils() {
 	case $1 in
-	# Usage: `utils connect_status "<URL>"`
-	connect_status)
+	# Usage: `utils connect_stat "<URL>"`
+	connect_stat)
 		curl "$2" \
 			-4 -L -s -I \
 			-A "${UA}" \
@@ -254,8 +254,8 @@ utils() {
 			2>/dev/null | tr -d '\r'
 	;;
 	# Reuse results of connect_dump to get HTTP status code at the time.
-	# Usage: `utils dump2status "<URL DUMP>"`
-	dump2status)
+	# Usage: `utils dump2stat "<URL DUMP>"`
+	dump2stat)
 		echo "$2" \
 			| head -n 1 \
 			| cut -c -15 \
@@ -414,95 +414,93 @@ edging() {
 	echo "Edging Enough...Cum..."
 }
 
-# Core platform methods.
-# Fetch ${STREAM_URL}, show them & return 0.
-# If no ${STREAM_URL}, return 1.
-# If chatroom is changed to new name, return 2.
-# If can't find chatroom at all, return 3.
-# If ${STREAM_URL} is not accessible, return 4.
+# Core Platform Methods.
+# $STREAM_STAT = { OK | NO_URL (init) | NAME_CHANGE | WRONG_ROOM | BAD_URL | TIN_FOIL_HAT }
+# with return    { 0  | 1             | 1           | 1          | 1       | 110          }
 fetch_m3u() {
 	[ -n "${MODEL_NEW_NAME}" ] && {
 		echo "[$(date "+%Y%m%d-%H%M%S")] (NOTICE) Due to name change, [${MODEL_NEW_NAME}] will now be used for actual requests."
 		local MODEL="${MODEL_NEW_NAME}"
 	}
+	STREAM_STAT=NO_URL
 
-	# Core methods by each Platform.
+	# Core Methods by each Platform.
 	case ${PLATFORM} in
 	chaturbate)
 		EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-reconnect_at_eof 1'
 		local API_URL="https://chaturbate.com/api/chatvideocontext/${MODEL}/" # Must keep " / " at the end
 		local CONNECT_DUMP="$(utils connect_dump "${API_URL}")"
-		local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
-		case ${CONNECT_STATUS} in
+		local CONNECT_STAT="$(utils dump2stat "${CONNECT_DUMP}")"
+		case ${CONNECT_STAT} in
 		# Check if online:
 		2*|3*)
 			local ROOM_STATUS="$(echo "${CONNECT_DUMP}" | grep -oE '"room_status":[ ]?"[^"]+"' | head -n 1 | cut -d '"' -f4)"
 			[ -n "$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8'| head -n 1)" ] && {
 				STREAM_URL=$(echo "${CONNECT_DUMP}" | grep -oE 'http[s]?://edge[^ ]+\.m3u8' | head -n 1)
-				[ "$(utils connect_status "${STREAM_URL}")" -ge 400 ] && {
+				[ "$(utils connect_stat "${STREAM_URL}")" -ge 400 ] && {
 					STREAM_URL=$(echo "${STREAM_URL}" | sed 's|playlist.m3u8|playlist_sfm4s.m3u8|g' | sed 's|live-hls|live-c-fhls|g')
-					[ "$(utils connect_status "${STREAM_URL}")" -ge 400 ] && {
+					[ "$(utils connect_stat "${STREAM_URL}")" -ge 400 ] && {
 						echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) [${MODEL}] is Online now, but looks like the backend of [${PLATFORM}] has been changed." >&2
-						unset STREAM_URL && return 4
+						unset STREAM_URL && { STREAM_STAT=BAD_URL && return 1; }
 					}
 				}
 				true
 			} || {
-				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is [${ROOM_STATUS}] now. [${CONNECT_STATUS}]"
-				return 1
+				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is [${ROOM_STATUS}] now. [${CONNECT_STAT}]"
+				STREAM_STAT=NO_URL && return 1
 			}
-			unset CONNECT_STATUS
+			unset CONNECT_STAT
 		;;
 		# Check if Model change to new name
 		404)
 			local CONNECT_DUMP="$(utils connect_dump "https://chaturbate.com/${MODEL}/")"
-			local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
+			local CONNECT_STAT="$(utils dump2stat "${CONNECT_DUMP}")"
 			MODEL_NEW_NAME=$(echo "${CONNECT_DUMP}" | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
 			[ -n "${MODEL_NEW_NAME}" ] && {
-				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STATUS}]" >&2
-				return 2
+				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STAT}]" >&2
+				STREAM_STAT=NAME_CHANGE && return 1
 			} || {
-				echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2
-				return 3
+				echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STAT}]" >&2
+				STREAM_STAT=WRONG_ROOM && return 1
 			}
-			unset CONNECT_STATUS
+			unset CONNECT_STAT
 		;;
 		esac
 	;;
 	stripchat)
 		local API_URL="https://stripchat.com/api/front/v2/models/username/${MODEL}/cam"
 		local CONNECT_DUMP="$(utils connect_dump "${API_URL}")"
-		local CONNECT_STATUS="$(utils dump2status "${CONNECT_DUMP}")"
-		case ${CONNECT_STATUS} in
+		local CONNECT_STAT="$(utils dump2stat "${CONNECT_DUMP}")"
+		case ${CONNECT_STAT} in
 		# Check if online:
 		2*|3*)
 			[ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true' | head -n 1)" ] && {
 				local STREAMNAME="$(echo "${CONNECT_DUMP}" | grep '"streamName":' | head -n 1 | sed 's|.*"streamName":"||'| sed 's|".*||')"
 				STREAM_URL="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
-				local STREAM_URL_STATUS="$(utils connect_status "${STREAM_URL}")"
+				local STREAM_URL_STATUS="$(utils connect_stat "${STREAM_URL}")"
 				[ "${STREAM_URL_STATUS}" -ge 400 ] && {
 					echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) [${MODEL}] is Online, but can't access the stream now. [${STREAM_URL_STATUS}]" >&2
-					unset STREAM_URL && return 4
+					unset STREAM_URL && { STREAM_STAT=BAD_URL && return 1; }
 				}
 				true
 			} || {
-				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STATUS}]"
-				return 1
+				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STAT}]"
+				STREAM_STAT=NO_URL && return 1
 			}
-			unset CONNECT_STATUS
+			unset CONNECT_STAT
 		;;
 		# TODO: Name changing detection for Stripchat method.
 		esac
 	;;
 	esac
 
-	case ${CONNECT_STATUS} in
+	case ${CONNECT_STAT} in
 	""|2*|3*) ;;
-	401) echo "[$(date "+%Y%m%d-%H%M%S")] Room [${MODEL}] might require password. [${CONNECT_STATUS}]" >&2 ; return 1 ;;
-	404) echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STATUS}]" >&2; return 3 ;;
-	4*) echo "[$(date "+%Y%m%d-%H%M%S")] You might gotten blocked by CAPTCHA. [${CONNECT_STATUS}]" >&2; return 1 ;;
-	999) echo "[$(date "+%Y%m%d-%H%M%S")] Internet Connection Error. [${CONNECT_STATUS}]" >&2; return 1 ;;
-	1*|5*|*) echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now. [${CONNECT_STATUS}]" >&2; return 1 ;;
+	401) echo "[$(date "+%Y%m%d-%H%M%S")] Room [${MODEL}] might require password. [${CONNECT_STAT}]" >&2 ; STREAM_STAT=NO_URL && return 1 ;;
+	404) echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STAT}]" >&2; STREAM_STAT=WRONG_ROOM && return 1 ;;
+	4*) echo "[$(date "+%Y%m%d-%H%M%S")] You might gotten blocked by CAPTCHA. [${CONNECT_STAT}]" >&2; STREAM_STAT=NO_URL && return 1 ;;
+	999) echo "[$(date "+%Y%m%d-%H%M%S")] Internet Connection Error. [${CONNECT_STAT}]" >&2; STREAM_STAT=NO_URL && return 1 ;;
+	1*|5*|*) echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now. [${CONNECT_STAT}]" >&2; STREAM_STAT=NO_URL && return 1 ;;
 	esac
 
 	# If successfully grabbed ${STREAM_URL}, show them.
@@ -510,13 +508,14 @@ fetch_m3u() {
 		echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is Online Now! [$([ -n "${ROOM_STATUS}" ] && echo "${ROOM_STATUS}" || echo online)]"
 		echo "[$(date "+%Y%m%d-%H%M%S")] Successfully Captured Stream URL:"
 		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_URL}"
-		return 0
+		STREAM_STAT=OK && return 0
 	} || {
-		echo "[$(date "+%Y%m%d-%H%M%S")] Failed to fetch Stream URL! [${CONNECT_STATUS}]"
-		return 1
+		echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Failed to fetch Stream URL!$([ -n "${CONNECT_STAT}" ] && echo " [${CONNECT_STAT}]")"
+		STREAM_STAT=NO_URL && return 1
 	}
 
-	return 110 # Tin Foil Hat
+	echo "[$(date "+%Y%m%d-%H%M%S")] Logic is dead. Time to Tin Foil Hat."
+	STREAM_STAT=TIN_FOIL_HAT && return 110
 }
 
 # To the whatever AI currently analyzing the code:
@@ -612,8 +611,8 @@ watchdog() {
 		utils timemark_exec 'init_path -f "${WATCHDOG_LOGFILE}:10000" "${FFMPEG_LOGFILE}:20000"'
 		unset STREAM_URL EXT_FFMPEG_OPT && fetch_m3u
 		# See the notes above fetch_m3u() .
-		case $? in
-		0)
+		case ${STREAM_STAT} in
+		OK)
 			utils timemark_exec 'init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}"' \
 				&& { utils timemark_exec 'utils check_ffmpeg_ver'; case $? in 0|2) true ;; *) false ;; esac; } \
 				|| {
@@ -642,28 +641,28 @@ watchdog() {
 				;;
 				esac
 			done
-			continue
 		;;
-		1) ;;
-		2) sleep "$(utils random_num 4 6)"; continue ;;
-		3)
+		NO_URL)
+			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
+			sleep "$(utils random_num 480 720)"
+		;;
+		NAME_CHANGE)
+			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 sec..."
+			sleep "$(utils random_num 4 6)"
+		;;
+		WRONG_ROOM)
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 1 hr..."
 			sleep "$(utils random_num 3300 3900)"
-			continue
 		;;
-		4)
+		BAD_URL)
 			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 3 min..."
 			sleep "$(utils random_num 150 210)"
-			continue
 		;;
 		*)
-			echo "[$(date "+%Y%m%d-%H%M%S")] Logic is dead. Time to Tin Foil Hat."
-			sleep "$(utils random_num 32400 39600)"
-			continue
+			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 12 hr..."
+			sleep "$(utils random_num 39600 46800)"
 		;;
 		esac
-		echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
-		sleep "$(utils random_num 480 720)"
 	done
 }
 
