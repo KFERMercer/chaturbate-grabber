@@ -109,7 +109,7 @@ doc() {
 		echo "			Change if online detection"
 		echo "			goes wrong."
 		echo
-		echo "-v			Show version info and quit."
+		echo "-v			Show [V]ersion info and quit."
 		echo
 		echo
 		echo "Chaturbate-Grabber (aka CtbCap) is made by KFERMercer"
@@ -308,12 +308,12 @@ utils() {
 		}
 		[ "${CUR_VER}" = "${REC_VER}" ] && return 0
 		[ "$(printf "${REC_VER}\n${CUR_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
-			echo "(WARNING) Using legacy version of FFmpeg. [${CUR_VER}] (Recommended ${REC_VER}+)" >&2
+			echo "(WARNING) Using legacy version of FFmpeg. [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
 			return 2
 		}
 		[ "${CUR_VER}" = "${REQ_VER}" ] && return 2
 		[ "$(printf "${REQ_VER}\n${CUR_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
-			echo "(ERROR) Version of FFmpeg must be higher than ${REQ_VER}! [${CUR_VER}] (Recommended ${REC_VER}+)" >&2
+			echo "(ERROR) Version of FFmpeg must be higher than ${REQ_VER}! [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
 			return 1
 		}
 		return 0
