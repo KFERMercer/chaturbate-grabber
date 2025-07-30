@@ -419,7 +419,8 @@ fetch_m3u() {
 		echo "[$(date "+%Y%m%d-%H%M%S")] (NOTICE) Due to name change, [${MODEL_NEW_NAME}] will now be used for actual requests."
 		local MODEL="${MODEL_NEW_NAME}"
 	}
-	STREAM_STAT=NO_URL
+	unset STREAM_URL
+	STREAM_STAT=NO_URL # init
 
 	# Core Methods by each Platform.
 	case ${PLATFORM} in
@@ -606,7 +607,7 @@ grab_stream() {
 watchdog() {
 	while true; do
 		utils timemark_exec 'init_path -f "${WATCHDOG_LOGFILE}:10000" "${FFMPEG_LOGFILE}:20000"'
-		unset STREAM_URL EXT_FFMPEG_OPT && fetch_m3u
+		unset EXT_FFMPEG_OPT && fetch_m3u
 		# See the notes above fetch_m3u() .
 		case ${STREAM_STAT} in
 		OK)
@@ -624,7 +625,7 @@ watchdog() {
 					|| { grab_stream 2>&1 | tee -a "${FFMPEG_LOGFILE}" >/dev/null 2>&1; }
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
 				utils timemark_exec 'init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}"' || break
-				unset STREAM_URL EXT_FFMPEG_OPT && fetch_m3u >/dev/null 2>&1
+				unset EXT_FFMPEG_OPT && fetch_m3u >/dev/null 2>&1
 				case $? in
 				0)
 					echo "[$(date "+%Y%m%d-%H%M%S")] Restart recording..."
