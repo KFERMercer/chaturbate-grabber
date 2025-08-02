@@ -62,7 +62,7 @@ doc() {
 		echo "              Simping Stream from CB & SC"
 	;;
 	help)
-		echo "Usage: ctbcap [options...] <Username|URL>"
+		echo "Usage: $0 [options...] <Username|URL>"
 		echo
 		echo "<username|url>		Streamer's Username or Chat"
 		echo "			Room URL."
