@@ -34,7 +34,7 @@ defaulting_args() {
 	[ -n "${CUT_TIME}" ] || CUT_TIME=3600
 
 	# https://jnrbsn.github.io/user-agents/user-agents.json
-	[ -n "${UA}" ] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'
+	[ -n "${UA}" ] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'
 
 	# Edging Mode.
 	# Delay initial requests to servers to avoid time-specific request waves caused by large-scale deployments.
