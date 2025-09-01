@@ -171,15 +171,19 @@ EOT
 WORKDIR /ffmpeg_source
 
 RUN <<EOT
-	# Get newest version tarball of FFmpeg.
-	FFMPEG_TARBALL="$( \
-		curl -s -L -k --connect-timeout 5 --retry 3 \
-			"https://ffmpeg.org/releases/" \
-			| grep -oE 'ffmpeg-[0-9]+.*.tar.xz' \
-			| sed 's|\.tar.xz.*||' \
-			| sort -V \
-			| tail -n 1 \
-	).tar.xz"
+	# # Get newest version tarball of FFmpeg.
+	# FFMPEG_TARBALL="$( \
+	# 	curl -s -L -k --connect-timeout 5 --retry 3 \
+	# 		"https://ffmpeg.org/releases/" \
+	# 		| grep -oE 'ffmpeg-[0-9]+.*.tar.xz' \
+	# 		| sed 's|\.tar.xz.*||' \
+	# 		| sort -V \
+	# 		| tail -n 1 \
+	# ).tar.xz"
+
+	# Temporarily lock FFmpeg at 7.1.1
+	# lock until upstream fixes "ld: libavformat/libavformat.so: undefined reference to `ff_udp_set_remote_addr/ff_udp_get_last_recv_addr'" issue.
+	FFMPEG_TARBALL="ffmpeg-7.1.1.tar.xz"
 
 	curl -L -k --connect-timeout 5 --retry 3 \
 		"https://ffmpeg.org/releases/${FFMPEG_TARBALL}" \
