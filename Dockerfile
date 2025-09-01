@@ -207,7 +207,6 @@ RUN <<EOT
 		--disable-autodetect \
 		--disable-avdevice \
 		--disable-swscale \
-		--disable-postproc \
 		--disable-doc \
 		--disable-programs --enable-ffmpeg \
 		--disable-shared --enable-static \
