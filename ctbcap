@@ -284,34 +284,33 @@ utils() {
 	# Human-friendly message and return value: `utils check_ffmpeg_ver`
 	# Check if version is met and return value: `utils check_ffmpeg_ver "[VERSION CODE]"`
 	check_ffmpeg_ver)
+		local REQ_VER=5.0 # Required minimum version of FFmpeg.
+		local REC_VER=7.1 # Recommended minimum version of FFmpeg.
+
 		local CUR_VER_RAW="$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)"
+		[ -z "${CUR_VER_RAW}" ] && {
+			echo "(ERROR) NO FFmpeg found! (Recommended ${REC_VER}+)" >&2
+			return 1
+		}
 
 		case ${CUR_VER_RAW} in
-		[!0-9][0-9]*) local CUR_VER="${CUR_VER_RAW#?}" ;;
-		*) local CUR_VER="${CUR_VER_RAW}" ;;
+		# Add `-` at the end to avoid version collision
+		[!0-9][0-9]*) local CUR_VER="${CUR_VER_RAW#?}-" ;;
+		*) local CUR_VER="${CUR_VER_RAW}-" ;;
 		esac
 
 		[ -n "$2" ] && {
 			local TAR_VER="$2"
-			[ "${CUR_VER}" = "${TAR_VER}" ] && return 0
-			[ "$(printf "${TAR_VER}\n${CUR_VER}" | sort -V | tail -n 1)" = "${TAR_VER}" ] && return 1
+			[ "$(printf "${CUR_VER}\n${TAR_VER}" | sort -V | tail -n 1)" = "${TAR_VER}" ] && return 1
 			return 0
 		}
-		local REQ_VER=5.0 # Required minimum version of FFmpeg.
-		local REC_VER=7.1 # Recommended minimum version of FFmpeg.
-		[ -z "${CUR_VER}" ] && {
-			echo "(ERROR) NO FFmpeg found! (Recommended ${REC_VER}+)" >&2
-			return 1
-		}
-		[ "${CUR_VER}" = "${REC_VER}" ] && return 0
-		[ "$(printf "${REC_VER}\n${CUR_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
-			echo "(WARNING) Using legacy version of FFmpeg. [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
-			return 2
-		}
-		[ "${CUR_VER}" = "${REQ_VER}" ] && return 2
-		[ "$(printf "${REQ_VER}\n${CUR_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
+		[ "$(printf "${CUR_VER}\n${REQ_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
 			echo "(ERROR) Version of FFmpeg must be higher than ${REQ_VER}! [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
 			return 1
+		}
+		[ "$(printf "${CUR_VER}\n${REC_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
+			echo "(WARNING) Using legacy version of FFmpeg. [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
+			return 2
 		}
 		return 0
 	;;
