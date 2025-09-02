@@ -288,7 +288,7 @@ utils() {
 
 		local CUR_VER_RAW="$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)"
 		[ -z "${CUR_VER_RAW}" ] && {
-			echo "(ERROR) NO FFmpeg found! (Recommended ${REC_VER}+)" >&2
+			[ -z "$2" ] && echo "(ERROR) NO FFmpeg found! (Recommended ${REC_VER}+)" >&2
 			return 1
 		}
 
