@@ -202,8 +202,7 @@ genesis_juicer() {
 
 	[ "${CUT_TIME}" = 0 ] && CUT_TIME="" || {
 		local _CUT_TIME="$(echo "${CUT_TIME}" | head -n 1 | grep -oE '^[0-9]+$')"
-		local _CUT_TIME="$(printf %d "${_CUT_TIME}" 2>/dev/null)"
-		[ "${_CUT_TIME}" = 0 ] && {
+		printf %d "${_CUT_TIME}" >/dev/null 2>&1 || {
 			echo "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]" >&2
 			return 1
 		}
