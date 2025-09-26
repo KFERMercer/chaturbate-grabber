@@ -138,7 +138,7 @@ doc() {
 		printf "$(command -v "ffmpeg" 1>/dev/null 2>&1 || echo "N/A")"
 		printf "$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)\n"
 		echo
-		echo "See [ $0 -h ] for Command Help."
+		echo "See [ -h ] for Command Help."
 	;;
 	esac
 }
