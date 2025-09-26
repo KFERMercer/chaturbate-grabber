@@ -66,7 +66,7 @@ doc() {
 		echo "              Simping Stream from CB & SC"
 	;;
 	help)
-		echo "Usage: $(basename "$0") [options...] <Username|URL>"
+		echo "Usage: $(basename "$0" 2>/dev/null || echo "$0") [options...] <Username|URL>"
 		echo
 		echo "<username|url>		Streamer's Username or Chat"
 		echo "			Room URL."
@@ -138,7 +138,7 @@ doc() {
 		printf "$(command -v "ffmpeg" 1>/dev/null 2>&1 || echo "N/A")"
 		printf "$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)\n"
 		echo
-		echo "See [ $(basename "$0") -h ] for Command Help."
+		echo "See [ $0 -h ] for Command Help."
 	;;
 	esac
 }
@@ -214,7 +214,7 @@ genesis_juicer() {
 	[ -n "${SHOW_VER}" ] && { doc ver; return 2; }
 
 	[ -z "${MODEL}" ] && { echo "(ERROR) No Username or URL Specified!" >&2; return 1; }
-	local _MODEL="$(basename "${MODEL}" | head -n 1 | tr '[:upper:]' '[:lower:]' | grep -oE '^[a-z0-9_-]+$')"
+	local _MODEL="$(basename "${MODEL}" 2>/dev/null | head -n 1 | tr '[:upper:]' '[:lower:]' | grep -oE '^[a-z0-9_-]+$')"
 	[ -z "${_MODEL}" ] && { echo "(ERROR) Invalid Username or URL! [${MODEL}]" >&2; return 1; }
 	MODEL=${_MODEL}
 
@@ -404,7 +404,7 @@ init_path() {
 			[ "${LINE}" -le 0 ] && { true > "${FILE}"; } >/dev/null 2>&1
 			[ "$(wc -l 2>/dev/null < "${FILE}" || echo 0)" -ge "$(( LINE + 2000 ))" ] && { # 2000 as buffer size
 				echo "Trim [${FILE}] to ${LINE} lines..."
-				local BUFFER_FILE="/dev/shm/_$(basename "${FILE}")_$(date +%s)"
+				local BUFFER_FILE="/dev/shm/_$(basename "${FILE}" 2>/dev/null || echo what_the_fuck)_$(date +%s)"
 				tail -n "${LINE}" "${FILE}" > "${BUFFER_FILE}"
 				cat "${BUFFER_FILE}" > "${FILE}"
 				rm -f "${BUFFER_FILE}"
@@ -696,7 +696,7 @@ watchdog() {
 	case $? in
 	0) echo "Simping Streamer: [${MODEL}] (${PLATFORM})"; echo ;;
 	2) echo; exit 0 ;;
-	*) echo >&2; echo "See [ $(basename "$0") -h ] for help." >&2; echo >&2; exit 1 ;;
+	*) echo >&2; echo "See [ $0 -h ] for Command Help." >&2; echo >&2; exit 1 ;;
 	esac
 
 	[ -n "${DEBUG_MODE}" ] && set -x # Debug Mode
