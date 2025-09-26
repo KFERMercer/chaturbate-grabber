@@ -30,7 +30,7 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 > [!TIP]
 > You can also choose to download/upgrade CtbCap to your local:\
 > `curl -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap -o ctbcap && chmod +x ctbcap`\
-> After its done, run `./ctbcap` to launch CtbCap.
+> Then, run `./ctbcap` to launch CtbCap.
 
 > [!TIP]
 > **Available on Termux.**
@@ -111,24 +111,24 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 
 ```shell
 docker run -t --rm \
--u $(id -u):$(id -g) \
+-u <UID>:<GID> \
 -v </path/to/recdir>:/save \
 -v </path/to/logdir>:/log \
 -e TZ=Asia/Shanghai \
 -e <VAR>=<value> \
 ... \
-kfermercer/ctbcap -h
+kfermercer/ctbcap [options...] <Username|URL>
 ```
 
 > [!NOTE]
-> Option `-u <UID>:<GID>` allows you to specify the user (UID) and group (GID) that the container will run as. For example, `-u 0:0` will run the container as root.
-> 
-> - If you don't specify `-u`, the container will running as `1000:1000`.
-> 
-> - Use `-u $(id -u):$(id -g)` to use your current UID and GID.
+> `-u <UID>:<GID>` Allows you to specify the user (UID) and group (GID) that the container will run as. For example, `-u 0:0` will run the container as root.\
+> \
+> If you don't specify `-u`, the container will running as `1000:1000`.\
+> \
+> Use `-u $(id -u):$(id -g)` to use your current UID and GID.
 
 > [!NOTE]
-> For Container Variables, see: [Container Variables](#container-variables)
+> For Container Variables, see: [Container Variables](#container-variables).
 
 #### **Update the Container Image:**
 
@@ -139,11 +139,12 @@ See [Official CtbCap Container Registry](#official-ctbcap-container-registry).
 | Variables | Value Type | Value Examples | Default | Necessary to Change |
 | :-: | :-: | :- | :- | :-: |
 | MODEL | Streamer's Username <br> or <br> Chatroom URL | `3rd8008` <br> `s1mp_L0r3-87` <br> `https://chaturbate.com/your_sister` <br> `https://stripchat.com/dicklessman` <br> ... | - | Yes |
-| PLATFORM | `chaturbate` <br> or <br> `stripchat` | `chaturbate` <br> `stripchat` | `chaturbate` | Yes <br> if not Chaturbate |
+| PLATFORM | `chaturbate` <br> or <br> `stripchat` | `chaturbate` <br> `stripchat` | `chaturbate` | Yes <br> if not Chaturbate. |
+| EDGING_MODE | Inactive if not `1` | `1` <br> `12306` <br> ... | `uncles make me pee white` | Yes <br> If the streamer is currently offline. |
+| TZ | [TZ identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) | `UTC` <br> `Asia/Shanghai` <br> `Africa/Harare` <br> ... | `UTC` | No <br> if you [live in Greenwich](https://www.royalgreenwich.gov.uk/info/200258/parking_transport_and_streets/810/find_a_public_toilet_in_royal_greenwich). |
 | CUT_TIME | INT | `0` <br> `911` <br> `6324` <br> ... | `3600` | No |
-| TZ | [TZ identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) | `UTC` <br> `Asia/Shanghai` <br> `Africa/Harare` <br> ... | `UTC` | No <br> if you [live in Greenwich](https://www.royalgreenwich.gov.uk/info/200258/parking_transport_and_streets/810/find_a_public_toilet_in_royal_greenwich) |
-| EDGING_MODE | Inactive if not `1` | `1` <br> `12306` <br> ... | `uncles make me pee white` | No |
 | DEBUG_MODE | Inactive if not `1` | `1` <br> `-999` <br> `i was born from my sis` <br> ... | `your mom is so hot` | No |
+| NOBANNER | Inactive if not `1` | `1` <br> `well, that reminds me` <br> ... | `^>vvv` <br> (Docker CLI) <br> `1` <br> (Compose file) | No |
 
 <div align="center"><h2>Command Examples</h2></div>
 
@@ -151,27 +152,48 @@ See [Official CtbCap Container Registry](#official-ctbcap-container-registry).
 
 ```shell
 # Local:
-./ctbcap -h
+./ctbcap
 
 # One-Command Run:
-sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @
 
 # Docker CLI:
-docker run -t --rm kfermercer/ctbcap -h
+docker run -t --rm kfermercer/ctbcap
 ```
 
 #### Simping your girl with nonstop:
 
 ```shell
 # Local:
-./ctbcap -f </path/to/recdir> your_girl
+./ctbcap your_girl
 
 # One-Command Run:
-sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> your_girl
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ your_girl
 
 # Docker CLI:
-docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save kfermercer/ctbcap your_girl
+docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}:/save kfermercer/ctbcap your_girl
 ```
+
+> [!NOTE]
+> By default, the recording file will be saved in current working dir.\
+> See the command help to change it if you want.
+
+#### Simping your girl and cut the recording files by every 1800 seconds:
+
+```shell
+# Local:
+./ctbcap -c 1800 your_girl
+
+# One-Command Run:
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -c 1800 your_girl
+
+# Docker CLI:
+docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}:/save kfermercer/ctbcap -c 1800 your_girl
+```
+
+> [!NOTE]
+> By default, the recording files will get cut every `3600` seconds (60 min).\
+> Set the `-c` to `0` if you don't want cut the file.
 
 #### Grab stream URL and generating FFmpeg command, but don't start recording:
 
@@ -186,32 +208,6 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 docker run -t --rm kfermercer/ctbcap -l your_girl
 ```
 
-#### Simping your girl's stream and don't cut the file (cut the files every 3600 seconds by default) :
-
-```shell
-# Local:
-./ctbcap -f </path/to/recdir> -c 0 your_girl
-
-# One-Command Run:
-sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> -c 0 your_girl
-
-# Docker CLI:
-docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save kfermercer/ctbcap -c 0 your_girl
-```
-
-#### Simping your girl's stream and cut the files by every 1800 seconds (30 min) :
-
-```shell
-# Local:
-./ctbcap -f </path/to/recdir> -c 1800 your_girl
-
-# One-Command Run:
-sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -f </path/to/recdir> -c 1800 your_girl
-
-# Docker CLI:
-docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save kfermercer/ctbcap -c 1800 your_girl
-```
-
 #### Show version & runtime info:
 
 ```shell
@@ -222,7 +218,7 @@ docker run -t --rm -u <UID>:<GID> -v </path/to/recdir>:/save kfermercer/ctbcap -
 sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -v
 
 # Docker CLI:
-docker run -t --rm -u <UID>:<GID> kfermercer/ctbcap -v
+docker run -t --rm kfermercer/ctbcap -v
 ```
 
 <div align="center"><h2>Branch Description</h2></div>
