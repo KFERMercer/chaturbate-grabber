@@ -46,6 +46,10 @@ defaulting_args() {
 
 	# Link Mode. Only grab stream URL. Inactive if not 1.
 	[ "${LINK_MODE}" = "1" ] || LINK_MODE=
+
+	# Disable banner display when in daemon to adapt non-interactive interfaces.
+	# Inactive if not 1.
+	[ "${NOBANNER}" = "1" ] || NOBANNER=
 }
 
 doc() {
@@ -62,7 +66,7 @@ doc() {
 		echo "              Simping Stream from CB & SC"
 	;;
 	help)
-		echo "Usage: $0 [options...] <Username|URL>"
+		echo "Usage: $(basename "$0") [options...] <Username|URL>"
 		echo
 		echo "<username|url>		Streamer's Username or Chat"
 		echo "			Room URL."
@@ -86,7 +90,7 @@ doc() {
 		echo
 		echo "-f </path/to/recdir>	Recording [f]iles saving path."
 		echo "			Default: \${PWD}/rec/"
-		echo "			Don't Use if Runs in Docker."
+		echo "			DON'T USE IF RUNS IN DOCKER!"
 		echo
 		echo "-h			Get [H]elp for Commands."
 		echo
@@ -97,16 +101,16 @@ doc() {
 		echo "-o </path/to/logdir>	L[o]gging saving path."
 		echo "			Disable logging if set to 0."
 		echo "			Default: <recdir>/log/"
-		echo "			Don't Use if Runs in Docker."
+		echo "			DON'T USE IF RUNS IN DOCKER!"
 		echo
 		echo "-p <chaturbate|stripchat> Specify Stream [P]latform"
 		echo "			to <chaturbate> (default) or"
 		echo "			<stripchat>. also support"
-		echo "			<ctb|cb> or <stc|sc|st>."
+		echo "			<cb|ctb> or <sc|st|stc>."
 		echo "			Change if online detection"
 		echo "			goes wrong."
 		echo
-		echo "-v			Show [V]ersion info and quit."
+		echo "-v			Show [v]ersion info and quit."
 		echo
 		echo
 		echo "Chaturbate-Grabber (aka CtbCap) is made by KFERMercer"
@@ -134,18 +138,17 @@ doc() {
 		printf "$(command -v "ffmpeg" 1>/dev/null 2>&1 || echo "N/A")"
 		printf "$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)\n"
 		echo
-		echo "See [ $0 -h ] for Command Help."
+		echo "See [ $(basename "$0") -h ] for Command Help."
 	;;
 	esac
 }
 
 # Produce Runtime Variables.
 genesis_juicer() {
+	unset NO_INPUT SHOW_HELP SHOW_VER SHOW_BANNER
 	[ -z "$1" ] && [ -z "${MODEL}" ] && {
-		echo "(NOTICE) No Option Specified! Show Help Message..."
-		echo
-		doc help
-		return 2
+		NO_INPUT=1
+		SHOW_HELP=1
 	}
 	while getopts ':c:def:hlo:p:v' OPT; do
 		case ${OPT} in
@@ -159,7 +162,7 @@ genesis_juicer() {
 			[ -n "${OPTARG##"-"*}" ] && SAVE_PATH=${OPTARG} \
 				|| { echo "(ERROR) -f: No Recording Saving Path Specified!" >&2; return 1; }
 		;;
-		h) doc help; return 2 ;;
+		h) SHOW_HELP=1 ;;
 		l) LINK_MODE=1 ;;
 		o)
 			[ -n "${OPTARG##"-"*}" ] && LOG_PATH=${OPTARG} \
@@ -169,7 +172,7 @@ genesis_juicer() {
 			[ -n "${OPTARG##"-"*}" ] && PLATFORM=${OPTARG} \
 				|| { echo "(ERROR) -p: No Platform Specified!" >&2; return 1; }
 		;;
-		v) defaulting_args; doc ver; return 2 ;;
+		v) NOBANNER=1 && SHOW_VER=1 ;;
 		\?) echo "(ERROR) Invalid Option: [${OPTARG}] !" >&2; return 1 ;;
 		:)
 			case ${OPTARG} in
@@ -187,6 +190,24 @@ genesis_juicer() {
 	[ -n "$1" ] && MODEL=$1
 
 	defaulting_args
+
+	# Always show banner when showing help.
+	[ -z "${NOBANNER}" ] && SHOW_BANNER=1 || [ -n "${SHOW_HELP}" ] && SHOW_BANNER=1
+
+	[ -n "${SHOW_BANNER}" ] && {
+		doc neon; echo;
+		[ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "linux" ] && {
+			echo "(NOTICE) Non-GNU/Linux OS detected! Make sure you have coreutils installed! Or You Will Get Error!"
+			echo
+		}
+	}
+
+	[ -n "${NO_INPUT}" ] && {
+		echo "(NOTICE) No Option Specified! Show Help Message..."
+		echo
+	}
+	[ -n "${SHOW_HELP}" ] && { doc help; return 2; }
+	[ -n "${SHOW_VER}" ] && { doc ver; return 2; }
 
 	[ -z "${MODEL}" ] && { echo "(ERROR) No Username or URL Specified!" >&2; return 1; }
 	local _MODEL="$(basename "${MODEL}" | head -n 1 | tr '[:upper:]' '[:lower:]' | grep -oE '^[a-z0-9_-]+$')"
@@ -667,18 +688,11 @@ watchdog() {
 
 	echo
 
-	[ "${NOBANNER}" = "1" ] || { doc neon; echo; }
-
-	[ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "linux" ] && {
-		echo "(NOTICE) Non-GNU/Linux detected! Make sure you have coreutils installed! Or You Will Get Error!"
-		echo
-	}
-
 	genesis_juicer "$@"
 	case $? in
 	0) echo "Simping Streamer: [${MODEL}] (${PLATFORM})"; echo ;;
 	2) echo; exit 0 ;;
-	*) echo >&2; echo "See [ $0 -h ] for help." >&2; echo >&2; exit 1 ;;
+	*) echo >&2; echo "See [ $(basename "$0") -h ] for help." >&2; echo >&2; exit 1 ;;
 	esac
 
 	[ -n "${DEBUG_MODE}" ] && set -x # Debug Mode
