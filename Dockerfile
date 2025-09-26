@@ -44,7 +44,7 @@ ENV PLATFORM="chaturbate"
 ENV CUT_TIME=3600
 ENV EDGING_MODE="uncle makes me pee white"
 ENV DEBUG_MODE="your mom is so hot"
-ENV NOBANNER=1
+ENV NOBANNER="^>vvv"
 
 COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 	#!/usr/bin/env sh

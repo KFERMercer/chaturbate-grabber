@@ -11,6 +11,7 @@ services:
       CUT_TIME: 3600 # Used as number of seconds to cut recording file in real time. Don't cut if set to 0.
       EDGING_MODE: "uncle makes me pee white" # Edging Mode. Inactive if not 1. Delay initial requests to servers to avoid time-specific request waves caused by large-scale deployments.
       DEBUG_MODE: "your mom is so hot" # Debug Mode. Inactive if not 1.
+      NOBANNER: 1 # Disable banner display.
     volumes:
       - /path/to/recdir:/save # Recorded files save path mapping.
       - /path/to/logdir:/log # Log files save path mapping.
@@ -32,6 +33,7 @@ services:
       # CUT_TIME: 3600
       # EDGING_MODE: "uncle makes me pee white"
       # DEBUG_MODE: "your mom is so hot"
+      # NOBANNER: 1
     # volumes:
     #   - /path/to/recdir:/save
     #   - /path/to/logdir:/log

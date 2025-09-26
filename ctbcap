@@ -145,7 +145,7 @@ doc() {
 
 # Produce Runtime Variables.
 genesis_juicer() {
-	unset NO_INPUT SHOW_HELP SHOW_VER SHOW_BANNER
+	unset NO_INPUT SHOW_HELP SHOW_VER
 	[ -z "$1" ] && [ -z "${MODEL}" ] && {
 		NO_INPUT=1
 		SHOW_HELP=1
@@ -191,21 +191,11 @@ genesis_juicer() {
 
 	defaulting_args
 
-	[ -z "${NOBANNER}" ] && SHOW_BANNER=1
-	# Always show banner when showing help.
-	[ -n "${SHOW_HELP}" ] && SHOW_BANNER=1
-	# Always no banner when showing version.
-	[ -n "${SHOW_VER}" ] && unset SHOW_BANNER
-
-	[ -n "${SHOW_BANNER}" ] && { doc neon; echo; }
-
-	[ -n "${SHOW_BANNER}" ] || [ -n "${SHOW_VER}" ] && {
-		[ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "linux" ] && {
-			echo "(NOTICE) Non-GNU/Linux OS detected! Make sure you have coreutils installed! Or You Will Get Error!"
-			echo
-		}
+	[ -z "${NOBANNER}" ] && { doc neon; echo; }
+	[ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "linux" ] && {
+		echo "(NOTICE) Non-GNU/Linux OS detected! Make sure you have coreutils installed! Or You Will Get Error!"
+		echo
 	}
-
 	[ -n "${NO_INPUT}" ] && {
 		echo "(NOTICE) No Option Specified! Show Help Message..."
 		echo
