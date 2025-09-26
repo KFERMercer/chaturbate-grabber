@@ -20,7 +20,7 @@ defaulting_args() {
 
 	# Log files saving path
 	# Disable logging if set to 0.
-	[ -n "${LOG_PATH}" ] || LOG_PATH="${SAVE_PATH}/log"
+	[ -n "${LOG_PATH}" ] || LOG_PATH="${SAVE_PATH}/ctbcap_log"
 	[ -n "${LOG_PATH_SPACE}" ] || LOG_PATH_SPACE=16 # Required disk space by MiB.
 
 	# Streamer's Username or Room URL.
@@ -100,7 +100,7 @@ doc() {
 		echo
 		echo "-o </path/to/logdir>	L[o]gging saving path."
 		echo "			Disable logging if set to 0."
-		echo "			Default: <recdir>/log/"
+		echo "			Default: <recdir>/ctbcap_log/"
 		echo "			DON'T USE IF RUNS IN DOCKER!"
 		echo
 		echo "-p <chaturbate|stripchat> Specify Stream [P]latform"
