@@ -30,6 +30,7 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 > [!TIP]
 > You can also choose to download/upgrade CtbCap to your local:\
 > `curl -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap -o ctbcap && chmod +x ctbcap`\
+> \
 > Then, run `./ctbcap` to launch CtbCap.
 
 > [!TIP]
