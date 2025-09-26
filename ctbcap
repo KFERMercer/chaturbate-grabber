@@ -404,24 +404,29 @@ init_path() {
 	esac
 }
 
-# Sleep time (sec) before initial request to server. Range better EQ to watchdog().while.echo .
+# Delay initial requests to servers by secs.
+# Usage:
+# Quiet mode (non-interactive friendly): `edging`
+# Verbose mode:                          `edging -v`
 edging() {
-	local EDGING_TIME="$(utils random_num 0 600)"
-
-	echo "Edging Mode is On."
-	echo
-	echo "Delay [${EDGING_TIME}]s before Simping [${MODEL}]."
-	echo
-	echo "Considering we won't send any requests to [${PLATFORM}]"
-	echo "server until Edging is over, So please make sure that"
-	echo "[${MODEL}] exists on [${PLATFORM}]. "
-	echo
-	echo "Edging..."
-	echo
-
+	local EDGING_TIME="$(utils random_num 0 600)" # Range better EQ to watchdog().while.echo .
+	[ "$1" = "-v" ] && {
+		echo "Edging Mode is On."
+		echo
+		echo "Delay [${EDGING_TIME}]s before Simping [${MODEL}]."
+		echo
+		echo "Considering we won't send any requests to [${PLATFORM}]"
+		echo "server until Edging is over, So please make sure that"
+		echo "[${MODEL}] exists on [${PLATFORM}]. "
+		echo
+		echo "Edging..."
+		echo
+		sleep "${EDGING_TIME}"
+		echo "Edging Enough...Cum..."
+		return
+	}
+	echo "[$(date "+%Y%m%d-%H%M%S")] (NOTICE) Edging [${EDGING_TIME}]s for Simping [${MODEL}] (${PLATFORM})..."
 	sleep "${EDGING_TIME}"
-
-	echo "Edging Enough...Cum..."
 }
 
 # Core Platform Methods.
@@ -678,13 +683,13 @@ watchdog() {
 }
 
 { # Execution Entry
-	trap '{ echo; echo "BYE (. )( .) BYE"; echo; exit 0; }' HUP INT QUIT TERM
+	trap 'exec printf "\n%s\n\n" "BYE (. )( .) BYE"' HUP INT QUIT TERM
 
 	echo
 
 	genesis_juicer "$@"
 	case $? in
-	0) echo "Simping Streamer: [${MODEL}] (${PLATFORM})"; echo ;;
+	0) [ -z "${NOBANNER}" ] && { echo "Simping Streamer: [${MODEL}] (${PLATFORM})"; echo; } ;;
 	2) echo; exit 0 ;;
 	*) echo >&2; echo "See [ $0 -h ] for Command Help." >&2; echo >&2; exit 1 ;;
 	esac
@@ -710,7 +715,9 @@ watchdog() {
 	init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" || { echo >&2; exit 1; }
 	init_path -f "${WATCHDOG_LOGFILE}:" "${FFMPEG_LOGFILE}:" || { echo >&2; exit 1; }
 
-	[ -n "${EDGING_MODE}" ] && { edging; echo; }
+	[ -n "${EDGING_MODE}" ] && {
+		[ -z "${NOBANNER}" ] && { edging -v; echo; } || edging
+	}
 
 	watchdog 2>&1 | tee -a "${WATCHDOG_LOGFILE}" 2>/dev/null
 }
