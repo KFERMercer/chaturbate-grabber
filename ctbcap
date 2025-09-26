@@ -172,7 +172,7 @@ genesis_juicer() {
 			[ -n "${OPTARG##"-"*}" ] && PLATFORM=${OPTARG} \
 				|| { echo "(ERROR) -p: No Platform Specified!" >&2; return 1; }
 		;;
-		v) NOBANNER=1 && SHOW_VER=1 ;;
+		v) SHOW_VER=1 ;;
 		\?) echo "(ERROR) Invalid Option: [${OPTARG}] !" >&2; return 1 ;;
 		:)
 			case ${OPTARG} in
@@ -191,11 +191,15 @@ genesis_juicer() {
 
 	defaulting_args
 
+	[ -z "${NOBANNER}" ] && SHOW_BANNER=1
 	# Always show banner when showing help.
-	[ -z "${NOBANNER}" ] && SHOW_BANNER=1 || [ -n "${SHOW_HELP}" ] && SHOW_BANNER=1
+	[ -n "${SHOW_HELP}" ] && SHOW_BANNER=1
+	# Always no banner when showing version.
+	[ -n "${SHOW_VER}" ] && unset SHOW_BANNER
 
-	[ -n "${SHOW_BANNER}" ] && {
-		doc neon; echo;
+	[ -n "${SHOW_BANNER}" ] && { doc neon; echo; }
+
+	[ -n "${SHOW_BANNER}" ] || [ -n "${SHOW_VER}" ] && {
 		[ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "linux" ] && {
 			echo "(NOTICE) Non-GNU/Linux OS detected! Make sure you have coreutils installed! Or You Will Get Error!"
 			echo
