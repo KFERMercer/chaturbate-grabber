@@ -15,7 +15,7 @@ CTBCAP_RELEASE=8
 defaulting_args() {
 
 	# Recorded files saving path
-	[ -n "${SAVE_PATH}" ] || SAVE_PATH="${PWD}/rec"
+	[ -n "${SAVE_PATH}" ] || SAVE_PATH="${PWD}/ctbcap_rec"
 	[ -n "${SAVE_PATH_SPACE}" ] || SAVE_PATH_SPACE=512 # Required disk space by MiB.
 
 	# Log files saving path
@@ -89,7 +89,7 @@ doc() {
 		echo "			large-scale deployments."
 		echo
 		echo "-f </path/to/recdir>	Recording [f]iles saving path."
-		echo "			Default: \${PWD}/rec/"
+		echo "			Default: \${PWD}/ctbcap_rec/"
 		echo "			DON'T USE IF RUNS IN DOCKER!"
 		echo
 		echo "-h			Get [H]elp for Commands."
