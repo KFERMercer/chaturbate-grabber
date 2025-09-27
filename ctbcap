@@ -289,7 +289,7 @@ utils() {
 	# Usage: `utils check_depend "<COMMAND>"`
 	check_depend)
 		command -v "$2" 1>/dev/null 2>&1 || {
-			echo "(ERROR) Command [$2] not found! Check \$PATH or install it." >&2
+			echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Command [$2] not found! Check \$PATH or install it." >&2
 			return 1
 		}
 		return 0
@@ -303,7 +303,7 @@ utils() {
 
 		local CUR_VER_RAW="$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)"
 		[ -z "${CUR_VER_RAW}" ] && {
-			[ -z "$2" ] && echo "(ERROR) NO FFmpeg found! (Recommended ${REC_VER}+)" >&2
+			[ -z "$2" ] && echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) NO FFmpeg found! (Recommended ${REC_VER}+)" >&2
 			return 1
 		}
 
@@ -319,27 +319,14 @@ utils() {
 			return 0
 		}
 		[ "$(printf "${CUR_VER}\n${REQ_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
-			echo "(ERROR) Version of FFmpeg must be higher than ${REQ_VER}! [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
+			echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Version of FFmpeg must be higher than ${REQ_VER}! [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
 			return 1
 		}
 		[ "$(printf "${CUR_VER}\n${REC_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
-			echo "(WARNING) Using legacy version of FFmpeg. [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
+			echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) Using legacy version of FFmpeg. [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
 			return 2
 		}
 		return 0
-	;;
-	# Execute the command and prefix the output with a Time-Mark.
-	# Only for short execution command.
-	# Commands run within cannot assign global variable.
-	# Usage: `utils timemark_exec '<COMMAND LINE>'`
-	timemark_exec)
-		local TIME_MARK="[$(date "+%Y%m%d-%H%M%S")] "
-		local RAW="$(eval "$2" 2>&1; printf "\n$?")"
-		local OUTPUT="$(echo "${RAW}" | sed '$d')"
-		[ -z "${OUTPUT}" ] && return 0
-		local EXEC_STAT="$(echo "${RAW}" | tail -n 1)"
-		echo "${OUTPUT}" | sed "s|^|${TIME_MARK}|"
-		return "${EXEC_STAT}"
 	;;
 	esac
 }
@@ -356,21 +343,21 @@ init_path() {
 			[ -z "${DIR}" ] && continue # Skip empty path
 			local SPACE="$(echo "${_ARG}" | sed 's|.*:||')"
 			[ -z "${SPACE}" ] && local SPACE=0 # No space require
-			[ -z "${DIR%"/"}" ] && { echo "(ERROR) Root directory are not allowed!" >&2; return 1; }
+			[ -z "${DIR%"/"}" ] && { echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Root directory are not allowed!" >&2; return 1; }
 
 			local _DIR="${DIR}"; while [ ! -d "${_DIR}" ]; do # ${DIR} may not created yet
 				local _DIR="$(dirname "${_DIR}")"
 			done
 			local FREESPACE="$(( $(df -k "${_DIR}" | awk 'NR==2 {print $4}') / 1024 ))"
 			[ "${FREESPACE}" -lt "${SPACE}" ] && {
-				echo "(ERROR) Space on [${_DIR}/] must be bigger than ${SPACE}MiB! [${FREESPACE}MiB]" >&2
+				echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Space on [${_DIR}/] must be bigger than ${SPACE}MiB! [${FREESPACE}MiB]" >&2
 				return 1
 			}
 
 			mkdir -p "${DIR}" 1>/dev/null 2>&1
-			[ ! -e "${DIR}" ] && { echo "(ERROR) Unable to create directory [${DIR}] !" >&2; return 1; }
-			[ ! -d "${DIR}" ] && { echo "(ERROR) [${DIR}] is not a directory!" >&2; return 1; }
-			[ ! -w "${DIR}" ] && { echo "(ERROR) Unable to write to directory [${DIR}/] !" >&2; return 1; }
+			[ ! -e "${DIR}" ] && { echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Unable to create directory [${DIR}] !" >&2; return 1; }
+			[ ! -d "${DIR}" ] && { echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) [${DIR}] is not a directory!" >&2; return 1; }
+			[ ! -w "${DIR}" ] && { echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Unable to write to directory [${DIR}/] !" >&2; return 1; }
 			true
 		done
 	;;
@@ -381,14 +368,14 @@ init_path() {
 			[ -z "${FILE}" ] && continue # Skip empty path
 			[ ! -e "${FILE}" ] && continue # Skip not exist
 			[ "${FILE}" = "/dev/null" ] && continue # Skip black hole
-			[ ! -f "${FILE}" ] && { echo "(ERROR) [${FILE}] is not a file!" >&2; return 1; }
-			[ ! -w "${FILE}" ] && { echo "(ERROR) Unable to write to file [${FILE}] !" >&2; return 1; }
+			[ ! -f "${FILE}" ] && { echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) [${FILE}] is not a file!" >&2; return 1; }
+			[ ! -w "${FILE}" ] && { echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Unable to write to file [${FILE}] !" >&2; return 1; }
 
 			local LINE="$(echo "${_ARG}" | sed 's|.*:||')"
 			[ -z "${LINE}" ] && continue # Skip trimming file
 			[ ! -r "${FILE}" ] && {
-				echo "(WARNING) Unable to read file [${FILE}] !" >&2
-				echo "(WARNING) Skip trimming [${FILE}] due to unreadability." >&2
+				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) Unable to read file [${FILE}] !" >&2
+				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) Skip trimming [${FILE}] due to unreadability." >&2
 				continue
 			}
 			[ "${LINE}" -le 0 ] && { true > "${FILE}"; } >/dev/null 2>&1
@@ -624,13 +611,13 @@ grab_stream() {
 
 watchdog() {
 	while true; do
-		utils timemark_exec 'init_path -f "${WATCHDOG_LOGFILE}:10000" "${FFMPEG_LOGFILE}:20000"'
+		init_path -f "${WATCHDOG_LOGFILE}:10000" "${FFMPEG_LOGFILE}:20000"
 		unset EXT_FFMPEG_OPT && fetch_m3u
 		# See the notes above fetch_m3u() .
 		case ${STREAM_STAT} in
 		OK)
-			utils timemark_exec 'init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}"' \
-				&& { utils timemark_exec 'utils check_ffmpeg_ver'; case $? in 0|2) true ;; *) false ;; esac; } \
+			init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" \
+				&& { utils check_ffmpeg_ver; case $? in 0|2) true ;; *) false ;; esac; } \
 				|| {
 					echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
 					sleep "$(utils random_num 480 720)"
@@ -642,7 +629,7 @@ watchdog() {
 					&& { grab_stream 2>&1 | tee -a "${FFMPEG_LOGFILE}" 2>/dev/null; true; } \
 					|| { grab_stream 2>&1 | tee -a "${FFMPEG_LOGFILE}" >/dev/null 2>&1; }
 				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
-				utils timemark_exec 'init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}"' || break
+				init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" || break
 				unset EXT_FFMPEG_OPT && fetch_m3u >/dev/null 2>&1
 				case $? in
 				0)
