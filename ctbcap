@@ -191,7 +191,7 @@ genesis_juicer() {
 
 	defaulting_args
 
-	[ -z "${NOBANNER}" ] && { doc neon; echo; }
+	[ -z "${NOBANNER}" ] && [ -z "${SHOW_VER}" ] && { doc neon; echo; } # Also, never show banner when in version mode.
 	[ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "linux" ] && {
 		echo "(NOTICE) Non-GNU/Linux OS detected! Make sure you have coreutils installed! Or You Will Get Error!"
 		echo
