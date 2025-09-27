@@ -172,11 +172,11 @@ docker run -t --rm kfermercer/ctbcap
 sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ your_girl
 
 # Docker CLI:
-docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}:/save kfermercer/ctbcap your_girl
+docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ctbcap your_girl
 ```
 
 > [!NOTE]
-> By default, the recording file will be saved in current working dir.\
+> By default, the recording file will be saved to `${PWD}/ctbcap_rec/`.\
 > See the command help to change it if you want.
 
 #### Simping your girl and cut the recording files by every 1800 seconds:
@@ -189,7 +189,7 @@ docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}:/save kfermercer/ctbcap your_g
 sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -c 1800 your_girl
 
 # Docker CLI:
-docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}:/save kfermercer/ctbcap -c 1800 your_girl
+docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ctbcap -c 1800 your_girl
 ```
 
 > [!NOTE]
