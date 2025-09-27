@@ -242,6 +242,8 @@ genesis_juicer() {
 	return 0
 }
 
+alias log='printf "[$(date "+%Y%m%d-%H%M%S")] %s\n"'
+
 # Power Tools
 utils() {
 	case $1 in
@@ -289,7 +291,7 @@ utils() {
 	# Usage: `utils check_depend "<COMMAND>"`
 	check_depend)
 		command -v "$2" 1>/dev/null 2>&1 || {
-			echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Command [$2] not found! Check \$PATH or install it." >&2
+			log "(ERROR) Command [$2] not found! Check \$PATH or install it." >&2
 			return 1
 		}
 		return 0
@@ -303,7 +305,7 @@ utils() {
 
 		local CUR_VER_RAW="$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)"
 		[ -z "${CUR_VER_RAW}" ] && {
-			[ -z "$2" ] && echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) NO FFmpeg found! (Recommended ${REC_VER}+)" >&2
+			[ -z "$2" ] && log "(ERROR) NO FFmpeg found! (Recommended ${REC_VER}+)" >&2
 			return 1
 		}
 
@@ -319,11 +321,11 @@ utils() {
 			return 0
 		}
 		[ "$(printf "${CUR_VER}\n${REQ_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
-			echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Version of FFmpeg must be higher than ${REQ_VER}! [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
+			log "(ERROR) Version of FFmpeg must be higher than ${REQ_VER}! [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
 			return 1
 		}
 		[ "$(printf "${CUR_VER}\n${REC_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
-			echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) Using legacy version of FFmpeg. [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
+			log "(WARNING) Using legacy version of FFmpeg. [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
 			return 2
 		}
 		return 0
@@ -343,21 +345,21 @@ init_path() {
 			[ -z "${DIR}" ] && continue # Skip empty path
 			local SPACE="$(echo "${_ARG}" | sed 's|.*:||')"
 			[ -z "${SPACE}" ] && local SPACE=0 # No space require
-			[ -z "${DIR%"/"}" ] && { echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Root directory are not allowed!" >&2; return 1; }
+			[ -z "${DIR%"/"}" ] && { log "(ERROR) Root directory are not allowed!" >&2; return 1; }
 
 			local _DIR="${DIR}"; while [ ! -d "${_DIR}" ]; do # ${DIR} may not created yet
 				local _DIR="$(dirname "${_DIR}")"
 			done
 			local FREESPACE="$(( $(df -k "${_DIR}" | awk 'NR==2 {print $4}') / 1024 ))"
 			[ "${FREESPACE}" -lt "${SPACE}" ] && {
-				echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Space on [${_DIR}/] must be bigger than ${SPACE}MiB! [${FREESPACE}MiB]" >&2
+				log "(ERROR) Space on [${_DIR}/] must be bigger than ${SPACE}MiB! [${FREESPACE}MiB]" >&2
 				return 1
 			}
 
 			mkdir -p "${DIR}" 1>/dev/null 2>&1
-			[ ! -e "${DIR}" ] && { echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Unable to create directory [${DIR}] !" >&2; return 1; }
-			[ ! -d "${DIR}" ] && { echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) [${DIR}] is not a directory!" >&2; return 1; }
-			[ ! -w "${DIR}" ] && { echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Unable to write to directory [${DIR}/] !" >&2; return 1; }
+			[ ! -e "${DIR}" ] && { log "(ERROR) Unable to create directory [${DIR}] !" >&2; return 1; }
+			[ ! -d "${DIR}" ] && { log "(ERROR) [${DIR}] is not a directory!" >&2; return 1; }
+			[ ! -w "${DIR}" ] && { log "(ERROR) Unable to write to directory [${DIR}/] !" >&2; return 1; }
 			true
 		done
 	;;
@@ -368,14 +370,14 @@ init_path() {
 			[ -z "${FILE}" ] && continue # Skip empty path
 			[ ! -e "${FILE}" ] && continue # Skip not exist
 			[ "${FILE}" = "/dev/null" ] && continue # Skip black hole
-			[ ! -f "${FILE}" ] && { echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) [${FILE}] is not a file!" >&2; return 1; }
-			[ ! -w "${FILE}" ] && { echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Unable to write to file [${FILE}] !" >&2; return 1; }
+			[ ! -f "${FILE}" ] && { log "(ERROR) [${FILE}] is not a file!" >&2; return 1; }
+			[ ! -w "${FILE}" ] && { log "(ERROR) Unable to write to file [${FILE}] !" >&2; return 1; }
 
 			local LINE="$(echo "${_ARG}" | sed 's|.*:||')"
 			[ -z "${LINE}" ] && continue # Skip trimming file
 			[ ! -r "${FILE}" ] && {
-				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) Unable to read file [${FILE}] !" >&2
-				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) Skip trimming [${FILE}] due to unreadability." >&2
+				log "(WARNING) Unable to read file [${FILE}] !" >&2
+				log "(WARNING) Skip trimming [${FILE}] due to unreadability." >&2
 				continue
 			}
 			[ "${LINE}" -le 0 ] && { true > "${FILE}"; } >/dev/null 2>&1
@@ -412,7 +414,7 @@ edging() {
 		echo "Edging Enough...Cum..."
 		return
 	}
-	echo "[$(date "+%Y%m%d-%H%M%S")] (NOTICE) Edging [${EDGING_TIME}]s for Simping [${MODEL}] (${PLATFORM})..."
+	log "(NOTICE) Edging [${EDGING_TIME}]s for Simping [${MODEL}] (${PLATFORM})..."
 	sleep "${EDGING_TIME}"
 }
 
@@ -421,7 +423,7 @@ edging() {
 # with return    { 0  | 1             | 1           | 1          | 1       | 110          }
 fetch_m3u() {
 	[ -n "${MODEL_NEW_NAME}" ] && {
-		echo "[$(date "+%Y%m%d-%H%M%S")] (NOTICE) Due to name change, [${MODEL_NEW_NAME}] will now be used for actual requests."
+		log "(NOTICE) Due to name change, [${MODEL_NEW_NAME}] will now be used for actual requests."
 		local MODEL="${MODEL_NEW_NAME}"
 	}
 	unset STREAM_URL
@@ -443,13 +445,13 @@ fetch_m3u() {
 				[ "$(utils connect_stat "${STREAM_URL}")" -ge 400 ] && {
 					STREAM_URL=$(echo "${STREAM_URL}" | sed 's|playlist.m3u8|playlist_sfm4s.m3u8|g' | sed 's|live-hls|live-c-fhls|g')
 					[ "$(utils connect_stat "${STREAM_URL}")" -ge 400 ] && {
-						echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) [${MODEL}] is Online now, but looks like the backend of [${PLATFORM}] has been changed." >&2
+						log "(ERROR) [${MODEL}] is Online now, but looks like the backend of [${PLATFORM}] has been changed." >&2
 						unset STREAM_URL && { STREAM_STAT=BAD_URL && return 1; }
 					}
 				}
 				true
 			} || {
-				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is [${ROOM_STATUS}] now. [${CONNECT_STAT}]"
+				log "[${MODEL}] is [${ROOM_STATUS}] now. [${CONNECT_STAT}]"
 				STREAM_STAT=NO_URL && return 1
 			}
 			unset CONNECT_STAT
@@ -460,10 +462,10 @@ fetch_m3u() {
 			local CONNECT_STAT="$(utils dump2stat "${CONNECT_DUMP}")"
 			MODEL_NEW_NAME=$(echo "${CONNECT_DUMP}" | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
 			[ -n "${MODEL_NEW_NAME}" ] && {
-				echo "[$(date "+%Y%m%d-%H%M%S")] (WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STAT}]" >&2
+				log "(WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STAT}]" >&2
 				STREAM_STAT=NAME_CHANGE && return 1
 			} || {
-				echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STAT}]" >&2
+				log "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STAT}]" >&2
 				STREAM_STAT=WRONG_ROOM && return 1
 			}
 			unset CONNECT_STAT
@@ -482,12 +484,12 @@ fetch_m3u() {
 				STREAM_URL="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
 				local STREAM_URL_STATUS="$(utils connect_stat "${STREAM_URL}")"
 				[ "${STREAM_URL_STATUS}" -ge 400 ] && {
-					echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) [${MODEL}] is Online, but can't access the stream now. [${STREAM_URL_STATUS}]" >&2
+					log "(ERROR) [${MODEL}] is Online, but can't access the stream now. [${STREAM_URL_STATUS}]" >&2
 					unset STREAM_URL && { STREAM_STAT=BAD_URL && return 1; }
 				}
 				true
 			} || {
-				echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is offline/private now. [${CONNECT_STAT}]"
+				log "[${MODEL}] is offline/private now. [${CONNECT_STAT}]"
 				STREAM_STAT=NO_URL && return 1
 			}
 			unset CONNECT_STAT
@@ -499,25 +501,25 @@ fetch_m3u() {
 
 	case ${CONNECT_STAT} in
 	""|2*|3*) ;;
-	401) echo "[$(date "+%Y%m%d-%H%M%S")] Room [${MODEL}] might require password. [${CONNECT_STAT}]" >&2 ; STREAM_STAT=NO_URL && return 1 ;;
-	404) echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STAT}]" >&2; STREAM_STAT=WRONG_ROOM && return 1 ;;
-	4*) echo "[$(date "+%Y%m%d-%H%M%S")] You might gotten blocked by CAPTCHA. [${CONNECT_STAT}]" >&2; STREAM_STAT=NO_URL && return 1 ;;
-	999) echo "[$(date "+%Y%m%d-%H%M%S")] Internet Connection Error. [${CONNECT_STAT}]" >&2; STREAM_STAT=NO_URL && return 1 ;;
-	1*|5*|*) echo "[$(date "+%Y%m%d-%H%M%S")] ${PLATFORM} Server on failure now. [${CONNECT_STAT}]" >&2; STREAM_STAT=NO_URL && return 1 ;;
+	401) log "Room [${MODEL}] might require password. [${CONNECT_STAT}]" >&2 ; STREAM_STAT=NO_URL && return 1 ;;
+	404) log "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STAT}]" >&2; STREAM_STAT=WRONG_ROOM && return 1 ;;
+	4*) log "You might gotten blocked by CAPTCHA. [${CONNECT_STAT}]" >&2; STREAM_STAT=NO_URL && return 1 ;;
+	999) log "Internet Connection Error. [${CONNECT_STAT}]" >&2; STREAM_STAT=NO_URL && return 1 ;;
+	1*|5*|*) log "${PLATFORM} Server on failure now. [${CONNECT_STAT}]" >&2; STREAM_STAT=NO_URL && return 1 ;;
 	esac
 
 	# If successfully grabbed ${STREAM_URL}, show them.
 	[ -n "${STREAM_URL}" ] && {
-		echo "[$(date "+%Y%m%d-%H%M%S")] [${MODEL}] is Online Now! [$([ -n "${ROOM_STATUS}" ] && echo "${ROOM_STATUS}" || echo online)]"
-		echo "[$(date "+%Y%m%d-%H%M%S")] Successfully Captured Stream URL:"
-		echo "[$(date "+%Y%m%d-%H%M%S")] ${STREAM_URL}"
+		log "[${MODEL}] is Online Now! [$([ -n "${ROOM_STATUS}" ] && echo "${ROOM_STATUS}" || echo online)]"
+		log "Successfully Captured Stream URL:"
+		log "${STREAM_URL}"
 		STREAM_STAT=OK && return 0
 	} || {
-		echo "[$(date "+%Y%m%d-%H%M%S")] (ERROR) Failed to fetch Stream URL!$([ -n "${CONNECT_STAT}" ] && echo " [${CONNECT_STAT}]")"
+		log "(ERROR) Failed to fetch Stream URL!$([ -n "${CONNECT_STAT}" ] && echo " [${CONNECT_STAT}]")"
 		STREAM_STAT=NO_URL && return 1
 	}
 
-	echo "[$(date "+%Y%m%d-%H%M%S")] Logic is dead. Time to Tin Foil Hat."
+	log "Logic is dead. Time to Tin Foil Hat."
 	STREAM_STAT=TIN_FOIL_HAT && return 110
 }
 
@@ -595,8 +597,8 @@ grab_stream() {
 	done
 
 	[ -n "${LINK_MODE}" ] && {
-		echo "[$(date "+%Y%m%d-%H%M%S")] Direct Executable Command for FFmpeg (${FFMPEG_BASEVER}+):"
-		echo "[$(date "+%Y%m%d-%H%M%S")] ${FFMPEG_EXEC}"
+		log "Direct Executable Command for FFmpeg (${FFMPEG_BASEVER}+):"
+		log "${FFMPEG_EXEC}"
 		return 0
 	}
 
@@ -619,26 +621,25 @@ watchdog() {
 			init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" \
 				&& { utils check_ffmpeg_ver; case $? in 0|2) true ;; *) false ;; esac; } \
 				|| {
-					echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
+					log "Sleep for around 10 min..."
 					sleep "$(utils random_num 480 720)"
 					continue
 				}
-			echo "[$(date "+%Y%m%d-%H%M%S")] Now Start Recording..."
+			log "Now Start Recording..."
 			while true; do
 				[ -n "${DEBUG_MODE}" ] \
 					&& { grab_stream 2>&1 | tee -a "${FFMPEG_LOGFILE}" 2>/dev/null; true; } \
 					|| { grab_stream 2>&1 | tee -a "${FFMPEG_LOGFILE}" >/dev/null 2>&1; }
-				echo "[$(date "+%Y%m%d-%H%M%S")] Recording Interrupted..."
+				log "Recording Interrupted..."
 				init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" || break
 				unset EXT_FFMPEG_OPT && fetch_m3u >/dev/null 2>&1
 				case $? in
 				0)
-					echo "[$(date "+%Y%m%d-%H%M%S")] Restart recording..."
-					continue
+					log "Restart recording..." && continue
 				;;
 				*)
-					echo "[$(date "+%Y%m%d-%H%M%S")] Stream closed..."
-					echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 min & try reconnect..."
+					log "Stream closed..."
+					log "Sleep for around 5 min & try reconnect..."
 					sleep "$(utils random_num 240 360)"
 					break
 				;;
@@ -646,23 +647,23 @@ watchdog() {
 			done
 		;;
 		NO_URL)
-			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 10 min..."
+			log "Sleep for around 10 min..."
 			sleep "$(utils random_num 480 720)"
 		;;
 		NAME_CHANGE)
-			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 5 sec..."
+			log "Sleep for around 5 sec..."
 			sleep "$(utils random_num 4 6)"
 		;;
 		WRONG_ROOM)
-			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 1 hr..."
+			log "Sleep for around 1 hr..."
 			sleep "$(utils random_num 3300 3900)"
 		;;
 		BAD_URL)
-			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 3 min..."
+			log "Sleep for around 3 min..."
 			sleep "$(utils random_num 150 210)"
 		;;
 		*)
-			echo "[$(date "+%Y%m%d-%H%M%S")] Sleep for around 12 hr..."
+			log "Sleep for around 12 hr..."
 			sleep "$(utils random_num 39600 46800)"
 		;;
 		esac
