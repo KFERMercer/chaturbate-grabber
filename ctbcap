@@ -145,53 +145,54 @@ doc() {
 
 # Produce Runtime Variables.
 genesis_juicer() {
-	unset NO_INPUT SHOW_HELP SHOW_VER
+	unset NO_INPUT SHOW_HELP SHOW_VER ERRIPT
 	[ -z "$1" ] && [ -z "${MODEL}" ] && {
 		NO_INPUT=1
 		SHOW_HELP=1
 	}
 	while getopts ':c:def:hlo:p:v' OPT; do
 		case ${OPT} in
-		c)
-			[ -n "${OPTARG##"-"*}" ] && CUT_TIME=${OPTARG} \
-				|| { echo "(ERROR) -c: No Cut Time Specified!" >&2; return 1; }
-		;;
+		c) [ -z "${OPTARG##"-"*}" ] && ERRIPT=${OPT} || CUT_TIME=${OPTARG} ;;
 		d) DEBUG_MODE=1 ;;
 		e) EDGING_MODE=1 ;;
-		f)
-			[ -n "${OPTARG##"-"*}" ] && SAVE_PATH=${OPTARG} \
-				|| { echo "(ERROR) -f: No Recording Saving Path Specified!" >&2; return 1; }
-		;;
+		f) [ -z "${OPTARG##"-"*}" ] && ERRIPT=${OPT} || SAVE_PATH=${OPTARG} ;;
 		h) SHOW_HELP=1 ;;
 		l) LINK_MODE=1 ;;
-		o)
-			[ -n "${OPTARG##"-"*}" ] && LOG_PATH=${OPTARG} \
-				|| { echo "(ERROR) -o: No Log Saving Path Specified!" >&2; return 1; }
-		;;
-		p)
-			[ -n "${OPTARG##"-"*}" ] && PLATFORM=${OPTARG} \
-				|| { echo "(ERROR) -p: No Platform Specified!" >&2; return 1; }
-		;;
+		o) [ -z "${OPTARG##"-"*}" ] && ERRIPT=${OPT} || LOG_PATH=${OPTARG} ;;
+		p) [ -z "${OPTARG##"-"*}" ] && ERRIPT=${OPT} || PLATFORM=${OPTARG} ;;
 		v) SHOW_VER=1 ;;
-		\?) echo "(ERROR) Invalid Option: [${OPTARG}] !" >&2; return 1 ;;
+		\?) ERRIPT=${OPTARG} ;;
 		:)
 			case ${OPTARG} in
-			c) echo "(ERROR) -c: No Cut Time Specified!" >&2 ;;
-			f) echo "(ERROR) -f: No Recording Saving Path Specified!" >&2 ;;
-			o) echo "(ERROR) -o: No Log Saving Path Specified!" >&2 ;;
-			p) echo "(ERROR) -p: No Platform Specified!" >&2 ;;
+			c) ERRIPT=c ;;
+			f) ERRIPT=f ;;
+			o) ERRIPT=o ;;
+			p) ERRIPT=p ;;
 			esac
-			return 1
 		;;
 		esac
 	done
 	shift $((OPTIND - 1))
-	[ -n "$2" ] && { shift 1; echo "(ERROR) Invalid Inputs: [$*] !" >&2; return 1; }
+	[ -n "$2" ] && { shift 1; ERRIPT=_$*; }
 	[ -n "$1" ] && MODEL=$1
 
 	defaulting_args
 
-	[ -z "${NOBANNER}" ] && [ -z "${SHOW_VER}" ] && { doc neon; echo; } # Also, never show banner when in version mode.
+	[ -z "${NOBANNER}" ] && {
+		echo
+		[ -z "${SHOW_VER}" ] && { doc neon; echo; } # Also, never show banner when in version mode.
+	}
+	[ -n "${ERRIPT}" ] && {
+		case ${ERRIPT} in
+		c) echo "(ERROR) -c: No Cut Time Specified!" >&2 ;;
+		f) echo "(ERROR) -f: No Recording Saving Path Specified!" >&2 ;;
+		o) echo "(ERROR) -o: No Log Saving Path Specified!" >&2 ;;
+		p) echo "(ERROR) -p: No Platform Specified!" >&2 ;;
+		_*) echo "(ERROR) Invalid Inputs: [$*] !" >&2 ;;
+		*) echo "(ERROR) Invalid Option: [${ERRIPT}] !" >&2 ;;
+		esac
+		return 1
+	}
 	[ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "linux" ] && {
 		echo "(NOTICE) Non-GNU/Linux OS detected! Make sure you have coreutils installed! Or You Will Get Error!"
 		echo
@@ -671,15 +672,18 @@ watchdog() {
 }
 
 { # Execution Entry
-	trap 'exec printf "\n%s\n\n" "BYE (. )( .) BYE"' HUP INT QUIT TERM
-
-	echo
+	trap '[ -z "${NOBANNER}" ] && exec printf "\n%s\n\n" "BYE (. )( .) BYE" || exec true' HUP INT QUIT TERM
 
 	genesis_juicer "$@"
 	case $? in
 	0) [ -z "${NOBANNER}" ] && { echo "Simping Streamer: [${MODEL}] (${PLATFORM})"; echo; } ;;
-	2) echo; exit 0 ;;
-	*) echo >&2; echo "See [ $0 -h ] for Command Help." >&2; echo >&2; exit 1 ;;
+	2) [ -z "${NOBANNER}" ] && { echo; exit 0; } ;;
+	*)
+		echo >&2
+		echo "See [ $0 -h ] for Command Help." >&2
+		[ -z "${NOBANNER}" ] && echo >&2
+		exit 1
+	;;
 	esac
 
 	[ -n "${DEBUG_MODE}" ] && set -x # Debug Mode
