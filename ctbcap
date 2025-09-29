@@ -54,6 +54,12 @@ defaulting_args() {
 	[ "${BANNER}" = "1" ] || BANNER=
 }
 
+{ # Useful aliases
+	alias msg='printf "%s\n\n"' # Message that needs to show before the daemon
+	alias mgn='[ -z "${NOBANNER}" ] && echo' # Bottom margin for better exit look
+	alias log='printf "[$(date "+%Y%m%d-%H%M%S")] %s\n"' # Timestamped message
+}
+
 doc() {
 	case $1 in
 	neon)
@@ -181,49 +187,47 @@ genesis_juicer() {
 	defaulting_args
 
 	[ "${BANNER}" -eq "${NOBANNER}" ] 2>/dev/null && unset BANNER NOBANNER
-	[ -n "${BANNER}" ] && { echo; doc neon; return 2; }
 	[ -z "${NOBANNER}" ] && {
 		echo
-		[ -z "${SHOW_VER}" ] && { doc neon; echo; } # Also, never show banner when in version mode.
+		[ -z "${SHOW_VER}" ] && { doc neon; echo; } # never show banner when in version mode.
+		[ -n "${BANNER}" ] && return 3
 	}
 	[ -n "${ERRIPT}" ] && {
 		case ${ERRIPT} in
-		c) echo "(ERROR) -c: No Cut Time Specified!" >&2 ;;
-		f) echo "(ERROR) -f: No Recording Saving Path Specified!" >&2 ;;
-		o) echo "(ERROR) -o: No Log Saving Path Specified!" >&2 ;;
-		p) echo "(ERROR) -p: No Platform Specified!" >&2 ;;
-		_) echo "(ERROR) Invalid Inputs: [$*] !" >&2 ;;
-		*) echo "(ERROR) Invalid Option: [${ERRIPT}] !" >&2 ;;
+		c) msg >&2 "(ERROR) -c: No Cut Time Specified!" ;;
+		f) msg >&2 "(ERROR) -f: No Recording Saving Path Specified!" ;;
+		o) msg >&2 "(ERROR) -o: No Log Saving Path Specified!" ;;
+		p) msg >&2 "(ERROR) -p: No Platform Specified!" ;;
+		_) msg >&2 "(ERROR) Invalid Inputs: [$*] !" ;;
+		*) msg >&2 "(ERROR) Invalid Option: [${ERRIPT}] !" ;;
 		esac
 		return 1
 	}
 	[ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "linux" ] && {
-		echo "(NOTICE) Non-GNU/Linux OS detected! Make sure you have coreutils installed! Or You Will Get Error!"
-		echo
+		msg "(NOTICE) Non-GNU/Linux OS detected! Make sure you have coreutils installed! Or You Will Get Error!"
 	}
 	[ -n "${NO_INPUT}" ] && {
-		echo "(NOTICE) No Option Specified! Show Help Message..."
-		echo
+		msg "(NOTICE) No Option Specified! Show Help Message..."
 	}
 	[ -n "${SHOW_HELP}" ] && { doc help; return 2; }
 	[ -n "${SHOW_VER}" ] && { doc ver; return 2; }
 
-	[ -z "${MODEL}" ] && { echo "(ERROR) No Username or URL Specified!" >&2; return 1; }
+	[ -z "${MODEL}" ] && { msg >&2 "(ERROR) No Username or URL Specified!"; return 1; }
 	local _MODEL="$(basename "${MODEL}" 2>/dev/null | head -n 1 | tr '[:upper:]' '[:lower:]' | grep -oE '^[a-z0-9_-]+$')"
-	[ -z "${_MODEL}" ] && { echo "(ERROR) Invalid Username or URL! [${MODEL}]" >&2; return 1; }
+	[ -z "${_MODEL}" ] && { msg >&2 "(ERROR) Invalid Username or URL! [${MODEL}]"; return 1; }
 	MODEL=${_MODEL}
 
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
 	case ${PLATFORM} in
 	chaturbate|ctb|cb) PLATFORM=chaturbate ;;
 	stripchat|stc|sc|st) PLATFORM=stripchat ;;
-	*) echo "(ERROR) Unknown Platform: [${PLATFORM}] !" >&2; return 1 ;;
+	*) msg >&2 "(ERROR) Unknown Platform: [${PLATFORM}] !"; return 1 ;;
 	esac
 
 	[ "${CUT_TIME}" = 0 ] && CUT_TIME="" || {
 		local _CUT_TIME="$(echo "${CUT_TIME}" | head -n 1 | grep -oE '^[0-9]+$')"
 		printf %d "${_CUT_TIME}" >/dev/null 2>&1 || {
-			echo "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]" >&2
+			msg >&2 "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]"
 			return 1
 		}
 		CUT_TIME=${_CUT_TIME}
@@ -244,10 +248,10 @@ genesis_juicer() {
 		FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
 	}
 
+	[ -z "${NOBANNER}" ] && msg "Simping Streamer: [${MODEL}] (${PLATFORM})"
+
 	return 0
 }
-
-alias log='printf "[$(date "+%Y%m%d-%H%M%S")] %s\n"'
 
 # Power Tools
 utils() {
@@ -296,7 +300,7 @@ utils() {
 	# Usage: `utils check_depend "<COMMAND>"`
 	check_depend)
 		command -v "$2" 1>/dev/null 2>&1 || {
-			log "(ERROR) Command [$2] not found! Check \$PATH or install it." >&2
+			log >&2 "(ERROR) Command [$2] not found! Check \$PATH or install it."
 			return 1
 		}
 		return 0
@@ -310,7 +314,7 @@ utils() {
 
 		local CUR_VER_RAW="$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)"
 		[ -z "${CUR_VER_RAW}" ] && {
-			[ -z "$2" ] && log "(ERROR) NO FFmpeg found! (Recommended ${REC_VER}+)" >&2
+			[ -z "$2" ] && log >&2 "(ERROR) NO FFmpeg found! (Recommended ${REC_VER}+)"
 			return 1
 		}
 
@@ -326,11 +330,11 @@ utils() {
 			return 0
 		}
 		[ "$(printf "${CUR_VER}\n${REQ_VER}" | sort -V | tail -n 1)" = "${REQ_VER}" ] && {
-			log "(ERROR) Version of FFmpeg must be higher than ${REQ_VER}! [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
+			log >&2 "(ERROR) Version of FFmpeg must be higher than ${REQ_VER}! [${CUR_VER_RAW}] (Better ${REC_VER}+)"
 			return 1
 		}
 		[ "$(printf "${CUR_VER}\n${REC_VER}" | sort -V | tail -n 1)" = "${REC_VER}" ] && {
-			log "(WARNING) Using legacy version of FFmpeg. [${CUR_VER_RAW}] (Better ${REC_VER}+)" >&2
+			log >&2 "(WARNING) Using legacy version of FFmpeg. [${CUR_VER_RAW}] (Better ${REC_VER}+)"
 			return 2
 		}
 		return 0
@@ -350,21 +354,21 @@ init_path() {
 			[ -z "${DIR}" ] && continue # Skip empty path
 			local SPACE="$(echo "${_ARG}" | sed 's|.*:||')"
 			[ -z "${SPACE}" ] && local SPACE=0 # No space require
-			[ -z "${DIR%"/"}" ] && { log "(ERROR) Root directory are not allowed!" >&2; return 1; }
+			[ -z "${DIR%"/"}" ] && { log >&2 "(ERROR) Root directory are not allowed!"; return 1; }
 
 			local _DIR="${DIR}"; while [ ! -d "${_DIR}" ]; do # ${DIR} may not created yet
 				local _DIR="$(dirname "${_DIR}")"
 			done
 			local FREESPACE="$(( $(df -k "${_DIR}" | awk 'NR==2 {print $4}') / 1024 ))"
 			[ "${FREESPACE}" -lt "${SPACE}" ] && {
-				log "(ERROR) Space on [${_DIR}/] must be bigger than ${SPACE}MiB! [${FREESPACE}MiB]" >&2
+				log >&2 "(ERROR) Space on [${_DIR}/] must be bigger than ${SPACE}MiB! [${FREESPACE}MiB]"
 				return 1
 			}
 
 			mkdir -p "${DIR}" 1>/dev/null 2>&1
-			[ ! -e "${DIR}" ] && { log "(ERROR) Unable to create directory [${DIR}] !" >&2; return 1; }
-			[ ! -d "${DIR}" ] && { log "(ERROR) [${DIR}] is not a directory!" >&2; return 1; }
-			[ ! -w "${DIR}" ] && { log "(ERROR) Unable to write to directory [${DIR}/] !" >&2; return 1; }
+			[ ! -e "${DIR}" ] && { log >&2 "(ERROR) Unable to create directory [${DIR}] !"; return 1; }
+			[ ! -d "${DIR}" ] && { log >&2 "(ERROR) [${DIR}] is not a directory!"; return 1; }
+			[ ! -w "${DIR}" ] && { log >&2 "(ERROR) Unable to write to directory [${DIR}/] !"; return 1; }
 			true
 		done
 	;;
@@ -375,14 +379,14 @@ init_path() {
 			[ -z "${FILE}" ] && continue # Skip empty path
 			[ ! -e "${FILE}" ] && continue # Skip not exist
 			[ "${FILE}" = "/dev/null" ] && continue # Skip black hole
-			[ ! -f "${FILE}" ] && { log "(ERROR) [${FILE}] is not a file!" >&2; return 1; }
-			[ ! -w "${FILE}" ] && { log "(ERROR) Unable to write to file [${FILE}] !" >&2; return 1; }
+			[ ! -f "${FILE}" ] && { log >&2 "(ERROR) [${FILE}] is not a file!"; return 1; }
+			[ ! -w "${FILE}" ] && { log >&2 "(ERROR) Unable to write to file [${FILE}] !"; return 1; }
 
 			local LINE="$(echo "${_ARG}" | sed 's|.*:||')"
 			[ -z "${LINE}" ] && continue # Skip trimming file
 			[ ! -r "${FILE}" ] && {
-				log "(WARNING) Unable to read file [${FILE}] !" >&2
-				log "(WARNING) Skip trimming [${FILE}] due to unreadability." >&2
+				log >&2 "(WARNING) Unable to read file [${FILE}] !"
+				log >&2 "(WARNING) Skip trimming [${FILE}] due to unreadability."
 				continue
 			}
 			[ "${LINE}" -le 0 ] && { true > "${FILE}"; } >/dev/null 2>&1
@@ -417,6 +421,7 @@ edging() {
 		echo
 		sleep "${EDGING_TIME}"
 		echo "Edging Enough...Cum..."
+		echo
 		return
 	}
 	log "(NOTICE) Edging [${EDGING_TIME}]s for Simping [${MODEL}] (${PLATFORM})..."
@@ -450,7 +455,7 @@ fetch_m3u() {
 				[ "$(utils connect_stat "${STREAM_URL}")" -ge 400 ] && {
 					STREAM_URL=$(echo "${STREAM_URL}" | sed 's|playlist.m3u8|playlist_sfm4s.m3u8|g' | sed 's|live-hls|live-c-fhls|g')
 					[ "$(utils connect_stat "${STREAM_URL}")" -ge 400 ] && {
-						log "(ERROR) [${MODEL}] is Online now, but looks like the backend of [${PLATFORM}] has been changed." >&2
+						log >&2 "(ERROR) [${MODEL}] is Online now, but looks like the backend of [${PLATFORM}] has been changed."
 						unset STREAM_URL && { STREAM_STAT=BAD_URL && return 1; }
 					}
 				}
@@ -467,10 +472,10 @@ fetch_m3u() {
 			local CONNECT_STAT="$(utils dump2stat "${CONNECT_DUMP}")"
 			MODEL_NEW_NAME=$(echo "${CONNECT_DUMP}" | grep -oE 'location:[ ]?/[^/]+/' | head -n 1 | cut -d '/' -f2)
 			[ -n "${MODEL_NEW_NAME}" ] && {
-				log "(WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STAT}]" >&2
+				log >&2 "(WARNING) [${MODEL}] has changed her name to [${MODEL_NEW_NAME}]. [${CONNECT_STAT}]"
 				STREAM_STAT=NAME_CHANGE && return 1
 			} || {
-				log "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STAT}]" >&2
+				log >&2 "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STAT}]"
 				STREAM_STAT=WRONG_ROOM && return 1
 			}
 			unset CONNECT_STAT
@@ -489,7 +494,7 @@ fetch_m3u() {
 				STREAM_URL="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
 				local STREAM_URL_STATUS="$(utils connect_stat "${STREAM_URL}")"
 				[ "${STREAM_URL_STATUS}" -ge 400 ] && {
-					log "(ERROR) [${MODEL}] is Online, but can't access the stream now. [${STREAM_URL_STATUS}]" >&2
+					log >&2 "(ERROR) [${MODEL}] is Online, but can't access the stream now. [${STREAM_URL_STATUS}]"
 					unset STREAM_URL && { STREAM_STAT=BAD_URL && return 1; }
 				}
 				true
@@ -506,11 +511,11 @@ fetch_m3u() {
 
 	case ${CONNECT_STAT} in
 	""|2*|3*) ;;
-	401) log "Room [${MODEL}] might require password. [${CONNECT_STAT}]" >&2 ; STREAM_STAT=NO_URL && return 1 ;;
-	404) log "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STAT}]" >&2; STREAM_STAT=WRONG_ROOM && return 1 ;;
-	4*) log "You might gotten blocked by CAPTCHA. [${CONNECT_STAT}]" >&2; STREAM_STAT=NO_URL && return 1 ;;
-	999) log "Internet Connection Error. [${CONNECT_STAT}]" >&2; STREAM_STAT=NO_URL && return 1 ;;
-	1*|5*|*) log "${PLATFORM} Server on failure now. [${CONNECT_STAT}]" >&2; STREAM_STAT=NO_URL && return 1 ;;
+	401) log >&2 "Room [${MODEL}] might require password. [${CONNECT_STAT}]" ; STREAM_STAT=NO_URL && return 1 ;;
+	404) log >&2 "(ERROR) Can't find [${MODEL}] on [${PLATFORM}]. [${CONNECT_STAT}]"; STREAM_STAT=WRONG_ROOM && return 1 ;;
+	4*) log >&2 "You might gotten blocked by CAPTCHA. [${CONNECT_STAT}]"; STREAM_STAT=NO_URL && return 1 ;;
+	999) log >&2 "Internet Connection Error. [${CONNECT_STAT}]"; STREAM_STAT=NO_URL && return 1 ;;
+	1*|5*|*) log >&2 "${PLATFORM} Server on failure now. [${CONNECT_STAT}]"; STREAM_STAT=NO_URL && return 1 ;;
 	esac
 
 	# If successfully grabbed ${STREAM_URL}, show them.
@@ -676,39 +681,34 @@ watchdog() {
 
 	genesis_juicer "$@"
 	case $? in
-	0) [ -z "${NOBANNER}" ] && { echo "Simping Streamer: [${MODEL}] (${PLATFORM})"; echo; } ;;
-	2) [ -z "${NOBANNER}" ] && echo; exit 0 ;;
-	*)
-		echo >&2
-		echo "See [ $0 -h ] for Command Help." >&2
-		[ -z "${NOBANNER}" ] && echo >&2
-		exit 1
+	0) ;; 2) mgn; exit 0 ;; 3) exit 0 ;; *)
+		echo >&2 "See [ $0 -h ] for Command Help."
+		mgn >&2; exit 1
 	;;
 	esac
 
 	[ -n "${DEBUG_MODE}" ] && set -x # Debug Mode
 
-	utils check_depend curl || { echo >&2; exit 1; }
+	utils check_depend curl || { mgn >&2; exit 1; }
 
 	[ -n "${LINK_MODE}" ] && {
 		fetch_m3u
 		case ${STREAM_STAT} in
 		NAME_CHANGE)
 			sleep "$(utils random_num 4 6)"
-			fetch_m3u || { echo >&2; exit 1; }
-		;; OK) ;; *) echo >&2; exit 1 ;; esac
-		grab_stream && { echo; exit 0; }
+			fetch_m3u || { mgn >&2; exit 1; }
+		;; OK) ;; *) mgn >&2; exit 1 ;; esac
+		grab_stream && { mgn; exit 0; }
 	}
 
-	utils check_depend ffmpeg || { echo >&2; exit 1; }
-	utils check_ffmpeg_ver
-	case $? in 1) echo >&2; exit 1 ;; 2) echo >&2 ;; esac
+	utils check_depend ffmpeg || { mgn >&2; exit 1; }
+	utils check_ffmpeg_ver; case $? in 1) mgn >&2; exit 1 ;; esac
 
-	init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" || { echo >&2; exit 1; }
-	init_path -f "${WATCHDOG_LOGFILE}:" "${FFMPEG_LOGFILE}:" || { echo >&2; exit 1; }
+	init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" || { mgn >&2; exit 1; }
+	init_path -f "${WATCHDOG_LOGFILE}:" "${FFMPEG_LOGFILE}:" || { mgn >&2; exit 1; }
 
 	[ -n "${EDGING_MODE}" ] && {
-		[ -z "${NOBANNER}" ] && { edging -v; echo; } || edging
+		[ -z "${NOBANNER}" ] && edging -v || edging
 	}
 
 	watchdog 2>&1 | tee -a "${WATCHDOG_LOGFILE}" 2>/dev/null
