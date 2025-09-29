@@ -696,11 +696,11 @@ watchdog() {
 
 	[ -n "${LINK_MODE}" ] && {
 		fetch_m3u
-		case $? in
-		2)
+		case ${STREAM_STAT} in
+		NAME_CHANGE)
 			sleep "$(utils random_num 4 6)"
 			fetch_m3u || { echo >&2; exit 1; }
-		;; 0) ;; *) echo >&2; exit 1 ;; esac
+		;; OK) ;; *) echo >&2; exit 1 ;; esac
 		grab_stream && { echo; exit 0; }
 	}
 
