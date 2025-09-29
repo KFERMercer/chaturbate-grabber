@@ -681,7 +681,7 @@ watchdog() {
 	genesis_juicer "$@"
 	case $? in
 	0) [ -z "${NOBANNER}" ] && { echo "Simping Streamer: [${MODEL}] (${PLATFORM})"; echo; } ;;
-	2) [ -z "${NOBANNER}" ] && { echo; exit 0; } ;;
+	2) [ -z "${NOBANNER}" ] && echo; exit 0 ;;
 	*)
 		echo >&2
 		echo "See [ $0 -h ] for Command Help." >&2
