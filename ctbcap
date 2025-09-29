@@ -224,7 +224,7 @@ genesis_juicer() {
 	*) msg >&2 "(ERROR) Unknown Platform: [${PLATFORM}] !"; return 1 ;;
 	esac
 
-	[ "${CUT_TIME}" = 0 ] && CUT_TIME="" || {
+	[ "${CUT_TIME}" = 0 ] && unset CUT_TIME || {
 		local _CUT_TIME="$(echo "${CUT_TIME}" | head -n 1 | grep -oE '^[0-9]+$')"
 		printf %d "${_CUT_TIME}" >/dev/null 2>&1 || {
 			msg >&2 "(ERROR) Cut Time Must be Some INT Number! [${CUT_TIME}]"
@@ -233,12 +233,15 @@ genesis_juicer() {
 		CUT_TIME=${_CUT_TIME}
 	}
 
+	[ -z "${NOBANNER}" ] && msg ">> Simping Streamer: [${MODEL}] (${PLATFORM}) <<"
+
 	SAVE_PATH="$(echo "${SAVE_PATH}" | sed "s|^~/|${HOME}/|")"
 	LOG_PATH="$(echo "${LOG_PATH}" | sed "s|^~/|${HOME}/|")"
 	_SAVE_PATH=$(realpath -m "${SAVE_PATH}" 2>/dev/null)
 	[ -n "${_SAVE_PATH}" ] && SAVE_PATH=${_SAVE_PATH}
 	[ "${LOG_PATH}" = 0 ] && {
-		LOG_PATH=""
+		unset LOG_PATH
+		msg "(NOTICE) Log saving is Disabled."
 		WATCHDOG_LOGFILE="/dev/null"
 		FFMPEG_LOGFILE="/dev/null"
 	} || {
@@ -247,8 +250,6 @@ genesis_juicer() {
 		WATCHDOG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.log"
 		FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
 	}
-
-	[ -z "${NOBANNER}" ] && msg "Simping Streamer: [${MODEL}] (${PLATFORM})"
 
 	return 0
 }
@@ -409,7 +410,7 @@ init_path() {
 edging() {
 	local EDGING_TIME="$(utils random_num 0 600)" # Range better EQ to watchdog().while.echo .
 	[ "$1" = "-v" ] && {
-		echo "Edging Mode is On."
+		echo "(NOTICE) Edging Mode is On."
 		echo
 		echo "Delay [${EDGING_TIME}]s before Simping [${MODEL}]."
 		echo
@@ -424,7 +425,7 @@ edging() {
 		echo
 		return
 	}
-	log "(NOTICE) Edging [${EDGING_TIME}]s for Simping [${MODEL}] (${PLATFORM})..."
+	log "(NOTICE) Edging [${EDGING_TIME}]s before Simping [${MODEL}] (${PLATFORM})..."
 	sleep "${EDGING_TIME}"
 }
 
