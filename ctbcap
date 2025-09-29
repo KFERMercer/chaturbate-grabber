@@ -173,7 +173,7 @@ genesis_juicer() {
 		esac
 	done
 	shift $((OPTIND - 1))
-	[ -n "$2" ] && { shift 1; ERRIPT=_$*; }
+	[ -n "$2" ] && { shift 1; ERRIPT=_; }
 	[ -n "$1" ] && MODEL=$1
 
 	defaulting_args
@@ -188,7 +188,7 @@ genesis_juicer() {
 		f) echo "(ERROR) -f: No Recording Saving Path Specified!" >&2 ;;
 		o) echo "(ERROR) -o: No Log Saving Path Specified!" >&2 ;;
 		p) echo "(ERROR) -p: No Platform Specified!" >&2 ;;
-		_*) echo "(ERROR) Invalid Inputs: [$*] !" >&2 ;;
+		_) echo "(ERROR) Invalid Inputs: [$*] !" >&2 ;;
 		*) echo "(ERROR) Invalid Option: [${ERRIPT}] !" >&2 ;;
 		esac
 		return 1
