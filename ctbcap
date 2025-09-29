@@ -47,9 +47,11 @@ defaulting_args() {
 	# Link Mode. Only grab stream URL. Inactive if not 1.
 	[ "${LINK_MODE}" = "1" ] || LINK_MODE=
 
-	# Disable banner display when in daemon to adapt non-interactive interfaces.
-	# Inactive if not 1.
+	# NOBANNER: Disable banner display when in daemon to adapt non-interactive interfaces.
+	# BANNER: Show only banner.
+	# Inactive if not 1. If set both, then neither will active.
 	[ "${NOBANNER}" = "1" ] || NOBANNER=
+	[ "${BANNER}" = "1" ] || BANNER=
 }
 
 doc() {
@@ -178,6 +180,8 @@ genesis_juicer() {
 
 	defaulting_args
 
+	[ "${BANNER}" -eq "${NOBANNER}" ] 2>/dev/null && unset BANNER NOBANNER
+	[ -n "${BANNER}" ] && { echo; doc neon; return 2; }
 	[ -z "${NOBANNER}" ] && {
 		echo
 		[ -z "${SHOW_VER}" ] && { doc neon; echo; } # Also, never show banner when in version mode.
