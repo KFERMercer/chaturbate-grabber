@@ -637,18 +637,14 @@ watchdog() {
 					|| { grab_stream 2>&1 | tee -a "${FFMPEG_LOGFILE}" >/dev/null 2>&1; }
 				log "Recording Interrupted..."
 				init_path -d "${SAVE_PATH}:${SAVE_PATH_SPACE}" "${LOG_PATH}:${LOG_PATH_SPACE}" || break
-				unset EXT_FFMPEG_OPT && fetch_m3u >/dev/null 2>&1
-				case $? in
-				0)
+				unset EXT_FFMPEG_OPT && fetch_m3u >/dev/null 2>&1 && {
 					log "Restart recording..." && continue
-				;;
-				*)
+				} || {
 					log "Stream closed..."
 					log "Sleep for around 5 min & try reconnect..."
 					sleep "$(utils random_num 240 360)"
 					break
-				;;
-				esac
+				}
 			done
 		;;
 		NO_URL)
