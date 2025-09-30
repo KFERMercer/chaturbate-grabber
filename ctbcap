@@ -233,8 +233,6 @@ genesis_juicer() {
 		CUT_TIME=${_CUT_TIME}
 	}
 
-	[ -z "${NOBANNER}" ] && msg ">> Simping Streamer: [${MODEL}] (${PLATFORM}) <<"
-
 	SAVE_PATH="$(echo "${SAVE_PATH}" | sed "s|^~/|${HOME}/|")"
 	LOG_PATH="$(echo "${LOG_PATH}" | sed "s|^~/|${HOME}/|")"
 	_SAVE_PATH=$(realpath -m "${SAVE_PATH}" 2>/dev/null)
@@ -250,6 +248,8 @@ genesis_juicer() {
 		WATCHDOG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.log"
 		FFMPEG_LOGFILE="${LOG_PATH}/${MODEL}-${PLATFORM}.ffmpeg.log"
 	}
+
+	[ -z "${NOBANNER}" ] && msg ">> Simping Streamer: [${MODEL}] (${PLATFORM})"
 
 	return 0
 }
@@ -410,7 +410,7 @@ init_path() {
 edging() {
 	local EDGING_TIME="$(utils random_num 0 600)" # Range better EQ to watchdog().while.echo .
 	[ "$1" = "-v" ] && {
-		echo "(NOTICE) Edging Mode is On."
+		echo "Edging Mode is On."
 		echo
 		echo "Delay [${EDGING_TIME}]s before Simping [${MODEL}]."
 		echo
