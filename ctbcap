@@ -443,7 +443,7 @@ fetch_m3u() {
 	# Core Methods by each Platform.
 	case ${PLATFORM} in
 	chaturbate)
-		EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-reconnect_at_eof 1'
+		# EXT_FFMPEG_OPT="${EXT_FFMPEG_OPT} "'-reconnect_at_eof 1' # experimental
 		local API_URL="https://chaturbate.com/api/chatvideocontext/${MODEL}/" # Must keep " / " at the end
 		local CONNECT_DUMP="$(utils connect_dump "${API_URL}")"
 		local CONNECT_STAT="$(utils dump2stat "${CONNECT_DUMP}")"
