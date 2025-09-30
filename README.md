@@ -149,6 +149,19 @@ See [Official CtbCap Container Registry](#official-ctbcap-container-registry).
 
 <div align="center"><h2>Command Examples</h2></div>
 
+#### Get help for commands:
+
+```shell
+# Local:
+./ctbcap
+
+# One-Command Run:
+sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @
+
+# Docker CLI:
+docker run -t --rm kfermercer/ctbcap
+```
+
 #### Simping your girl with nonstop:
 
 ```shell
