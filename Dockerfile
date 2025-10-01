@@ -181,9 +181,9 @@ RUN <<EOT
 	# 		| tail -n 1 \
 	# ).tar.xz"
 
-	# Temporarily lock FFmpeg at 7.1.1
+	# Temporarily lock FFmpeg at 7.1.2
 	# lock until upstream fixes "ld: libavformat/libavformat.so: undefined reference to `ff_udp_set_remote_addr/ff_udp_get_last_recv_addr'" issue.
-	FFMPEG_TARBALL="ffmpeg-7.1.1.tar.xz"
+	FFMPEG_TARBALL="ffmpeg-7.1.2.tar.xz"
 
 	curl -L -k --connect-timeout 5 --retry 3 \
 		"https://ffmpeg.org/releases/${FFMPEG_TARBALL}" \
