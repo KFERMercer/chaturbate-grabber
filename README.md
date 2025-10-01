@@ -25,7 +25,7 @@ sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -h
 
 > [!NOTE]
 > Put the options after `@` like:\
-> `sh -c <...curl...stuff...> @ -ef ~/rec your_mom`
+> `sh -c <...curl...stuff...> @ -ef ~/rec <Username|URL>`
 
 > [!TIP]
 > You can also choose to download/upgrade CtbCap to your local:\
@@ -166,13 +166,13 @@ docker run -t --rm kfermercer/ctbcap
 
 ```shell
 # Local:
-./ctbcap your_girl
+./ctbcap <Username|URL>
 
 # One-Command Run:
-sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ your_girl
+sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ <Username|URL>
 
 # Docker CLI:
-docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ctbcap your_girl
+docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ctbcap <Username|URL>
 ```
 
 > [!NOTE]
@@ -183,13 +183,13 @@ docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ct
 
 ```shell
 # Local:
-./ctbcap -c 1800 your_girl
+./ctbcap -c 1800 <Username|URL>
 
 # One-Command Run:
-sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -c 1800 your_girl
+sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -c 1800 <Username|URL>
 
 # Docker CLI:
-docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ctbcap -c 1800 your_girl
+docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ctbcap -c 1800 <Username|URL>
 ```
 
 > [!NOTE]
@@ -200,13 +200,13 @@ docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ct
 
 ```shell
 # Local:
-./ctbcap -l your_girl
+./ctbcap -l <Username|URL>
 
 # One-Command Run:
-sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -l your_girl
+sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -l <Username|URL>
 
 # Docker CLI:
-docker run -t --rm kfermercer/ctbcap -l your_girl
+docker run -t --rm kfermercer/ctbcap -l <Username|URL>
 ```
 
 #### Show version & runtime info:

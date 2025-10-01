@@ -1,17 +1,17 @@
 services:
 
-  modelname_1: &ctbcap-cfg # Change modelname to yours.
+  modelname_1: &ctbcap-cfg # Change to Model's Username (optional).
     image: kfermercer/ctbcap:latest # Mirror: ghcr.io/kfermercer/ctbcap:latest
     user: 1000:1000 # <UID>:<GID>. Specify the user (UID) and group (GID) that the ctbcap will run as.
     restart: unless-stopped
     environment: &ctbcap-env
-      MODEL: modelname_1 # Change modelname to yours.
+      MODEL: <Username|URL> # Change this value.
       PLATFORM: chaturbate # What platform are model streaming at. choose "chaturbate" or "stripchat".
       TZ: Asia/Shanghai # Naming saved files & logs by using this timezone. See <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List>.
       CUT_TIME: 3600 # Used as number of seconds to cut recording file in real time. Don't cut if set to 0.
       EDGING_MODE: "uncle makes me pee white" # Edging Mode. Inactive if not 1. Delay initial requests to servers to avoid time-specific request waves caused by large-scale deployments.
       DEBUG_MODE: "your mom is so hot" # Debug Mode. Inactive if not 1.
-      NOBANNER: 1 # Disable banner display.
+      NOBANNER: 1 # Disable banner display (recommend).
     volumes:
       - /path/to/recdir:/save # Recorded files save path mapping.
       - /path/to/logdir:/log # Log files save path mapping.
@@ -27,7 +27,7 @@ services:
     # restart: unless-stopped
     environment:
       <<: *ctbcap-env
-      MODEL: modelname_2
+      MODEL: <Username|URL>
       # PLATFORM: chaturbate
       # TZ: Asia/Shanghai
       # CUT_TIME: 3600
@@ -42,4 +42,4 @@ services:
     <<: *ctbcap-cfg
     environment:
       <<: *ctbcap-env
-      MODEL: modelname_3
+      MODEL: <Username|URL>
