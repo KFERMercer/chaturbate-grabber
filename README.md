@@ -20,7 +20,7 @@
 **Open your whatever terminal & drop this:**
 
 ```shell
-sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -h
+sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -h
 ```
 
 > [!NOTE]
@@ -29,7 +29,7 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
 
 > [!TIP]
 > You can also choose to download/upgrade CtbCap to your local:\
-> `curl -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap -o ctbcap && chmod +x ctbcap`\
+> `curl -L https://kfermercer.github.io/chaturbate-grabber/ctbcap -o ctbcap && chmod +x ctbcap`\
 > \
 > Then, run `./ctbcap` to launch CtbCap.
 
@@ -90,7 +90,7 @@ sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabbe
   1. Custom your own compose file:
 
      ```shell
-     curl -L https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/docker-compose.sample.yml -o ctbcap-compose.yml
+     curl -L https://kfermercer.github.io/chaturbate-grabber/docker-compose.sample.yml -o ctbcap-compose.yml
      ```
 
      Then edit `./ctbcap-compose.yml` to configure.
@@ -156,7 +156,7 @@ See [Official CtbCap Container Registry](#official-ctbcap-container-registry).
 ./ctbcap
 
 # One-Command Run:
-sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @
+sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @
 
 # Docker CLI:
 docker run -t --rm kfermercer/ctbcap
@@ -169,7 +169,7 @@ docker run -t --rm kfermercer/ctbcap
 ./ctbcap your_girl
 
 # One-Command Run:
-sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ your_girl
+sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ your_girl
 
 # Docker CLI:
 docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ctbcap your_girl
@@ -186,7 +186,7 @@ docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ct
 ./ctbcap -c 1800 your_girl
 
 # One-Command Run:
-sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -c 1800 your_girl
+sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -c 1800 your_girl
 
 # Docker CLI:
 docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ctbcap -c 1800 your_girl
@@ -203,7 +203,7 @@ docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ct
 ./ctbcap -l your_girl
 
 # One-Command Run:
-sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -l your_girl
+sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -l your_girl
 
 # Docker CLI:
 docker run -t --rm kfermercer/ctbcap -l your_girl
@@ -216,7 +216,7 @@ docker run -t --rm kfermercer/ctbcap -l your_girl
 ./ctbcap -v
 
 # One-Command Run:
-sh -c "$(curl -sL https://raw.githubusercontent.com/KFERMercer/chaturbate-grabber/master/ctbcap)" @ -v
+sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -v
 
 # Docker CLI:
 docker run -t --rm kfermercer/ctbcap -v
