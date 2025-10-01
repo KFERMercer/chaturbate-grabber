@@ -182,7 +182,7 @@ RUN <<EOT
 	# ).tar.xz"
 
 	# Temporarily lock FFmpeg at 7.1.2
-	# lock until upstream fixes "ld: libavformat/libavformat.so: undefined reference to `ff_udp_set_remote_addr/ff_udp_get_last_recv_addr'" issue.
+	# https://github.com/KFERMercer/chaturbate-grabber/issues/37
 	FFMPEG_TARBALL="ffmpeg-7.1.2.tar.xz"
 
 	curl -L -k --connect-timeout 5 --retry 3 \
