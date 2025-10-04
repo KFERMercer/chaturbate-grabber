@@ -171,19 +171,15 @@ EOT
 WORKDIR /ffmpeg_source
 
 RUN <<EOT
-	# # Get newest version tarball of FFmpeg.
-	# FFMPEG_TARBALL="$( \
-	# 	curl -s -L -k --connect-timeout 5 --retry 3 \
-	# 		"https://ffmpeg.org/releases/" \
-	# 		| grep -oE 'ffmpeg-[0-9]+.*.tar.xz' \
-	# 		| sed 's|\.tar.xz.*||' \
-	# 		| sort -V \
-	# 		| tail -n 1 \
-	# ).tar.xz"
-
-	# Temporarily lock FFmpeg at 7.1.2
-	# https://github.com/KFERMercer/chaturbate-grabber/issues/37
-	FFMPEG_TARBALL="ffmpeg-7.1.2.tar.xz"
+	# Get newest version tarball of FFmpeg.
+	FFMPEG_TARBALL="$( \
+		curl -s -L -k --connect-timeout 5 --retry 3 \
+			"https://ffmpeg.org/releases/" \
+			| grep -oE 'ffmpeg-[0-9]+.*.tar.xz' \
+			| sed 's|\.tar.xz.*||' \
+			| sort -V \
+			| tail -n 1 \
+	).tar.xz"
 
 	curl -L -k --connect-timeout 5 --retry 3 \
 		"https://ffmpeg.org/releases/${FFMPEG_TARBALL}" \
@@ -219,7 +215,7 @@ RUN <<EOT
 		--enable-parser=h264,hevc,av1,aac \
 		--enable-demuxer=hls,mp4,m4v,mpegts \
 		--enable-muxer=segment,matroska \
-		--enable-protocol=hls,http,https,file \
+		--enable-protocol=hls,http,https,file,udplite \
 		--enable-bsf=extract_extradata \
 		--enable-small \
 		--optflags=-O3 --extra-ldflags="-s"
