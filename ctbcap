@@ -140,11 +140,11 @@ doc() {
 		echo "UA: ${UA}"
 		echo
 		printf "cURL: "
-		printf "$(command -v "curl" 1>/dev/null 2>&1 || echo "N/A")"
+		printf "$(command -v "curl" >/dev/null 2>&1 || echo "N/A")"
 		printf "$(curl -V 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f2)\n"
 		echo
 		printf "FFmpeg: "
-		printf "$(command -v "ffmpeg" 1>/dev/null 2>&1 || echo "N/A")"
+		printf "$(command -v "ffmpeg" >/dev/null 2>&1 || echo "N/A")"
 		printf "$(ffmpeg -version 2>/dev/null | head -n 1 | tr -s '[:space:]' ' ' | cut -d ' ' -f3)\n"
 		echo
 		echo "See [ -h ] for Command Help."
@@ -300,7 +300,7 @@ utils() {
 	;;
 	# Usage: `utils check_depend "<COMMAND>"`
 	check_depend)
-		command -v "$2" 1>/dev/null 2>&1 || {
+		command -v "$2" >/dev/null 2>&1 || {
 			log >&2 "(ERROR) Command [$2] not found! Check \$PATH or install it."
 			return 1
 		}
@@ -366,7 +366,7 @@ init_path() {
 				return 1
 			}
 
-			mkdir -p "${DIR}" 1>/dev/null 2>&1
+			mkdir -p "${DIR}" >/dev/null 2>&1
 			[ ! -e "${DIR}" ] && { log >&2 "(ERROR) Unable to create directory [${DIR}] !"; return 1; }
 			[ ! -d "${DIR}" ] && { log >&2 "(ERROR) [${DIR}] is not a directory!"; return 1; }
 			[ ! -w "${DIR}" ] && { log >&2 "(ERROR) Unable to write to directory [${DIR}/] !"; return 1; }
