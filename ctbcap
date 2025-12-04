@@ -492,7 +492,7 @@ fetch_m3u() {
 		2*|3*)
 			[ -n "$(echo "${CONNECT_DUMP}" | grep -o '"isCamAvailable":true' | head -n 1)" ] && {
 				local STREAMNAME="$(echo "${CONNECT_DUMP}" | grep '"streamName":' | head -n 1 | sed 's|.*"streamName":"||'| sed 's|".*||')"
-				STREAM_URL="https://edge-hls.doppiocdn.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
+				STREAM_URL="https://edge-hls.sacdnssedge.com/hls/${STREAMNAME}/master/${STREAMNAME}_auto.m3u8"
 				local STREAM_URL_STATUS="$(utils connect_stat "${STREAM_URL}")"
 				[ "${STREAM_URL_STATUS}" -ge 400 ] && {
 					log >&2 "(ERROR) [${MODEL}] is Online, but can't access the stream now. [${STREAM_URL_STATUS}]"
