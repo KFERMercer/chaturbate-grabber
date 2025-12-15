@@ -59,7 +59,7 @@ COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 	# Process ${MODEL}
 	# TODO: Model may change their name, consider using realtime name.
 	MODEL="$(basename "${MODEL}" | head -n 1 | tr '[:upper:]' '[:lower:]' | grep -oE '^[a-z0-9_-]+$')"
-	[ -z "${MODEL}" ] && { echo "(ERROR) Invalid Username or URL!"; exit 1; }
+	[ -z "${MODEL}" ] && { echo >&2 "(ERROR) Invalid Username or URL!"; exit 1; }
 
 	# Process ${PLATFORM}
 	PLATFORM=$(echo "${PLATFORM}" | tr '[:upper:]' '[:lower:]')
@@ -67,7 +67,7 @@ COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 	chaturbate|ctb|cb) PLATFORM=chaturbate ;;
 	stripchat|stc|sc|st) PLATFORM=stripchat ;;
 	*)
-		echo "(ERROR) Invalid Platform!"
+		echo >&2 "(ERROR) Invalid Platform!"
 		exit 1
 	;;
 	esac
@@ -77,18 +77,18 @@ COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 	[ -n "${FFMPEG_PROCESS}" ] && {
 		STREAM_URL="$(echo "${FFMPEG_PROCESS}" | grep -oE 'http[s]?://[^ ]+\.m3u8')"
 		UA="$(ctbcap -v | grep '^UA: ' | sed 's|UA: ||')"
-		[ -z "${UA}" ] && { echo "(ERROR) UA is not set!"; exit 1; }
+		[ -z "${UA}" ] && { echo >&2 "(ERROR) UA is not set!"; exit 1; }
 
 		M3U8_RESPONSE="$(curl "${STREAM_URL}" -4 -L -s -A "${UA}" --compressed --retry 3 --retry-delay 2 2>/dev/null | tr -d '\r')"
 		[ -n "${M3U8_RESPONSE}" ] && {
 			# Is directories writable?
-			[ ! -w "${SAVE_PATH}" ] && { echo "(ERROR) [${SAVE_PATH}] is unwritable!"; exit 1; }
+			[ ! -w "${SAVE_PATH}" ] && { echo >&2 "(ERROR) [${SAVE_PATH}] is unwritable!"; exit 1; }
 			[ "${LOG_PATH}" = 0 ] || { # Has FFmpeg process, but directories unwritable --> err
-				[ ! -w "${LOG_PATH}" ] && { echo "(ERROR) [${LOG_PATH}] is unwritable!"; exit 1; }
+				[ ! -w "${LOG_PATH}" ] && { echo >&2 "(ERROR) [${LOG_PATH}] is unwritable!"; exit 1; }
 			}
 		true
 		} || { # Has FFmpeg process, but m3u8 URL is unavailable --> err
-			echo "(ERROR) FFMPEG process did not exit correctly!"
+			echo >&2 "(ERROR) FFMPEG process did not exit correctly!"
 			exit 1
 		}
 	}
@@ -183,18 +183,20 @@ RUN <<EOT
 
 	curl -L -k --connect-timeout 5 --retry 3 \
 		"https://ffmpeg.org/releases/${FFMPEG_TARBALL}" \
-		-o ffmpeg.tar.xz
+		-o "${FFMPEG_TARBALL}"
 
 	curl -L -k --connect-timeout 5 --retry 3 \
 		"https://ffmpeg.org/releases/${FFMPEG_TARBALL}.asc" \
-		-o ffmpeg.tar.xz.asc
+		-o "${FFMPEG_TARBALL}.asc"
 
-	gpg --verify ffmpeg.tar.xz.asc ffmpeg.tar.xz || {
-		echo "Failed to verify FFmpeg signature!"
+	gpg --verify "${FFMPEG_TARBALL}.asc" "${FFMPEG_TARBALL}" || {
+		echo >&2 "(ERROR) Failed to verify FFmpeg signature for ${FFMPEG_TARBALL} !"
 		exit 1
 	}
 
-	tar -xf ffmpeg.tar.xz --strip-components 1
+	echo "(INFO) Will build using ${FFMPEG_TARBALL} ..."
+
+	tar -xf "${FFMPEG_TARBALL}" --strip-components 1
 EOT
 
 WORKDIR /ffmpeg_bin
@@ -224,7 +226,7 @@ EOT
 RUN <<EOT
 	make -j$(nproc)
 	[ -e ./ffmpeg ] || {
-		echo "Failed to build FFmpeg!"
+		echo >&2 "(ERROR) Failed to build FFmpeg bin!"
 		exit 1
 	}
 EOT
