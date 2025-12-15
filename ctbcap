@@ -33,8 +33,8 @@ defaulting_args() {
 	# Don't cut if set to 0.
 	[ -n "${CUT_TIME}" ] || CUT_TIME=3600
 
-	# https://jnrbsn.github.io/user-agents/user-agents.json
-	[ -n "${UA}" ] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36'
+	# https://raw.githubusercontent.com/jtanx/user-agents/refs/heads/main/user-agents.json
+	[ -n "${UA}" ] || UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'
 
 	# Edging Mode.
 	# Delay initial requests to servers to avoid time-specific request waves caused by large-scale deployments.
