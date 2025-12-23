@@ -1,6 +1,4 @@
-<div align="center"><h1>Chaturbate-Grabber | CtbCap</h1></div>
-
-<div align="center"><p>Chaturbate-Grabber/CtbCap is a Functional, Reliable, Easy to Use, yet Extremely Lightweight <strong>Recorder</strong>/<strong>Watchbot</strong> for Chaturbate|StripChat.</p></div>
+<div align="center"><p><strong>CtbCap</strong> is a Functional, Reliable, Easy to Use, yet Extremely Lightweight <strong>Recorder</strong>/<strong>Watchbot</strong> for Chaturbate|StripChat.</p></div>
 
 <div align="center"><h2>Key Advantages</h2></div>
 
@@ -20,7 +18,7 @@
 **Open your whatever terminal & drop this:**
 
 ```shell
-sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -h
+sh -c "$(curl -sL https://kfermercer.github.io/ctbcap/ctbcap)" @ -h
 ```
 
 > [!NOTE]
@@ -29,7 +27,7 @@ sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -h
 
 > [!TIP]
 > You can also choose to download/upgrade CtbCap to your local:\
-> `curl -L https://kfermercer.github.io/chaturbate-grabber/ctbcap -o ctbcap && chmod +x ctbcap`\
+> `curl -L https://kfermercer.github.io/ctbcap/ctbcap -o ctbcap && chmod +x ctbcap`\
 > \
 > Then, run `./ctbcap` to launch CtbCap.
 
@@ -48,7 +46,7 @@ sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -h
 | Registry | Docker CLI |
 | :-: | :-: |
 | [Docker Hub](https://hub.docker.com/r/kfermercer/ctbcap) | `docker pull kfermercer/ctbcap:latest` |
-| [GitHub Package](https://github.com/KFERMercer/chaturbate-grabber/pkgs/container/ctbcap) | `docker pull ghcr.io/kfermercer/ctbcap:latest` |
+| [GitHub Package](https://ghcr.io/kfermercer/ctbcap) | `docker pull ghcr.io/kfermercer/ctbcap:latest` |
 
 <table>
 <tr align="center">
@@ -57,7 +55,7 @@ sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -h
 </tr>
 <tr align="center">
 <td>x86</td>
-<td rowspan="9"><a href="https://github.com/KFERMercer/chaturbate-grabber/actions/workflows/Build-Push-Containers.yml"><img src="https://img.shields.io/github/actions/workflow/status/KFERMercer/chaturbate-grabber/Build-Push-Containers.yml"></a></td>
+<td rowspan="9"><a href="https://github.com/KFERMercer/ctbcap/actions/workflows/Build-Push-Containers.yml"><img src="https://img.shields.io/github/actions/workflow/status/KFERMercer/ctbcap/Build-Push-Containers.yml"></a></td>
 </tr>
 <tr align="center">
 <td>x86_64</td>
@@ -90,7 +88,7 @@ sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -h
   1. Custom your own compose file:
 
      ```shell
-     curl -L https://kfermercer.github.io/chaturbate-grabber/docker-compose.sample.yml -o ctbcap-compose.yml
+     curl -L https://kfermercer.github.io/ctbcap/docker-compose.sample.yml -o ctbcap-compose.yml
      ```
 
      Then edit `./ctbcap-compose.yml` to configure.
@@ -139,13 +137,13 @@ See [Official CtbCap Container Registry](#official-ctbcap-container-registry).
 
 | Variables | Value Type | Value Examples | Default | Recommend to Change |
 | :-: | :-: | :- | :- | :-: |
-| MODEL | Streamer's Username <br> or <br> Chatroom URL | `3rd8008` <br> `s1mp_L0r3-87` <br> `https://chaturbate.com/your_sister` <br> `https://stripchat.com/dicklessman` <br> ... | - | Yes |
-| PLATFORM | `chaturbate` <br> or <br> `stripchat` | `chaturbate` <br> `stripchat` | `chaturbate` | Yes, <br> if not Chaturbate. |
-| EDGING_MODE | Inactive if not `1` | `1` <br> `12306` <br> ... | `uncles make me pee white` | Yes, <br> If the streamer is currently offline. |
-| TZ | [TZ identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) | `UTC` <br> `Asia/Shanghai` <br> `Africa/Harare` <br> ... | `UTC` | No, <br> if you [live in Greenwich](https://www.royalgreenwich.gov.uk/info/200258/parking_transport_and_streets/810/find_a_public_toilet_in_royal_greenwich). |
+| MODEL | Streamer's Username or Chatroom URL | `3rd8008` <br> `s1mp_L0r3-87` <br> `https://chaturbate.com/your_sister` <br> `https://stripchat.com/dicklessman` <br> ... | - | Yes |
+| PLATFORM | `chaturbate` or `stripchat` | `chaturbate` <br> `stripchat` | `chaturbate` | Yes, if not Chaturbate. |
+| EDGING_MODE | Inactive if not `1` | `1` <br> `12306` <br> ... | `uncles make me pee white` | Yes, if the streamer is currently offline. |
+| TZ | [TZ identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) | `UTC` <br> `Asia/Shanghai` <br> `Africa/Harare` <br> ... | `UTC` | No, if you [live in Greenwich](https://www.royalgreenwich.gov.uk/info/200258/parking_transport_and_streets/810/find_a_public_toilet_in_royal_greenwich). |
 | CUT_TIME | INT | `0` <br> `911` <br> `6324` <br> ... | `3600` | No |
 | DEBUG_MODE | Inactive if not `1` | `1` <br> `-999` <br> `i was born from my sis` <br> ... | `your mom is so hot` | No |
-| NOBANNER | Inactive if not `1` | `1` <br> `well, that reminds me` <br> ... | `^>vvv` <br> (Docker CLI) <br> `1` <br> (Compose file) | No |
+| NOBANNER | Inactive if not `1` | `1` <br> `well, that reminds me` <br> ... | `^>vvv` (Docker CLI) <br> `1` (Compose file) | No |
 
 <div align="center"><h2>Command Examples</h2></div>
 
@@ -156,7 +154,7 @@ See [Official CtbCap Container Registry](#official-ctbcap-container-registry).
 ./ctbcap
 
 # One-Command Run:
-sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @
+sh -c "$(curl -sL https://kfermercer.github.io/ctbcap/ctbcap)" @
 
 # Docker CLI:
 docker run -t --rm kfermercer/ctbcap
@@ -169,7 +167,7 @@ docker run -t --rm kfermercer/ctbcap
 ./ctbcap <Username|URL>
 
 # One-Command Run:
-sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ <Username|URL>
+sh -c "$(curl -sL https://kfermercer.github.io/ctbcap/ctbcap)" @ <Username|URL>
 
 # Docker CLI:
 docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ctbcap <Username|URL>
@@ -186,7 +184,7 @@ docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ct
 ./ctbcap -c 1800 <Username|URL>
 
 # One-Command Run:
-sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -c 1800 <Username|URL>
+sh -c "$(curl -sL https://kfermercer.github.io/ctbcap/ctbcap)" @ -c 1800 <Username|URL>
 
 # Docker CLI:
 docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ctbcap -c 1800 <Username|URL>
@@ -203,7 +201,7 @@ docker run -t --rm -u $(id -u):$(id -g) -v ${PWD}/ctbcap_rec:/save kfermercer/ct
 ./ctbcap -l <Username|URL>
 
 # One-Command Run:
-sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -l <Username|URL>
+sh -c "$(curl -sL https://kfermercer.github.io/ctbcap/ctbcap)" @ -l <Username|URL>
 
 # Docker CLI:
 docker run -t --rm kfermercer/ctbcap -l <Username|URL>
@@ -216,7 +214,7 @@ docker run -t --rm kfermercer/ctbcap -l <Username|URL>
 ./ctbcap -v
 
 # One-Command Run:
-sh -c "$(curl -sL https://kfermercer.github.io/chaturbate-grabber/ctbcap)" @ -v
+sh -c "$(curl -sL https://kfermercer.github.io/ctbcap/ctbcap)" @ -v
 
 # Docker CLI:
 docker run -t --rm kfermercer/ctbcap -v
@@ -224,9 +222,9 @@ docker run -t --rm kfermercer/ctbcap -v
 
 <div align="center"><h2>Branch Description</h2></div>
 
-[`master`](https://github.com/KFERMercer/chaturbate-grabber/tree/master): Main Branch. Use this branch for practical purposes.
+[`master`](https://github.com/KFERMercer/ctbcap/tree/master): Main Branch. Use this branch for practical purposes.
 
-[`dev`](https://github.com/KFERMercer/chaturbate-grabber/tree/dev): Development Branch. Includes latest features and optimizations. But it may be unstable.
+[`dev`](https://github.com/KFERMercer/ctbcap/tree/dev): Development Branch. Includes latest features and optimizations. But it may be unstable.
 
 ##
 

@@ -12,7 +12,7 @@
 # `docker build --build-arg BUILD_TARGET=fat --target fat --tag ctbcap ./`
 #
 
-# Universal base for ctbcap and FFmpeg building.
+# Universal base for ctbcap & FFmpeg builder.
 FROM alpine:latest AS mother
 
 RUN apk add --no-cache curl
@@ -25,8 +25,8 @@ LABEL org.opencontainers.image.title="CtbCap"
 LABEL org.opencontainers.image.description="A simple webcam capturer for CB & SC."
 LABEL org.opencontainers.image.authors="KFERMercer <https://github.com/KFERMercer>"
 LABEL org.opencontainers.image.licenses="GPL-3.0-or-later"
-LABEL org.opencontainers.image.url="https://github.com/KFERMercer/chaturbate-grabber?tab=readme-ov-file"
-LABEL org.opencontainers.image.source="https://github.com/KFERMercer/chaturbate-grabber"
+LABEL org.opencontainers.image.url="https://github.com/KFERMercer/ctbcap?tab=readme-ov-file"
+LABEL org.opencontainers.image.source="https://github.com/KFERMercer/ctbcap"
 
 RUN <<EOT
 	apk add --no-cache tini tzdata

@@ -67,9 +67,11 @@ doc() {
 		# Multi-line message should not be larger than 55 columns per line:
 		#     v                     55 columns                      v
 		echo "8=====================================================D"
-		echo " ┌─┐┬ ┬┌─┐┌┬┐┬ ┬┬─┐┌┐ ┌─┐┌┬┐┌─┐  ┌─┐┬─┐┌─┐┌┐ ┌┐ ┌─┐┬─┐"
-		echo " │  ├─┤├─┤ │ │ │├┬┘├┴┐├─┤ │ ├┤───│ ┬├┬┘├─┤├┴┐├┴┐├┤ ├┬┘"
-		echo " └─┘┴ ┴┴ ┴ ┴ └─┘┴└─└─┘┴ ┴ ┴ └─┘  └─┘┴└─┴ ┴└─┘└─┘└─┘┴└─"
+		echo "       ####   ######  #####    ####    ####   #####    "
+		echo "     ##  ##    ##    ##  ##  ##  ##  ##  ##  ##  ##    "
+		echo "    ##        ##    #####   ##      ######  #####      "
+		echo "   ##  ##    ##    ##  ##  ##  ##  ##  ##  ##          "
+		echo "   ####     ##    #####    ####   ##  ##  ##     .sh   "
 		echo "                        v${CTBCAP_VERSION}-r${CTBCAP_RELEASE}"
 		echo "8=====================================================D"
 		echo "              Simping Stream from CB & SC"
@@ -122,12 +124,11 @@ doc() {
 		echo "-v			Show [v]ersion info and quit."
 		echo
 		echo
-		echo "Chaturbate-Grabber (aka CtbCap) is made by KFERMercer"
-		echo "with Sweat and Cum. Please use Her under GPLv3, and"
-		echo "kindly ask you that don't use for any commercial "
-		echo "operations. If you like this toy, please visit the"
-		echo "official REPO to Star/Fork, Issue/PR are also open."
-		echo "<https://github.com/KFERMercer/chaturbate-grabber>"
+		echo "CtbCap is made by KFERMercer with Sweat and Cum. Please"
+		echo "use it under GPLv3. And kindly ask you that don't use"
+		echo "for any commercial operations. If you like this toy,"
+		echo "please visit the official Repo to Star/Fork, Issue/PR"
+		echo "are also open - <https://github.com/KFERMercer/ctbcap>."
 	;;
 	ver)
 		printf "%s" "CtbCap/${CTBCAP_VERSION}-r${CTBCAP_RELEASE} "
