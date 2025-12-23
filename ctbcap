@@ -2,7 +2,7 @@
 #
 # A simple webcam capturer for CB & SC.
 #
-# Copyright (C) 2019-2025 KFERMercer <https://github.com/KFERMercer>
+# Copyright (C) 2019-2026 KFERMercer <https://github.com/KFERMercer>
 #
 # shellcheck disable=2015,2016,2155,3043
 # shellcheck source=/dev/null
@@ -132,7 +132,7 @@ doc() {
 	;;
 	ver)
 		printf "%s" "CtbCap/${CTBCAP_VERSION}-r${CTBCAP_RELEASE} "
-		echo "Copyright (C) 2019-2025 KFERMercer <https://github.com/KFERMercer>"
+		echo "Copyright (C) 2019-2026 KFERMercer <https://github.com/KFERMercer>"
 		echo
 		echo "Time-Mark: [$(date "+%Y%m%d-%H%M%S")] ($(date "+%Z"))"
 		echo

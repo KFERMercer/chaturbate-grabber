@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019-2025 KFERMercer <https://github.com/KFERMercer>
+# Copyright (C) 2019-2026 KFERMercer <https://github.com/KFERMercer>
 #
 # By default, this Dockerfile will build a minimal FFmpeg tailored for ctbcap.
 # By doing so, it will significantly reduce the size of final image. ( 140MB -> 18MB )
@@ -48,6 +48,8 @@ ENV NOBANNER="^>vvv"
 
 COPY --chmod=755 <<-'EOF' /usr/bin/ctbcap-healthcheck
 	#!/usr/bin/env sh
+
+	# Copyright (C) 2019-2026 KFERMercer <https://github.com/KFERMercer>
 
 	[ "${DEBUG_MODE}" = "1" ] && set -x # Debug Mode
 
